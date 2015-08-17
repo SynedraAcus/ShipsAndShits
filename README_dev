@@ -1,0 +1,24 @@
+CONFLICT CALL
+
+Conflict must be initialised, then shown, then you may get results. The following is a complete run-through:
+
+    $ init_conflict(u'0З1С1Д')
+    # This line initialises everything for a conflict. The only argument is deck-defining line.
+    # The syntax is digit-suit letter-digit-suit letter, et cetera et cetera. Usable letters are ЗСДИ
+    # As this is a python line, don't forget that dollar sign in the beginning!
+
+    show screen conf
+    # This line actually starts conflict. Careful: it's 'show screen', not 'call screen' as in previous version
+
+    "Launching conflict"
+    # There must be at least one line of text between showing screen and reading results
+    #
+    #$ _return = renpy.show_screen('conf')
+    if ret == 'Defeat':
+        "Returned defeat"
+        jump failure
+    #Below are victory variants. The game returns FULL suit name (unicode, don't forget the letter u before the line)
+    elif ret == u'Знания':
+        jump success_knowledge
+    elif ret == u'Сила':
+        jump success_force
