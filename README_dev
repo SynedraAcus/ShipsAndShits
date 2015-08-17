@@ -13,7 +13,6 @@ Conflict must be initialised, then shown, then you may get results. The followin
     "Launching conflict"
     # There must be at least one line of text between showing screen and reading results
     #
-    #$ _return = renpy.show_screen('conf')
     if ret == 'Defeat':
         "Returned defeat"
         jump failure
