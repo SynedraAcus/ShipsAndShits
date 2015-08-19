@@ -109,10 +109,13 @@ init -1 python hide:
     ## Padding is space inside the window, where the background is
     ## drawn.
 
-    # style.nvl_window.left_padding = 5
-    # style.nvl_window.right_padding = 5
-    # style.nvl_window.top_padding = 5
-    # style.nvl_window.bottom_padding = 5
+    style.nvl_window.left_padding = 5
+    style.nvl_window.right_padding = 5
+    style.nvl_window.top_padding = 5
+    style.nvl_window.bottom_padding = 5
+
+    ## NVL menu text
+    style.nvl_menu_choice.color = '#000'
 
     ## This is the minimum height of the window, including the margins
     ## and padding.
@@ -175,6 +178,7 @@ init -1 python hide:
 
     # style.button.activate_sound = "click.wav"
     # style.imagemap.activate_sound = "click.wav"
+
 
     ## Sounds that are used when entering and exiting the game menu.
 
@@ -296,3 +300,11 @@ init -1 python hide:
     config.nvl_layer = 'nvl_layer'
     config.nvl_paged_rollback = True
     config.mode_callbacks = []
+
+# Card button visual configuration
+# Note: these are buttons, not imagebuttons, and they take card Displayable as a child
+    style.card_button = Style(style.button)
+    style.card_button.xpadding = 2
+    style.card_button.ypadding = 2
+    style.card_button.background = '#6A3819'
+    style.card_button.insensitive_background = None

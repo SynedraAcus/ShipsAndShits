@@ -104,7 +104,7 @@ init -2 python:
 
     def conflict(**kwargs):
         '''
-        Screen for card game
+        Screen for card game. All buttons here use style.card_button
         '''
         # Defining UI elements
         global player_deck
@@ -119,8 +119,8 @@ init -2 python:
         ui.vbox(id = 'p_hand', spacing = 10, xalign=0.05, ysize = 220*len(player_deck))
         # Player's deck
         for card in (x for x in player_deck if x not in stack if x.suit in {y.suit for y in opponent_deck}):
-            ui.button(action = CardMove(card), xysize = (210,110))
-            ui.add(card, xanchor=5, yanchor=5)
+            ui.button(action = CardMove(card), style=style.card_button)
+            ui.add(card, align = (0.5, 0.5))
         ui.close()
         # Played cards
         ui.vbox(id = 'stack', spacing = 10, xalign = 0.4, ymaximum = 0.9)
@@ -136,7 +136,7 @@ init -2 python:
         if len(stack)>0 and len(stack)%2==0:
             if len(filter(lambda x: x.suit==stack[-1].suit and x.number>=stack[-1].number, player_deck))==0:
                 ui.textbutton('You lose', xalign=0.5, xanchor=0.5, yalign=0.95,\
-                action=[Hide('conf'), SetVariable('ret', 'Defeat')])
+                action=[Hide('conf'), SetVariable('ret', 'Defeat')], style=style.card_button)
             try:
                 opponent_deck.remove(stack[-1])
             except ValueError: # No clue where this exception comes from, but all works well if we just catch it
@@ -145,7 +145,7 @@ init -2 python:
             # This is cute: stack has an odd amount of cards iff oppponent didn't play during button actions
             # Even better: 0%2==1 so no worries about empty stack
             ui.textbutton('You win', xalign=0.5, xanchor=0.5, yalign=0.95, \
-            action=[SetVariable('ret', stack[-1].suit), Hide('conf')])
+            action=[SetVariable('ret', stack[-1].suit), Hide('conf')], style=style.card_button)
         ui.vbox(id = 'o_hand', spacing = 10, xalign = 0.85)
         for card in opponent_deck:
             ui.add(card)
