@@ -115,7 +115,12 @@ init -1 python hide:
     style.nvl_window.bottom_padding = 5
 
     ## NVL menu text
+
     style.nvl_menu_choice.color = '#000'
+    style.nvl_menu_choice.font = 'OldStandard-Regular.ttf'
+
+    ## NVL text
+    style.nvl_dialogue.font = 'OldStandard-Regular.ttf'
 
     ## This is the minimum height of the window, including the margins
     ## and padding.
@@ -148,7 +153,7 @@ init -1 python hide:
 
     ## The file containing the default font.
 
-    # style.default.font = "DejaVuSans.ttf"
+    # style.default.font = "OldStandard-Regular.ttf"
 
     ## The default size of text.
 
