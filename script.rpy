@@ -6,14 +6,14 @@
 # Declare characters used by this game.
 define narrator = Character(None, kind = nvl, what_color="#000000", size = 10)
 
-# Test screen definitions
-
 init python:
     menu = nvl_menu
     # Initialising global conflict variables so they exist when we call init_conflict()
     stack = []
     opponent_deck = []
     ret = ''
+    # Initialising starting position
+    current_port = monet
 
 
 # The game starts here.
@@ -22,22 +22,26 @@ label start:
     $ player_deck.append(Card(u'З', 7, spendable = True, tooltip = u'Эта карта не перманентна; в отличие от прочих она серая'))
     image bg solid_bg = Solid('#EEE')
     show bg solid_bg
-    "Посмотреть на все эти прелести ты можешь в следующем конфликте."
-    "Как и в прошлый раз, ты можешь проиграть, начав с семёрки знаний."
+    "Вы видите перед собой Порт Моне. Короли-развратники, торговцы, политики, вот это всё."
+    "Поскольку тексты не написаны, насладиться обаянием этого города вы не можете."
+    "Тем не менее, кое-что тут сделать всё-таки можно:"
     menu:
-        "Сыграть":
+        "Вступить в беспричинный конфликт":
             #nvl clear
             jump gamble
-        "Перечитать текст":
+        "Перечитать предыдущие три строчки":
             nvl clear
             jump start
+        "Куда-нибудь поплыть":
+            nvl clear
+            jump map_label
     #nvl clear
 
 label gamble:
 
     $ init_conflict(u'0З1С')
     show screen conf
-    "Launching conflict"
+    "Вы вступили в конфликт. Ни его цель, ни награда за победу вам не ясны."
     #$ _return = renpy.show_screen('conf')
     if ret == 'Defeat':
         jump failure
@@ -47,20 +51,51 @@ label gamble:
         jump success_force
 
 label success_knowledge:
-    "Ты умный"
+    "Вы победили, применив свой безмерный интеллект"
     jump success
 
 label success_force:
-    "Ты пизды дал"
+    "Вы победили, применив свою безмерную силу"
     jump success
 
 label failure:
     nvl clear
     $ player_deck.append(Card(u'З', 11, spendable = True, tooltip = u'Эта карта была выдана после поражения'))
-    "Тебе выдаётся новая карта - одиннадцать знаний, тоже одноразовая"
-    "Обрати внимание: истраченной семёрки у тебя больше нет"
+    "Раз уж вы потерпели поражение, ваша колода была усилена"
+    "Теперь поражение невозможно в принципе"
     jump gamble
 
 label success:
-    "Всё, ты подебил"
+    "Вы победили в нашей игре"
     return
+
+label map_label:
+    call screen map_screen
+    "Showing map"
+
+label node1:
+    nvl clear
+    "Вы прибыли в node1."
+    "К сожалению, делать тут совершенно нечего"
+    show screen map_screen
+
+label monet:
+    nvl clear
+    "Вы вернулись в Порт Моне"
+    menu:
+        "Посмотреть, что тут можно делать":
+            jump start
+        "Посетить другие порты":
+            show screen map_screen
+
+label node2:
+    nvl clear
+    "Вы прибыли в node2."
+    "К сожалению, делать тут совершенно нечего"
+    call screen map_screen
+
+label node3:
+    nvl clear
+    "Вы прибыли в node3."
+    "К сожалению, делать тут совершенно нечего"
+    call screen map_screen
