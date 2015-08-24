@@ -1,3 +1,5 @@
+# Everything related to the card conflict mechanics
+
 init -2 python:
     import random
     import math
