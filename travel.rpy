@@ -6,10 +6,36 @@ screen map_screen:
     zorder 10
     imagemap:
         auto 'images/1024map_%s.png'
+        #  Main cities
         hotspot (132, 610, 37, 37) action Travel(monet)
+        hotspot (246, 90, 27, 27) action Travel(tartari)
+        hotspot (570, 95, 27, 27) action Travel(plains)
+        hotspot (639, 320, 27, 27) action Travel(poop)
+        hotspot (896, 364, 27, 27) action Travel(office)
+        hotspot (352, 418, 27, 27) action Travel(yankee)
+        hotspot (632, 495, 27, 27) action Travel(vortex)
+        hotspot (581, 661, 27, 27) action Travel(monastery)
+        #  Nodes (in no particular order)
         hotspot (203, 550, 14, 14) action Travel(node3)
         hotspot (130, 706, 14, 14) action Travel(node1)
         hotspot (289, 693, 14, 14) action Travel(node2)
+        hotspot (140, 142, 14, 14) action Travel(node16)
+        hotspot (321, 190, 14, 14) action Travel(node17)
+        hotspot (451, 164, 14, 14) action Travel(node18)
+        hotspot (647, 198, 14, 14) action Travel(node19)
+        hotspot (802, 202, 14, 14) action Travel(node20)
+        hotspot (383, 309, 14, 14) action Travel(node13)
+        hotspot (485, 337, 14, 14) action Travel(node14)
+        hotspot (857, 312, 14, 14) action Travel(node15)
+        hotspot (98, 359, 14, 14) action Travel(node12)
+        hotspot (262, 415, 14, 14) action Travel(node9)
+        hotspot (551, 423, 14, 14) action Travel(node10)
+        hotspot (720, 385, 14, 14) action Travel(node11)
+        hotspot (387, 565, 14, 14) action Travel(node4)
+        hotspot (520, 534, 14, 14) action Travel(node7)
+        hotspot (812, 469, 14, 14) action Travel(node8)
+        hotspot (625, 605, 14, 14) action Travel(node5)
+        hotspot (812, 657, 14, 14) action Travel(node6)
 
 init -2 python:
     class Travel(Action):
