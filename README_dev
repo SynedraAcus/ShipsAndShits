@@ -1,4 +1,4 @@
-CONFLICT CALL
+CONFLICT CALLS
 
 Conflict must be initialised, then shown, then you may get results. The following is a complete run-through:
 
@@ -21,3 +21,41 @@ Conflict must be initialised, then shown, then you may get results. The followin
         jump success_knowledge
     elif ret == u'Сила':
         jump success_force
+
+TRAVEL
+Unlike previous section, this is guidelines, not strict rules. As in, game won't crash if you violate it,
+but I'll personally rip your throat away if you mess label markup.
+When the player gets into port from map, renpy jumps to the label named like that port (yankee, node*, poop, etc)
+The part right after it should do some port initialisation: roll for random events,
+check variables and so on.
+It should also send a player to correct label within this port. Labels within a port should conform to
+variant of hungarian notation described below. Please do not display anything outside of hungarian labels
+
+To leave port, just insert the following line:
+    show screen map_screen
+Make sure you're done with setting variables, editing deck, etc, etc. After this line jump will be called.
+
+HUNGARIAN NOTATION
+Please keep naming consistent. All label and variable names should start with port name,
+followed by underscore, followed by variable name. If variable has to do with some specific plot
+within a port, plot name should be included as well.
+
+For example, labels related to node1 should be called:
+node1_start
+node1_waves
+node1_wind
+(the following 3 are about an encounter with the Devil)
+node1_devil_ship
+node1_devil_sell
+node1_devil_refuse
+(the following probably calls map screen)
+node1_final
+
+If the variable has nothing to do with any particular port,
+it should start with gl_ (short for 'global'):
+gl_office_interest = 0
+gl_ill = True
+
+This doesn't apply to global variables like player_deck, Map_point objects and others.
+As a rule of thumb, if you create variable, make it as it says above. If it was created
+before you, let it be.
