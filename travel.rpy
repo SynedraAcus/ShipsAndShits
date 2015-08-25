@@ -58,7 +58,7 @@ init -2 python:
                 return False
 
     class Map_point():
-        def __init__(self, name, label = ''):
+        def __init__(self, name, label = '', connected = []):
             '''
             Create a map_point object. If label is not specified,
             it is the same as name of that object
@@ -68,10 +68,8 @@ init -2 python:
                 self.label = label
             else:
                 self.label = name
-            self.connected = []
 
-        def set_connected(self, other_point):
-            self.connected.append(other_point)
+            self.connected = connected
 
         def check_connected(self, other_point):
             if other_point in self.connected:
@@ -82,13 +80,36 @@ init -2 python:
         def list_connected(self):
             return self.connected
 
-    # Map initialisation
-    monet = Map_point('monet')
-    node1 = Map_point('node1')
-    node2 = Map_point('node2')
-    node3 = Map_point('node3')
-    for x in (node1, node3):
-        monet.set_connected(x)
-        x.set_connected(monet)
-    node1.set_connected(node2)
-    node2.set_connected(node1)
+    # Map points initialization
+
+    #  Cities
+    monet = Map_point('monet', connected=[node1, node3])
+    tartari = Map_point('tartari', connected=[node16, node17])
+    plains = Map_point('plains', connected=[node18, node19])
+    vein = Map_point('vein', connected=[node16, node12])
+    poop = Map_point('poop', connected=[node11, node14, node20]
+    office = Map_point('office', connected=[node8, node11, node15])
+    yankee = Map_point('yankee', connected=[node10, node13, node14])
+    vortex = Map_point('vortex', connected=[node5, node7, node8, node10, node11])
+    monastery = Map_point('monastery', connected=[node5])
+    #  Nodes
+    node1 = Map_point('node1', connected=[monet, node2])
+    node2 = Map_point('node2', connected=[node1, node4])
+    node3 = Map_point('node3', connected=[monet, node4, node9, node12])
+    node4 = Map_point('node4', connected=[node2, node3, node7, node10])
+    node5 = Map_point('node5', connected=[vortex, monastery, node6, node7])
+    node6 = Map_point('node6', connected=[node5, node8])
+    node7 = Map_point('node7', connected=[node4, node5, node10, vortex])
+    node8 = Map_point('node8', connected=[vortex, office, node6, node11])
+    node9 = Map_point('node9', connected=[node3, node12, node13, node17])
+    node10 = Map_point('node10', connected=[yankee, vortex, node7, node10, node11, node14])
+    node11 = Map_point('node11', connected=[poop, office, vortex, node8, node10])
+    node12 = Map_point('node12', connected=[vein, node3, node9])
+    node13 = Map_point('node13', connected=[yankee, node9, node14, node17, node18])
+    node14 = Map_point('node14', connected=[yankee, poop, node10, node13, node18, node19])
+    node15 = Map_point('node15', connected=[office, node20])
+    node16 = Map_point('node16', connected=[vein, tartari, node17])
+    node17 = Map_point('node17', connected=[tartari, node9, node13, node16, node18])
+    node18 = Map_point('node18', connected=[plains, node17, node19, node14, node13])
+    node19 = Map_point('node19', connected=[plains, node14, node18, node20])
+    node20 = Map_point('node20', connected=[poop, node15, node19])
