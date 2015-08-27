@@ -130,6 +130,12 @@ label monastery:
     "К сожалению, делать тут совершенно нечего"
     show screen map_screen
 
+label vortex:
+    nvl clear
+    "Вы прибыли в Омут"
+    "К сожалению, делать тут совершенно нечего"
+    show screen map_screen
+
 
 #  Node placeholders
 label node1:

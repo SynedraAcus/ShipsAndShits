@@ -7,36 +7,36 @@ screen map_screen:
     imagemap:
         auto 'images/1024map_%s.png'
         #  Main cities
-        hotspot (132, 610, 37, 37) action Travel(monet)
-        hotspot (246, 90, 27, 27) action Travel(tartari)
-        hotspot (570, 95, 27, 27) action Travel(plains)
-        hotspot (639, 320, 27, 27) action Travel(poop)
-        hotspot (896, 364, 27, 27) action Travel(office)
-        hotspot (352, 418, 27, 27) action Travel(yankee)
-        hotspot (632, 495, 27, 27) action Travel(vortex)
-        hotspot (581, 661, 27, 27) action Travel(monastery)
-        hotspot (121, 254, 27, 27) action Travel(vein)
+        hotspot monet.hotspot action Travel(monet)
+        hotspot tartari.hotspot action Travel(tartari)
+        hotspot plains.hotspot action Travel(plains)
+        hotspot poop.hotspot action Travel(poop)
+        hotspot office.hotspot action Travel(office)
+        hotspot yankee.hotspot action Travel(yankee)
+        hotspot vortex.hotspot action Travel(vortex)
+        hotspot monastery.hotspot action Travel(monastery)
+        hotspot vein.hotspot action Travel(vein)
         #  Nodes (in no particular order)
-        hotspot (203, 550, 14, 14) action Travel(node3)
-        hotspot (130, 706, 14, 14) action Travel(node1)
-        hotspot (289, 693, 14, 14) action Travel(node2)
-        hotspot (140, 142, 14, 14) action Travel(node16)
-        hotspot (321, 190, 14, 14) action Travel(node17)
-        hotspot (451, 164, 14, 14) action Travel(node18)
-        hotspot (647, 198, 14, 14) action Travel(node19)
-        hotspot (802, 202, 14, 14) action Travel(node20)
-        hotspot (383, 309, 14, 14) action Travel(node13)
-        hotspot (485, 337, 14, 14) action Travel(node14)
-        hotspot (857, 312, 14, 14) action Travel(node15)
-        hotspot (98, 359, 14, 14) action Travel(node12)
-        hotspot (262, 415, 14, 14) action Travel(node9)
-        hotspot (551, 423, 14, 14) action Travel(node10)
-        hotspot (720, 385, 14, 14) action Travel(node11)
-        hotspot (387, 565, 14, 14) action Travel(node4)
-        hotspot (520, 534, 14, 14) action Travel(node7)
-        hotspot (812, 469, 14, 14) action Travel(node8)
-        hotspot (625, 605, 14, 14) action Travel(node5)
-        hotspot (812, 657, 14, 14) action Travel(node6)
+        hotspot node3.hotspot action Travel(node3)
+        hotspot node1.hotspot action Travel(node1)
+        hotspot node2.hotspot action Travel(node2)
+        hotspot node16.hotspot action Travel(node16)
+        hotspot node17.hotspot action Travel(node17)
+        hotspot node18.hotspot action Travel(node18)
+        hotspot node19.hotspot action Travel(node19)
+        hotspot node20.hotspot action Travel(node20)
+        hotspot node13.hotspot action Travel(node13)
+        hotspot node14.hotspot action Travel(node14)
+        hotspot node15.hotspot action Travel(node15)
+        hotspot node12.hotspot action Travel(node12)
+        hotspot node9.hotspot action Travel(node9)
+        hotspot node10.hotspot action Travel(node10)
+        hotspot node11.hotspot action Travel(node11)
+        hotspot node4.hotspot action Travel(node4)
+        hotspot node7.hotspot action Travel(node7)
+        hotspot node8.hotspot action Travel(node8)
+        hotspot node5.hotspot action Travel(node5)
+        hotspot node6.hotspot action Travel(node6)
 
 init -2 python:
     class Travel(Action):
@@ -59,12 +59,19 @@ init -2 python:
                 return False
 
     class Map_point():
-        def __init__(self, name, label = '', connected = []):
+        def __init__(self, name, coordinates, label = '', connected = [], hotspot_size=50):
             '''
             Create a map_point object. If label is not specified,
             it is the same as name of that object
             '''
+            if not((type(coordinates) is tuple) and (len(coordinates)==2)):
+                raise TypeError('Coordinates must be two-item tuple!')
             self.name = name
+            self.hotspot = (coordinates[0]-int(hotspot_size/2),
+                           coordinates[1]-int(hotspot_size/2),
+                           hotspot_size,
+                           hotspot_size)
+            self.hotspot_size=hotspot_size
             if not label == '':
                 self.label = label
             else:
@@ -84,37 +91,37 @@ init -2 python:
     # Map points initialization
 
     #  Cities
-    monet = Map_point('monet')
-    tartari = Map_point('tartari')
-    plains = Map_point('plains')
-    vein = Map_point('vein')
-    poop = Map_point('poop')
-    office = Map_point('office')
-    yankee = Map_point('yankee')
-    vortex = Map_point('vortex')
-    monastery = Map_point('monastery')
+    monet = Map_point('monet', (150, 628))
+    tartari = Map_point('tartari', (259, 103))
+    plains = Map_point('plains', (584, 109))
+    vein = Map_point('vein', (134, 267))
+    poop = Map_point('poop', (642, 333))
+    office = Map_point('office', (909, 377))
+    yankee = Map_point('yankee', (365, 431))
+    vortex = Map_point('vortex', (645, 518))
+    monastery = Map_point('monastery', (594, 674))
 
     #  Nodes
-    node1 = Map_point('node1')
-    node2 = Map_point('node2')
-    node3 = Map_point('node3')
-    node4 = Map_point('node4')
-    node5 = Map_point('node5')
-    node6 = Map_point('node6')
-    node7 = Map_point('node7')
-    node8 = Map_point('node8')
-    node9 = Map_point('node9')
-    node10 = Map_point('node10')
-    node11 = Map_point('node11')
-    node12 = Map_point('node12')
-    node13 = Map_point('node13')
-    node14 = Map_point('node14')
-    node15 = Map_point('node15')
-    node16 = Map_point('node16')
-    node17 = Map_point('node17')
-    node18 = Map_point('node18')
-    node19 = Map_point('node19')
-    node20 = Map_point('node20')
+    node1 = Map_point('node1', (137, 713))
+    node2 = Map_point('node2', (296, 700))
+    node3 = Map_point('node3', (210, 557))
+    node4 = Map_point('node4', (394, 572))
+    node5 = Map_point('node5', (632, 612))
+    node6 = Map_point('node6', (819, 664))
+    node7 = Map_point('node7', (527, 541))
+    node8 = Map_point('node8', (819, 476))
+    node9 = Map_point('node9', (269, 422))
+    node10 = Map_point('node10', (558, 431))
+    node11 = Map_point('node11', (727, 392))
+    node12 = Map_point('node12', (105, 366))
+    node13 = Map_point('node13', (394, 316))
+    node14 = Map_point('node14', (492, 344))
+    node15 = Map_point('node15', (864, 319))
+    node16 = Map_point('node16', (147, 149))
+    node17 = Map_point('node17', (328, 197))
+    node18 = Map_point('node18', (458, 171))
+    node19 = Map_point('node19', (654, 205))
+    node20 = Map_point('node20', (809, 209))
 
     #  *.connected
     monastery.connected=[node5]
