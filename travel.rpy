@@ -37,6 +37,8 @@ screen map_screen:
         hotspot node8.hotspot action Travel(node8)
         hotspot node5.hotspot action Travel(node5)
         hotspot node6.hotspot action Travel(node6)
+    #  Ship icon on current_port
+    add 'images/1024ship.png' pos current_port.coordinates anchor (0.5, 1.0)
 
 init -2 python:
     class Travel(Action):
@@ -67,6 +69,7 @@ init -2 python:
             if not((type(coordinates) is tuple) and (len(coordinates)==2)):
                 raise TypeError('Coordinates must be two-item tuple!')
             self.name = name
+            self.coordinates = coordinates
             self.hotspot = (coordinates[0]-int(hotspot_size/2),
                            coordinates[1]-int(hotspot_size/2),
                            hotspot_size,
