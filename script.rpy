@@ -218,7 +218,7 @@ label node14:
 
 label node15:
     nvl clear
-    "Вы прибыли в крепость Тартари"
+    "Вы прибыли в node15"
     "К сожалению, делать тут совершенно нечего"
     show screen map_screen
 

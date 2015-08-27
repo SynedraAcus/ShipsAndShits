@@ -15,6 +15,7 @@ screen map_screen:
         hotspot (352, 418, 27, 27) action Travel(yankee)
         hotspot (632, 495, 27, 27) action Travel(vortex)
         hotspot (581, 661, 27, 27) action Travel(monastery)
+        hotspot (121, 254, 27, 27) action Travel(vein)
         #  Nodes (in no particular order)
         hotspot (203, 550, 14, 14) action Travel(node3)
         hotspot (130, 706, 14, 14) action Travel(node1)
@@ -119,25 +120,25 @@ init -2 python:
     monastery.connected=[node5]
     vortex.connected=[node5, node7, node8, node10, node11]
     yankee.connected=[node10, node13, node14]
-    office.connected=[node8, node11, node15]
-    poop.connected=[node11, node14, node20]
+    office.connected=[node11, node15]
+    poop.connected=[node10, node11, node14]
     plains.connected=[node18, node19]
     tartari.connected=[node16, node17]
     monet.connected=[node1, node3]
     vein.connected=[node16, node12]
     node18.connected=[plains, node17, node19, node14, node13]
-    node20.connected=[poop, node15, node19]
-    node19.connected=[plains, node14, node18, node20]
+    node20.connected=[node15, node19]
+    node19.connected=[plains, node14, node18, node20, node8]
     node17.connected=[tartari, node9, node13, node16, node18]
     node16.connected=[vein, tartari, node17]
-    node15.connected=[office, node20]
+    node15.connected=[office, node11, node20]
     node14.connected=[yankee, poop, node10, node13, node18, node19]
     node13.connected=[yankee, node9, node14, node17, node18]
     node12.connected=[vein, node3, node9]
-    node11.connected=[poop, office, vortex, node8, node10]
-    node10.connected=[yankee, vortex, node7, node10, node11, node14]
+    node11.connected=[poop, office, vortex, node8, node10, node15]
+    node10.connected=[yankee, vortex, poop, node7, node10, node11, node14]
     node9.connected=[node3, node12, node13, node17]
-    node8.connected=[vortex, office, node6, node11]
+    node8.connected=[vortex, node6, node11, node19]
     node7.connected=[node4, node5, node10, vortex]
     node6.connected=[node5, node8]
     node5.connected=[vortex, monastery, node6, node7]
