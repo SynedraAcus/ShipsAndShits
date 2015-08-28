@@ -163,7 +163,8 @@ init -2 python:
         ui.fixed(id='collection_fixed', xpos=0.0, ypos=0.0)
         ui.text(u"Колода", color='#000000', xalign=0.5, ypos=0)
         rows = int(math.ceil(len(player_deck)/3.0))
-        ui.viewport (id='collection_viewport', scrollbars='vertical', mousewheel = True, ypos=0.1, yanchor=0, ysize=0.9, xfill=True)
+        ui.viewport (id='collection_viewport', scrollbars='vertical', mousewheel = True, ypos=0.1,\
+            yanchor=0, ysize=0.9, xfill=True, style=style.card_button)
         ui.grid(3, rows, id='collection_grid', transpose = False, spacing = 5)
         for card in player_deck:
             ui.add(card)
@@ -172,7 +173,7 @@ init -2 python:
         ui.close()  # For grid
         ui.close()  # For fixed
         # The following is outside the window!
-        ui.textbutton(u"Продолжить", action = Hide('collection'), xalign = 0.5, yalign = 0.95)
+        ui.textbutton(u"Продолжить", action = Hide('collection'), xalign = 0.5, yalign = 0.95, style=style.card_button)
 
     renpy.define_screen('conf', conflict, modal='True', zorder=10)
     renpy.define_screen('collection', card_collection, modal = 'True', zorder=10)
