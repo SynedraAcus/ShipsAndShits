@@ -117,7 +117,7 @@ init -2 python:
         #ui.add(Solid('0000'))
         ui.fixed(id='conflict_fixed', xpos=0.0, ypos=0.0)
         ui.viewport(id = 'hand_view', xmaximum = 220, mousewheel=True, \
-        draggable = True, yadjustment=ui.adjustment(), ymaximum = 0.9)
+        draggable = True, yadjustment=ui.adjustment(), ymaximum = 0.85, ypos =0.05, xalign=0.1)
         ui.vbox(id = 'p_hand', spacing = 10, xalign=0.05, ysize = 220*len(player_deck))
         # Player's deck
         for card in (x for x in player_deck if x not in stack if x.suit in {y.suit for y in opponent_deck}):
@@ -125,7 +125,7 @@ init -2 python:
             ui.add(card, align = (0.5, 0.5))
         ui.close()
         # Played cards
-        ui.vbox(id = 'stack', spacing = 10, xalign = 0.4, ymaximum = 0.9)
+        ui.vbox(id = 'stack', spacing = 10, xalign = 0.5, ypos =0.05, ymaximum = 0.85)
         for card in stack:
             ui.add(card)
         ui.close()
@@ -148,7 +148,7 @@ init -2 python:
             # Even better: 0%2==1 so no worries about empty stack
             ui.textbutton('You win', xalign=0.5, xanchor=0.5, yalign=0.95, \
             action=[SetVariable('ret', stack[-1].suit), Hide('conf')], style=style.card_button)
-        ui.vbox(id = 'o_hand', spacing = 10, xalign = 0.85)
+        ui.vbox(id = 'o_hand', spacing = 10, ypos=0.05, xalign = 0.85, ymaximum=0.85)
         for card in opponent_deck:
             ui.add(card)
         ui.close()
