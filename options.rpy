@@ -60,7 +60,7 @@ init -1 python hide:
         disabled = "#404040",
 
         ## The color of disabled widget text.
-        disabled_text = "#e7d690",
+        disabled_text = "#6a3819",
 
         ## The color of informational labels.
         label = "#ffffff",
@@ -308,8 +308,8 @@ init -1 python hide:
 
 # Card button visual configuration
 # Note: these are buttons, not imagebuttons, and they take card Displayable as a child
-#    style.card_button = Style(style.button)
-#    style.card_button.xpadding = 2
-#    style.card_button.ypadding = 2
-#    style.card_button.background = '#6A3819'
+    style.card_button = Style(style.button)
+    style.card_button.xpadding = 2
+    style.card_button.ypadding = 2
+    style.card_button.background = '#6A3819'
     style.card_button.insensitive_background = None

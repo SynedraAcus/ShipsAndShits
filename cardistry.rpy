@@ -23,7 +23,6 @@ init -2 python:
             self.spendable = spendable
             self.tooltip = tooltip
             self.text = Text(u'{0} {1}'.format(self.suit, number), color = '#6A3819', font='Hangyaboly.ttf')
-            spendability = (self.spendable == True and u'Тратится' or u'Перманент')
             self.t_text = Text(tooltip, size = 12, color = '#6A3819', font='Hangyaboly.ttf')
             self.bg = (self.spendable == True and Solid(SPENDABLE_COLOR) or Solid(PERMANENT_COLOR))
 
@@ -138,7 +137,7 @@ init -2 python:
         if len(stack)>0 and len(stack)%2==0:
             if len(filter(lambda x: x.suit==stack[-1].suit and x.number>=stack[-1].number, player_deck))==0:
                 ui.textbutton('You lose', xalign=0.5, xanchor=0.5, yalign=0.95,\
-                action=[Hide('conf'), SetVariable('ret', 'Defeat')], style=style.card_button)
+                action=[Hide('conf'), SetVariable('ret', 'Defeat')])
             try:
                 opponent_deck.remove(stack[-1])
             except ValueError: # No clue where this exception comes from, but all works well if we just catch it
@@ -147,10 +146,12 @@ init -2 python:
             # This is cute: stack has an odd amount of cards iff oppponent didn't play during button actions
             # Even better: 0%2==1 so no worries about empty stack
             ui.textbutton('You win', xalign=0.5, xanchor=0.5, yalign=0.95, \
-            action=[SetVariable('ret', stack[-1].suit), Hide('conf')], style=style.card_button)
+            action=[SetVariable('ret', stack[-1].suit), Hide('conf')])
         ui.vbox(id = 'o_hand', spacing = 10, ypos=0.05, xalign = 0.85, ymaximum=0.85)
         for card in opponent_deck:
-            ui.add(card)
+            ui.button(action=None, style=style.card_button)
+            ui.add(card.spendable == True and Solid(SPENDABLE_COLOR, xysize=(200,100))\
+                or Solid(PERMANENT_COLOR, xysize=(200,100)))
         ui.close()
         ui.close()
 
