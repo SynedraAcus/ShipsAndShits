@@ -106,7 +106,7 @@ init -2 python:
 
     def conflict(**kwargs):
         '''
-        Screen for card game. All buttons here use style.card_button
+        Screen for card game. style.card_button imports only inactive_background = None
         '''
         # Defining UI elements
         global player_deck
@@ -173,7 +173,7 @@ init -2 python:
         ui.close()  # For grid
         ui.close()  # For fixed
         # The following is outside the window!
-        ui.textbutton(u"Продолжить", action = Hide('collection'), xalign = 0.5, yalign = 0.95, style=style.card_button)
+        ui.textbutton(u"Продолжить", action = Hide('collection'), xalign = 0.5, yalign = 0.95)
 
     renpy.define_screen('conf', conflict, modal='True', zorder=10)
     renpy.define_screen('collection', card_collection, modal = 'True', zorder=10)

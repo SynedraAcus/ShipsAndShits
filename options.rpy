@@ -44,29 +44,29 @@ init -1 python hide:
         ## Color scheme: Basic Blue
 
         ## The color of an idle widget face.
-        widget = "#003c78",
+        widget = "#dec666",
 
         ## The color of a focused widget face.
-        widget_hover = "#0050a0",
+        widget_hover = "#dec666",
 
         ## The color of the text in a widget.
-        widget_text = "#c8ffff",
+        widget_text = "#6a3819",
 
         ## The color of the text in a selected widget. (For
         ## example, the current value of a preference.)
-        widget_selected = "#ffffc8",
+        widget_selected = "#6a3819",
 
         ## The color of a disabled widget face.
         disabled = "#404040",
 
         ## The color of disabled widget text.
-        disabled_text = "#c8c8c8",
+        disabled_text = "#e7d690",
 
         ## The color of informational labels.
         label = "#ffffff",
 
         ## The color of a frame containing widgets.
-        frame = "#6496c8",
+        frame = "#6a3819",
 
         ## The background of the main menu. This can be a color
         ## beginning with '#', or an image filename. The latter
@@ -308,8 +308,8 @@ init -1 python hide:
 
 # Card button visual configuration
 # Note: these are buttons, not imagebuttons, and they take card Displayable as a child
-    style.card_button = Style(style.button)
-    style.card_button.xpadding = 2
-    style.card_button.ypadding = 2
-    style.card_button.background = '#6A3819'
+#    style.card_button = Style(style.button)
+#    style.card_button.xpadding = 2
+#    style.card_button.ypadding = 2
+#    style.card_button.background = '#6A3819'
     style.card_button.insensitive_background = None
