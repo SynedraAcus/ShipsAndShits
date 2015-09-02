@@ -312,4 +312,4 @@ init -1 python hide:
     style.card_button.xpadding = 2
     style.card_button.ypadding = 2
     style.card_button.background = '#6A3819'
-    style.card_button.insensitive_background = None
+    style.card_button.insensitive_background = '#6A3819'
