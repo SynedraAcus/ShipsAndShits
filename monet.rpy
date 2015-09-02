@@ -6,3 +6,4 @@ label monet:
             jump start
         "Посетить другие порты":
             show screen map_screen
+            "NOTHING"

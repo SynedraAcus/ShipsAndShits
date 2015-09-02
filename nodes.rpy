@@ -119,3 +119,4 @@ label node20:
     "Вы прибыли в node20"
     "К сожалению, делать тут совершенно нечего"
     show screen map_screen
+    "NOTHING"
