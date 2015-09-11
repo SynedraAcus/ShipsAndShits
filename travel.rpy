@@ -1,9 +1,9 @@
 # Everything related to travels
-
+#
 screen map_screen:
     tag map
     modal True
-    zorder 10
+    zorder 2
     imagemap:
         auto 'images/1024map_%s.png'
         #  Main cities
@@ -37,8 +37,16 @@ screen map_screen:
         hotspot node8.hotspot action Travel(node8)
         hotspot node5.hotspot action Travel(node5)
         hotspot node6.hotspot action Travel(node6)
-    #  Ship icon on current_port
-    add 'images/1024ship.png' pos current_port.coordinates anchor (0.5, 1.0)
+    add 'images/1024ship.png':
+        anchor (0.5, 1.0)
+        pos current_port.coordinates
+        id 'ship'
+
+#transform move_ship(x1, y1, x2, y2, time):
+#    on update:
+#        xpos x1
+#        ypos y1
+#        linear time xpos x2 ypos y2
 
 init -2 python:
     class Travel(Action):
@@ -48,10 +56,13 @@ init -2 python:
 
         def __call__(self):
             global current_port
+            coord1 = current_port.coordinates
+            coord2 = self.map_point.coordinates
+            ship = renpy.get_widget('map_screen', 'ship')
+            ship.pos = self.map_point.coordinates
             current_port = self.map_point
             renpy.hide_screen('map')
             renpy.jump(self.map_point.label)
-            #renpy.Return()
 
         def get_sensitive(self):
             global current_port

@@ -33,6 +33,9 @@ variant of hungarian notation described below. Please do not display anything ou
 
 To leave port, just insert the following line:
     show screen map_screen
+    "ANY_RANDOM_LINE"
+At least one line should be between calling screen and whatever follows,
+for the same reasons as with showing conflict screen.
 Make sure you're done with setting variables, editing deck, etc, etc. After this line jump will be called.
 
 HUNGARIAN NOTATION

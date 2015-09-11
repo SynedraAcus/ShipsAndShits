@@ -70,7 +70,7 @@ label success:
     return
 
 label map_label:
-    call screen map_screen
+    show screen map_screen
     "Showing map"
 
 #  The rest is in port files, even Monet's events
