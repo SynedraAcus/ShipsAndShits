@@ -150,8 +150,7 @@ init -2 python:
         ui.vbox(id = 'o_hand', spacing = 10, ypos=0.05, xalign = 0.85, ymaximum=0.85)
         for card in opponent_deck:
             ui.button(action=None, style=style.card_button)
-            ui.add(card.spendable == True and Solid(SPENDABLE_COLOR, xysize=(200,100))\
-                or Solid(PERMANENT_COLOR, xysize=(200,100)))
+            ui.add('images/ROOBASTSHKA.png')
         ui.close()
         ui.close()
 
