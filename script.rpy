@@ -20,6 +20,13 @@ init python:
 label start:
     $ player_deck = deck(u'0С1С4Д0С1С4Д0С1С4Д0С1С4Д')
     $ player_deck.append(Card(u'З', 7, spendable = True, tooltip = u'Эта карта не перманентна; в отличие от прочих она серая'))
+    $ vortex_firsttime = 0
+    $ gl_cargo = []
+    $ gl_knowhow = []
+    $ gl_cargo_jerry = 0
+    $ gl_you_are_terrible = 0
+    $ useless_variable = 0
+    $ useless_variable_2 = 0
     image bg solid_bg = Solid('#EEE')
     show bg solid_bg
     "Вы видите перед собой Порт Моне. Короли-развратники, торговцы, политики, вот это всё."
