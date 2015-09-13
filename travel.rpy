@@ -41,6 +41,13 @@ screen map_screen:
         anchor (0.5, 1.0)
         pos current_port.coordinates
         id 'ship'
+        #at ship_d
+
+transform ship_d(new_pos):
+    linear 1.0 pos new_pos
+
+transform slow:
+    pause 5.0
 
 #transform move_ship(x1, y1, x2, y2, time):
 #    on update:
@@ -56,11 +63,11 @@ init -2 python:
 
         def __call__(self):
             global current_port
-            coord1 = current_port.coordinates
-            coord2 = self.map_point.coordinates
-            ship = renpy.get_widget('map_screen', 'ship')
-            ship.pos = self.map_point.coordinates
             current_port = self.map_point
+            #renpy.show('foo', what=Image('images/1024ship.png', tag='ship', anchor=(0.5, 1.0), pos=self.map_point.coordinates),\
+            #    at_list=[slow], zorder=3, layer='screens')
+            ship = renpy.get_widget('map_screen', 'ship')
+            ship.pos = current_port.coordinates
             renpy.hide_screen('map')
             renpy.jump(self.map_point.label)
 

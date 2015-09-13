@@ -147,6 +147,8 @@ init -2 python:
             # Even better: 0%2==1 so no worries about empty stack
             ui.textbutton('You win', xalign=0.5, xanchor=0.5, yalign=0.95, \
             action=[SetVariable('ret', stack[-1].suit), Hide('conf')])
+        ui.viewport(id = 'o_view', xmaximum = 220, mousewheel=True, \
+        draggable = True, yadjustment=ui.adjustment(), ymaximum = 0.85, ypos =0.05, xalign=0.85)
         ui.vbox(id = 'o_hand', spacing = 10, ypos=0.05, xalign = 0.85, ymaximum=0.85)
         for card in opponent_deck:
             ui.button(action=None, style=style.card_button)
