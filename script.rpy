@@ -12,14 +12,15 @@ init python:
     stack = []
     opponent_deck = []
     ret = ''
+    price = '0'
     # Initialising starting position
     current_port = monet
+    player_deck = deck(u'0С1С4Д0С1С4Д0С1С4Д0С1С4Д')
+    player_deck.append(Card(u'З', 7, spendable = True, tooltip = u'Эта карта не перманентна; в отличие от прочих она серая'))
 
 
 #  This is the beginning, from the very start to the first trip from Monet
 label start:
-    $ player_deck = deck(u'0С1С4Д0С1С4Д0С1С4Д0С1С4Д')
-    $ player_deck.append(Card(u'З', 7, spendable = True, tooltip = u'Эта карта не перманентна; в отличие от прочих она серая'))
     $ vortex_firsttime = 0
     $ gl_cargo = []
     $ gl_knowhow = []
@@ -42,7 +43,23 @@ label start:
         "Куда-нибудь поплыть":
             nvl clear
             jump map_label
+        "Включить торговый экран":
+            nvl clear
+            jump trade_test
     #nvl clear
+
+label trade_test:
+    $ test_card = Card(u'Д', 10, spendable=True, tooltip='Эта карта была куплена при тестировании магазина')
+    $ init_trade(10, test_card)
+    "Здесь вы можете купить десятку денег за десятку денег. Я подозреваю, что в реальности бизнес работает как-то иначе, но для дебага сойдёт"
+    show screen trade
+    "Включаем магазин"
+    if ret == 'Sold':
+        "Сделка завершена. Убедитесь в этом на экране колоды."
+        jump start
+    if ret == 'NotSold':
+        "Сделка отменена."
+        jump start
 
 label gamble:
 

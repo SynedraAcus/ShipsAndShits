@@ -15,7 +15,7 @@ init -2 python:
 
     class Card(renpy.Displayable):
         def __init__(self, suit, number, spendable = False, tooltip = DEFAULT_HISTORY, **kwargs):
-            super(Card, self).__init__(xysize=(200, 100), xfill=False, yfill=False, **kwargs)
+            super(Card, self).__init__(xysize=(200, 120), xfill=False, yfill=False, **kwargs)
             self.suit = SUITS[suit]
             if number == 0:
                 number = 10
@@ -100,6 +100,7 @@ init -2 python:
         ret = ''
         stack = []
         opponent_deck = deck(deckline)
+
 
     # Screens
 
@@ -196,5 +197,137 @@ init -2 python:
         # The following is outside the window!
         ui.textbutton(u"Продолжить", action = Hide('collection'), xalign = 0.5, yalign = 0.95)
 
+
+    ###############################################################
+    #Trade system
+    ###############################################################
+
+    class CardSell(Action):
+        '''
+        Analogue of CardMove, except for trading screen
+        '''
+        def __init__(self, card, **kwargs):
+            self.card = card
+            super(Action, self).__init__(**kwargs)
+
+        def __call__(self):
+            player_deck.remove(self.card)
+            trade_stack.append(self.card)
+            renpy.restart_interaction()
+
+    class CardUnsell(Action):
+        '''
+        The same as CardSell, except it moves card the other way around
+        '''
+        def __init__(self, card, **kwargs):
+            self.card = card
+            super(Action, self).__init__(**kwargs)
+
+        def __call__(self):
+            trade_stack.remove(self.card)
+            player_deck.append(self.card)
+            renpy.restart_interaction()
+
+    class Sell(Action):
+        '''
+        Buy the sold item if there are enough money in the trade_stack and close screen
+        '''
+        def __init__(self, price, to_sell, **kwargs):
+            if not(type(to_sell) is Card):
+                raise ValueError('Only cards can be sold')
+            if not (type(price) is int):
+                raise ValueError('Only integer prices are allowed')
+            self.to_sell = to_sell
+            self.price = price
+            super(Action, self).__init__(**kwargs)
+
+        def __call__(self):
+            player_deck.append(self.to_sell)
+            global ret
+            ret = 'Sold'
+            renpy.hide_screen('trade')
+            renpy.restart_interaction()
+
+        def get_sensitive(self):
+            if sum((x.number for x in trade_stack))>=self.price:
+                return True
+            else:
+                return False
+
+    class DontSell(Action):
+        '''
+        Do not sell shit, return trade_stack to the deck and close screen
+        '''
+        def __init__(self, **kwargs):
+            super(Action, self).__init__(**kwargs)
+
+        def __call__(self):
+            player_deck.extend(trade_stack)
+            global ret
+            ret = 'NotSold'
+            renpy.hide_screen('trade')
+            renpy.restart_interaction()
+
+    def init_trade(i, o):
+        # Initialises global variables for a trader screen
+        global price
+        global sell_card
+        global trade_stack
+        ret = ''
+        if not (type(o) is Card):
+            raise ValueError('Only cards can be used for initialising trade screen')
+        price = i
+        sell_card = o
+        trade_stack = []
+
+    def trade(**kwargs):
+        '''
+        Screen for buying shit for gold
+        For gold only for now!
+        One item of shit per screen only for now!
+        '''
+        global player_deck
+        global trade_stack
+        #Player hand, copypasted from conflict screen
+        p_adjustment = ui.adjustment()
+        ui.vbox(spacing=10, ypos=0.05, xpos=0.1,  ymaximum = 0.75)
+        ui.imagebutton(idle='images/STRELKAH_VVERKH.png',
+                       hover='images/STRELKAH_VVERKH.png',
+                       action=Function(p_adjustment.change, 0))
+        ui.viewport(id = 'hand_view', xmaximum = 220, mousewheel=True, \
+        draggable = True, yadjustment=p_adjustment, xalign=0.1)
+        ui.vbox(id = 'p_hand', spacing = 10, ysize = 220*len(player_deck))
+        for card in (x for x in player_deck if x.suit==u'Деньги'):
+            ui.button(action = CardSell(card), style=style.card_button)
+            ui.add(card, align = (0.5, 0.5))
+        ui.close()
+        ui.imagebutton(idle='images/STRELKAH_VNEESE.png',
+                       hover='images/STRELKAH_VNEESE.png',
+                       yminimum=50,
+                       action=Function(p_adjustment.change, p_adjustment.range))
+        ui.close()
+        # Cards player wants to trade
+        stack_adjustment = ui.adjustment()
+        ui.vbox(spacing=10, ypos=0.05, xalign=0.5, ymaximum=0.75)
+        ui.imagebutton(idle='images/STRELKAH_VVERKH.png',
+                       hover='images/STRELKAH_VVERKH.png',
+                       action=Function(stack_adjustment.change, 0))
+        ui.viewport(id = 'hand_view', xmaximum = 220, mousewheel=True, \
+        draggable = True, yadjustment=stack_adjustment, xalign=0.1)
+        ui.vbox(id = 'p_hand', spacing = 10, ysize = 220*len(player_deck))
+        for card in trade_stack:
+            ui.button(action = CardUnsell(card), style=style.card_button)
+            ui.add(card, align = (0.5, 0.5))
+        ui.close()
+        ui.imagebutton(idle='images/STRELKAH_VNEESE.png',
+                       hover='images/STRELKAH_VNEESE.png',
+                       yminimum=50,
+                       action=Function(p_adjustment.change, p_adjustment.range))
+        ui.close()
+        ui.text(u'Продаём {0} за {1}'.format(sell_card.__str__(), str(price)), xalign=0.85, yalign=0.3)
+        ui.textbutton('Купить', action=Sell(price, sell_card), xalign=0.8, yalign=0.4)
+        ui.textbutton('Отмена', action=DontSell(), xalign=0.8, yalign=0.5)
+
     renpy.define_screen('conf', conflict, modal='True', zorder=10)
     renpy.define_screen('collection', card_collection, modal = 'True', zorder=10)
+    renpy.define_screen('trade', trade, modal='True', zorder=10)

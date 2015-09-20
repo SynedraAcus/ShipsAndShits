@@ -22,6 +22,25 @@ Conflict must be initialised, then shown, then you may get results. The followin
     elif ret == u'Сила':
         jump success_force
 
+TRADING SCREEN
+You currently can add only "Sell card for money"-type actions. The screen is much like previous one.
+    $ test_card = Card(u'Д', 10, spendable=True, tooltip='Эта карта была куплена при тестировании магазина')
+    # Defining card for sale. First two papameters are suit and value. Spendable is boolean,
+    # tooltip is card description; these two can (but should not) be omitted
+    #
+    $ init_trade(10, test_card)
+    #Initialising card's price and card itself
+    #
+    "Calling shop"
+    #Again, at least one line should be present between calling screen and checking for output
+    #
+    if ret == 'Sold':
+        "Покупка совершена"
+        jump sold
+    elif ret == 'NotSold':
+        "Покупка отменена игроком"
+        jump cancelled
+
 TRAVEL
 Unlike previous section, this is guidelines, not strict rules. As in, game won't crash if you violate it,
 but I'll personally rip your throat away if you mess label markup.
