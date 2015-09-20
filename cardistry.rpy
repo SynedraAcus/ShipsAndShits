@@ -112,16 +112,25 @@ init -2 python:
         global stack
         global opponent_deck
         global ret
-        #ui.frame(id='conflict_window', background=Solid('0000'), area = (0.0, 0.00, 1.0, 0.85))
-        #ui.add(Solid('0000'))
+        renpy.block_rollback()
         ui.fixed(id='conflict_fixed', xpos=0.0, ypos=0.0)
+        # Player hand
+        p_adjustment = ui.adjustment()
+        ui.vbox(spacing=10, ypos=0.05, xpos=0.1,  ymaximum = 0.75)
+        ui.imagebutton(idle='images/STRELKAH_VVERKH.png',
+                       hover='images/STRELKAH_VVERKH.png',
+                       action=Function(p_adjustment.change, 0))
         ui.viewport(id = 'hand_view', xmaximum = 220, mousewheel=True, \
-        draggable = True, yadjustment=ui.adjustment(), ymaximum = 0.85, ypos =0.05, xalign=0.1)
-        ui.vbox(id = 'p_hand', spacing = 10, xalign=0.05, ysize = 220*len(player_deck))
-        # Player's deck
+        draggable = True, yadjustment=p_adjustment, xalign=0.1)
+        ui.vbox(id = 'p_hand', spacing = 10, ysize = 220*len(player_deck))
         for card in (x for x in player_deck if x not in stack if x.suit in {y.suit for y in opponent_deck}):
             ui.button(action = CardMove(card), style=style.card_button)
             ui.add(card, align = (0.5, 0.5))
+        ui.close()
+        ui.imagebutton(idle='images/STRELKAH_VNEESE.png',
+                       hover='images/STRELKAH_VNEESE.png',
+                       yminimum=50,
+                       action=Function(p_adjustment.change, p_adjustment.range))
         ui.close()
         # Played cards
         ui.vbox(id = 'stack', spacing = 10, xalign = 0.5, ypos =0.05, ymaximum = 0.85)
@@ -147,13 +156,23 @@ init -2 python:
             # Even better: 0%2==1 so no worries about empty stack
             ui.textbutton('You win', xalign=0.5, xanchor=0.5, yalign=0.95, \
             action=[SetVariable('ret', stack[-1].suit), Hide('conf')])
+        # Opponent hand
+        o_adjustment=ui.adjustment()
+        ui.vbox(ypos=0.05, xalign=0.85, ymaximum=0.75)
+        ui.imagebutton(idle='images/STRELKAH_VVERKH.png',
+                       hover='images/STRELKAH_VVERKH.png',
+                       action=Function(o_adjustment.change, 0))
         ui.viewport(id = 'o_view', xmaximum = 220, mousewheel=True, \
-        draggable = True, yadjustment=ui.adjustment(), ymaximum = 0.85, ypos =0.05, xalign=0.85)
-        ui.vbox(id = 'o_hand', spacing = 10, ypos=0.05, xalign = 0.85, ymaximum=0.85)
+                    draggable = True, yadjustment=o_adjustment)
+        ui.vbox(id = 'o_hand', spacing = 10)
         for card in opponent_deck:
             ui.button(action=None, style=style.card_button)
             ui.add('images/ROOBASTSHKA.png')
         ui.close()
+        ui.imagebutton(idle='images/STRELKAH_VNEESE.png',
+            hover='images/STRELKAH_VNEESE.png',
+            yminimum=50,
+            action=Function(o_adjustment.change, p_adjustment.range))
         ui.close()
 
     def card_collection(**kwargs):
