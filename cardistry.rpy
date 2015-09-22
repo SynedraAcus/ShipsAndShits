@@ -45,6 +45,15 @@ init -2 python:
         def visit(self):
             return [self.text, self.t_text, self.bg]
 
+        def __eq__(self, other):
+            if not type(other) is Card:
+                return False
+            elif other.suit==self.suit and other.number==self.number \
+                and other.tooltip==self.tooltip and other.spendable==self.spendable:
+                return True
+            else:
+                return False
+
     class CardMove(Action):
         '''
         Class for card button action in a conflict screen
@@ -70,6 +79,14 @@ init -2 python:
             if (stack == [] or self.card.suit == stack[-1].suit and self.card.number>=stack[-1].number)\
             and len(stack)%2==0:  #  Blocks cards when it's opp's turn but you won
                 # You can play a card when either there were no cards played or it beats the last played card
+                return True
+            else:
+                return False
+
+        def __eq__(self, other):
+            if not(type(other) is CardMove):
+                return False
+            if self.card==other.card:
                 return True
             else:
                 return False
@@ -215,6 +232,15 @@ init -2 python:
             trade_stack.append(self.card)
             renpy.restart_interaction()
 
+        def __eq__(self, other):
+            if not(type(other) is CardMove):
+                return False
+            if self.card==other.card:
+                return True
+            else:
+                return False
+
+
     class CardUnsell(Action):
         '''
         The same as CardSell, except it moves card the other way around
@@ -227,6 +253,15 @@ init -2 python:
             trade_stack.remove(self.card)
             player_deck.append(self.card)
             renpy.restart_interaction()
+
+        def __eq__(self, other):
+            if not(type(other) is CardMove):
+                return False
+            if self.card==other.card:
+                return True
+            else:
+                return False
+
 
     class Sell(Action):
         '''
