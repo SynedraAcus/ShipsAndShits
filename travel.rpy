@@ -4,7 +4,8 @@ screen map_screen():
     tag map
     modal True
     zorder 2
-    $ renpy.block_rollback()
+    if gl_no_rollback:
+        $ renpy.block_rollback()
     imagemap:
         auto 'images/1024map_%s.png'
         #  Main cities

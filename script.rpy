@@ -8,6 +8,7 @@ define narrator = Character(None, kind = nvl, what_color="#000000", size = 10)
 
 init python:
     menu = nvl_menu
+    gl_no_rollback = True
     # Initialising global conflict variables so they exist when we call init_conflict()
     stack = []
     opponent_deck = []

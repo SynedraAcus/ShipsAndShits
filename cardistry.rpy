@@ -130,7 +130,8 @@ init -2 python:
         global stack
         global opponent_deck
         global ret
-        renpy.block_rollback()
+        if gl_no_rollback:
+            renpy.block_rollback()
         ui.fixed(id='conflict_fixed', xpos=0.0, ypos=0.0)
         # Player hand
         p_adjustment = ui.adjustment()
@@ -321,7 +322,8 @@ init -2 python:
         For gold only for now!
         One item of shit per screen only for now!
         '''
-        renpy.block_rollback()
+        if gl_no_rollback:
+            renpy.block_rollback()
         global player_deck
         global trade_stack
         #Player hand, copypasted from conflict screen
