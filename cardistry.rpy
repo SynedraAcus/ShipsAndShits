@@ -286,6 +286,7 @@ init -2 python:
         For gold only for now!
         One item of shit per screen only for now!
         '''
+        renpy.block_rollback()
         global player_deck
         global trade_stack
         #Player hand, copypasted from conflict screen
@@ -328,6 +329,8 @@ init -2 python:
         ui.textbutton('Купить', action=Sell(price, sell_card), xalign=0.8, yalign=0.4)
         ui.textbutton('Отмена', action=DontSell(), xalign=0.8, yalign=0.5)
 
-    renpy.define_screen('conf', conflict, modal='True', zorder=10)
+    # Screen definitions
+    # Predict disabled because otherwise block_rollback shoots any time it likes
+    renpy.define_screen('conf', conflict, modal='True', zorder=10, predict=False)
     renpy.define_screen('collection', card_collection, modal = 'True', zorder=10)
-    renpy.define_screen('trade', trade, modal='True', zorder=10)
+    renpy.define_screen('trade', trade, modal='True', zorder=10, predict=False)

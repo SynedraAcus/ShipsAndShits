@@ -296,16 +296,6 @@ init -1 python hide:
     #########################################
     ## More customizations can go here.
 
-#####################################################
-#Uncoupling nvl screen from the rest of screen system
-#Some nvl fixes as well
-#
-#python early:
-    config.layers = ['master', 'transient', 'nvl_layer', 'screens', 'overlay']
-    config.nvl_layer = 'nvl_layer'
-    config.nvl_paged_rollback = True
-    config.mode_callbacks = []
-
 # Card button visual configuration
 # Note: these are buttons, not imagebuttons, and they take card Displayable as a child
     style.card_button = Style(style.button)
@@ -313,3 +303,14 @@ init -1 python hide:
     style.card_button.ypadding = 2
     style.card_button.background = '#6A3819'
     style.card_button.insensitive_background = '#6A3819'
+
+#####################################################
+#Uncoupling nvl screen from the rest of screen system
+#Some nvl fixes as well
+#
+python early:
+    config.layers = ['master', 'transient', 'nvl_layer', 'screens', 'overlay']
+    config.nvl_layer = 'nvl_layer'
+    #config.nvl_paged_rollback = False
+    config.mode_callbacks = []
+

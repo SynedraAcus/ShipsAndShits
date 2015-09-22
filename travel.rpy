@@ -1,9 +1,10 @@
 # Everything related to travels
 #
-screen map_screen:
+screen map_screen():
     tag map
     modal True
     zorder 2
+    $ renpy.block_rollback()
     imagemap:
         auto 'images/1024map_%s.png'
         #  Main cities
