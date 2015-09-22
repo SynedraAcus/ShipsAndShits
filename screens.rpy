@@ -151,8 +151,6 @@ screen nvl(dialogue, items=None):
         # Display a menu, if given.
         if items:
 
-            $renpy.fix_rollback()
-
             vbox:
                 id "menu"
 
