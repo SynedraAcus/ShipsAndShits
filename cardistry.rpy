@@ -199,12 +199,12 @@ init -2 python:
         '''
         global player_deck
         ui.window(id='collection_window', background=Frame('images/Tmp_frame.png', 5, 5), area = (0.05, 0.05, 0.9, 0.85))
-        ui.fixed(id='collection_fixed', xpos=0.0, ypos=0.0)
+        ui.fixed(id='collection_fixed', area = (0.05, 0.05, 0.9, 0.85))
         ui.text(u"Колода", color='#000000', xalign=0.5, ypos=0)
         rows = int(math.ceil(len(player_deck)/3.0))
-        ui.viewport (id='collection_viewport', scrollbars='vertical', mousewheel = True, ypos=0.1,\
-            yanchor=0, ysize=0.9, xfill=True, style=style.card_button)
-        ui.grid(3, rows, id='collection_grid', transpose = False, spacing = 5)
+        ui.viewport (id='collection_viewport', mousewheel = True, ypos=0.1,\
+            yanchor=0, xalign=0.5, xsize=630)
+        ui.grid(3, rows, id='collection_grid', transpose = False, spacing = 10)
         for card in player_deck:
             ui.add(card)
         for j in range(rows*3 - len(player_deck)):
