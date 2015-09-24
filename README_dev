@@ -67,6 +67,19 @@ At least one line should be between calling screen and whatever follows,
 for the same reasons as with showing conflict screen.
 Make sure you're done with setting variables, editing deck, etc, etc. After this line jump will be called.
 
+RANDOM EVENTS IN NODES
+Collection of random events available at node is defined as label_list keyword argument during map_point creation.
+It looks like this (indentation optional):
+    node1 = Map_point('node1', (137, 713),
+            label_list = (('node1_event1', 1), ('node1_event2', 2),
+            ('node1_event3', 2), ('node1_quit', 5)))
+
+Every event is ('label_name', probability) tuple, the label_list itself is a tuple too. Have fun figuring out
+those parentheses. Probability of event is any positive integer; it can be as high or low as one wants.
+To set probability of nothing happened, use 'node1_quit'. Please also set your events to always end up
+in player being set to 'node1_quit' (with appropriate node), unless he wins or loses the game without
+leaving the event.
+
 HUNGARIAN NOTATION
 Please keep naming consistent. All label and variable names should start with port name,
 followed by underscore, followed by variable name. If variable has to do with some specific plot

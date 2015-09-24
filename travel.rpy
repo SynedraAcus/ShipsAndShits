@@ -69,7 +69,7 @@ init -2 python:
             ship = renpy.get_widget('map_screen', 'ship')
             ship.pos = current_port.coordinates
             renpy.hide_screen('map')
-            renpy.jump(self.map_point.label)
+            renpy.jump(self.map_point.get_label())
 
         def get_sensitive(self):
             global current_port
@@ -79,7 +79,7 @@ init -2 python:
                 return False
 
     class Map_point():
-        def __init__(self, name, coordinates, label = '', connected = [], hotspot_size=50):
+        def __init__(self, name, coordinates, label_list = None, connected = [], hotspot_size=50):
             '''
             Create a map_point object. If label is not specified,
             it is the same as name of that object
@@ -93,11 +93,9 @@ init -2 python:
                            hotspot_size,
                            hotspot_size)
             self.hotspot_size=hotspot_size
-            if not label == '':
-                self.label = label
-            else:
-                self.label = name
-
+            self.label_list = label_list
+            if not label_list is None:
+                self.label_prob_sum = sum((x[1] for x in self.label_list))
             self.connected = connected
 
         def check_connected(self, other_point):
@@ -108,6 +106,22 @@ init -2 python:
 
         def list_connected(self):
             return self.connected
+
+        def get_label(self):
+            """
+            Return a label that the game must jump to upon entering port
+            """
+            if self.label_list is None:
+                return self.name
+            import random
+            r=random.uniform(0, self.label_prob_sum)
+            s = 0.0
+            for label in self.label_list:
+                s += label[1]
+                if r<s:
+                    return label[0]
+            return label[0]
+
 
     # Map points initialization
 
@@ -123,7 +137,9 @@ init -2 python:
     monastery = Map_point('monastery', (594, 674))
 
     #  Nodes
-    node1 = Map_point('node1', (137, 713))
+    node1 = Map_point('node1', (137, 713),
+            label_list = (('node1_event1', 1), ('node1_event2', 2),
+                ('node1_event3', 2), ('node1_quit', 5)))
     node2 = Map_point('node2', (296, 700))
     node3 = Map_point('node3', (210, 557))
     node4 = Map_point('node4', (394, 572))
@@ -174,3 +190,4 @@ init -2 python:
     node3.connected=[monet, node4, node9, node12]
     node1.connected=[monet, node2]
     node2.connected=[node1, node4]
+
