@@ -68,11 +68,11 @@ label gamble:
     show screen conf
     "Вы вступили в конфликт. Ни его цель, ни награда за победу вам не ясны."
     #$ _return = renpy.show_screen('conf')
-    if ret == 'Defeat':
+    if ret[0] == 'F':
         jump failure
-    elif ret == u'Знания':
+    elif ret == u'SЗнания':
         jump success_knowledge
-    elif ret == u'Сила':
+    elif ret == u'SСила':
         jump success_force
 
 label success_knowledge:

@@ -138,7 +138,7 @@ init -2 python:
         ui.vbox(spacing=10, ypos=0.05, xpos=0.1,  ymaximum = 0.75)
         ui.imagebutton(idle='images/STRELKAH_VVERKH.png',
                        hover='images/STRELKAH_VVERKH.png',
-                       action=Function(p_adjustment.change, 0))
+                       action=Function(p_adjustment.change, p_adjustment.value-0.1))
         ui.viewport(id = 'hand_view', xmaximum = 220, mousewheel=True, \
         draggable = True, yadjustment=p_adjustment, xalign=0.1)
         ui.vbox(id = 'p_hand', spacing = 10, ysize = 220*len(player_deck))
@@ -165,7 +165,7 @@ init -2 python:
         if len(stack)>0 and len(stack)%2==0:
             if len(filter(lambda x: x.suit==stack[-1].suit and x.number>=stack[-1].number, player_deck))==0:
                 ui.textbutton('You lose', xalign=0.5, xanchor=0.5, yalign=0.95,\
-                action=[Hide('conf'), SetVariable('ret', 'Defeat')])
+                action=[Hide('conf'), SetVariable('ret', u'F{0}'.format(stack[-1].suit))])
             try:
                 opponent_deck.remove(stack[-1])
             except ValueError: # No clue where this exception comes from, but all works well if we just catch it
@@ -174,7 +174,7 @@ init -2 python:
             # This is cute: stack has an odd amount of cards iff oppponent didn't play during button actions
             # Even better: 0%2==1 so no worries about empty stack
             ui.textbutton('You win', xalign=0.5, xanchor=0.5, yalign=0.95, \
-            action=[SetVariable('ret', stack[-1].suit), Hide('conf')])
+            action=[SetVariable('ret', u'S{0}'.format(stack[-1].suit)), Hide('conf')])
         # Opponent hand
         o_adjustment=ui.adjustment()
         ui.vbox(ypos=0.05, xalign=0.85, ymaximum=0.75)

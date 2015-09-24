@@ -12,15 +12,25 @@ Conflict must be initialised, then shown, then you may get results. The followin
 
     "Launching conflict"
     # There must be at least one line of text between showing screen and reading results
-    #
-    if ret == 'Defeat':
+    # Conflict screen sets ret variable as follows:
+    # Letter F or S for "Failure" or "Success"
+    # Then full cyrillic name of the suit that was used in a conflict
+    if ret == u'FЗнания':
+        "Returned defeat"
+        jump failure_knowledge
+    #Below are victory variants. The game returns FULL suit name (unicode, don't forget the letter u before the line)
+    elif ret == u'SЗнания':
+        jump success_knowledge
+    elif ret == u'SСила':
+        jump success_force
+
+    If you don't need to know which suit was used, you can read only the first letter as follows:
+    if ret[0] == u'F':
         "Returned defeat"
         jump failure
-    #Below are victory variants. The game returns FULL suit name (unicode, don't forget the letter u before the line)
-    elif ret == u'Знания':
-        jump success_knowledge
-    elif ret == u'Сила':
-        jump success_force
+    elif ret[0] == u'S':
+        "Returned success
+        jump success
 
 TRADING SCREEN
 You currently can add only "Sell card for money"-type actions. The screen is much like previous one.
