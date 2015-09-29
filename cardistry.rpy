@@ -407,8 +407,16 @@ init -2 python:
 
         def event(self, ev, x, y, st):
             if ev.type == pygame.MOUSEBUTTONDOWN and ev.button == 1:
-                self.text.append(Text('Click at {0};{1}'.format(x,y)))
+                #self.text.append(Text('Click at {0};{1}'.format(x,y)))
                 self.drag_state = True
+                self.drag_start = (x,y)
+                #renpy.redraw(self,0)
+            if ev.type == pygame.MOUSEBUTTONUP and ev.button == 1:
+                if (abs(x-self.drag_start[0]>10) or abs(y-self.drag_start[1]>10)):
+                    self.text.append(Text('Drag from {0};{1} to {2};{3}'.format(self.drag_start[0], self.drag_start[1], x, y)))
+                else:
+                    self.text.append(Text('Click at {0};{1}'.format(x,y)))
+                self.drag_state == False
                 renpy.redraw(self,0)
             pass
 
