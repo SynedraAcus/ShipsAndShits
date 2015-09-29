@@ -47,7 +47,19 @@ label start:
         "Включить торговый экран":
             nvl clear
             jump trade_test
+        "Включить новый экран конфликта":
+            nvl clear
+            jump new_conflict
     #nvl clear
+
+label new_conflict:
+    "Включаем"
+    $ test_table = Table(player_deck)
+    screen test_screen:
+        add test_table
+        zorder 10
+    show screen test_screen
+    jump start
 
 label trade_test:
     $ test_card = Card(u'Д', 10, spendable=True, tooltip='Эта карта была куплена при тестировании магазина')

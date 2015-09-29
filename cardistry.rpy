@@ -371,3 +371,52 @@ init -2 python:
     renpy.define_screen('conf', conflict, modal='True', zorder=10, predict=False)
     renpy.define_screen('collection', card_collection, modal = 'True', zorder=10)
     renpy.define_screen('trade', trade, modal='True', zorder=10, predict=False)
+
+    ##########################################################
+    #New card screen displayable and other event-capable shit#
+    ##########################################################
+    import pygame
+
+    class Table(renpy.Displayable):
+        def __init__(self, player_deck, **kwargs):
+            super(renpy.Displayable, self).__init__(xfill=True, yfill=True, **kwargs)
+            self.bg = Solid('#DDD')
+            self.player_deck = player_deck
+            self.text = [Text('Start of the log')]
+            self.dragging = False
+            pass
+
+        def render(self, width, height, st, at):
+            render_object = renpy.Render(width, height, st, at)
+            bg_render = renpy.render(self.bg, width, height, st, at)
+            render_object.blit(bg_render, (0,0))
+            card_renders = []
+            card_ypos = 0
+            for card in player_deck[:3]:
+                tmp_render = card.render(200, 120, st, at)
+                card_renders.append(tmp_render)
+                render_object.blit(tmp_render, (50, card_ypos))
+                card_ypos += 300
+            text_ypos = 10
+            for x in self.text:
+                text_render = renpy.render(x, width, height, st, at)
+                render_object.blit(text_render, (500, text_ypos))
+                text_ypos += 15
+            return render_object
+            pass
+
+        def event(self, ev, x, y, st):
+            if ev.type == pygame.MOUSEBUTTONDOWN and ev.button == 1:
+                self.text.append(Text('Click at {0};{1}'.format(x,y)))
+                self.drag_state = True
+                renpy.redraw(self,0)
+            pass
+
+        def visit(self):
+            l = self.player_deck[:3]
+            l.extend(self.text)
+            l.append(self.bg)
+            return l
+
+        def per_interact(self):
+            renpy.redraw(self, 0)
