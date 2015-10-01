@@ -25,9 +25,14 @@ init -2 python:
             self.text = Text(u'{0} {1}'.format(self.suit, number), color = '#6A3819', font='Hangyaboly.ttf')
             self.t_text = Text(tooltip, size = 12, color = '#6A3819', font='Hangyaboly.ttf')
             self.bg = (self.spendable == True and Solid(SPENDABLE_COLOR) or Solid(PERMANENT_COLOR))
+            #  Coordinates for new conflict; not referenced outside it
+            self.x = 0
+            self.y = 0
+            self.x_offset = 0
+            self.y_offset = 0
 
         def __str__(self):
-            return(u' '.join([unicode(self.number), self.suit]))
+            return(u' '.join([unicode(self.number), self.suit]).encode('utf-8'))
 
         def render(self, width, height, st, at):
             bg_render = renpy.render(self.bg, width, height, st, at)
@@ -379,12 +384,20 @@ init -2 python:
 
     class Table(renpy.Displayable):
         def __init__(self, player_deck, **kwargs):
+            if gl_no_rollback:
+                renpy.block_rollback()
             super(renpy.Displayable, self).__init__(xfill=True, yfill=True, **kwargs)
             self.bg = Solid('#DDD')
             self.player_deck = player_deck
             self.text = [Text('Start of the log')]
+            self.drag_text = Text('None dragged')
             self.dragging = False
-            pass
+            self.dragged = None
+            card_y = 0
+            for card in self.player_deck:
+                card.x = 50
+                card.y = card_y
+                card_y += 130
 
         def render(self, width, height, st, at):
             render_object = renpy.Render(width, height, st, at)
@@ -392,16 +405,24 @@ init -2 python:
             render_object.blit(bg_render, (0,0))
             card_renders = []
             card_ypos = 0
-            for card in player_deck[:3]:
+            for card in self.player_deck:
                 tmp_render = card.render(200, 120, st, at)
                 card_renders.append(tmp_render)
-                render_object.blit(tmp_render, (50, card_ypos))
-                card_ypos += 300
+                render_object.blit(tmp_render, (card.x, card.y))
+                #card_ypos += 300
+
+            #  Debug text
             text_ypos = 10
+            if self.dragged is not None:
+                self.drag_text = Text('{0}'.format(self.dragged.number))
+            else:
+                self.drag_text = Text('None dragged')
             for x in self.text:
                 text_render = renpy.render(x, width, height, st, at)
                 render_object.blit(text_render, (500, text_ypos))
-                text_ypos += 15
+                text_ypos += 25
+            drag_render = renpy.render(self.drag_text, width, height, st, at)
+            render_object.blit(drag_render, (500, 600))
             return render_object
             pass
 
@@ -410,12 +431,28 @@ init -2 python:
                 #self.text.append(Text('Click at {0};{1}'.format(x,y)))
                 self.drag_state = True
                 self.drag_start = (x,y)
-                #renpy.redraw(self,0)
+                #  Checking if we have clicked any cards:
+                for card in self.player_deck:
+                    if x>card.x and y >card.y and x - card.x < 200 and y - card.y < 120:
+                        self.dragged = card
+                        self.dragged.x_offset = self.dragged.x - x
+                        self.dragged.y_offset = self.dragged.y - y
+                        break
+                renpy.redraw(self,0)
+            if ev.type == pygame.MOUSEMOTION and self.dragged is not None:
+                self.dragged.x = x + self.dragged.x_offset
+                self.dragged.y = y + self.dragged.y_offset
+                renpy.redraw(self, 0)
             if ev.type == pygame.MOUSEBUTTONUP and ev.button == 1:
                 if (abs(x-self.drag_start[0]>10) or abs(y-self.drag_start[1]>10)):
+                    #  If it was a long enough drag
                     self.text.append(Text('Drag from {0};{1} to {2};{3}'.format(self.drag_start[0], self.drag_start[1], x, y)))
+                    if not self.dragged == None:
+                        self.dragged.x = x + self.dragged.x_offset
+                        self.dragged.y = y + self.dragged.y_offset
                 else:
                     self.text.append(Text('Click at {0};{1}'.format(x,y)))
+                self.dragged = None
                 self.drag_state == False
                 renpy.redraw(self,0)
             pass
@@ -424,6 +461,7 @@ init -2 python:
             l = self.player_deck[:3]
             l.extend(self.text)
             l.append(self.bg)
+            l.append(self.drag_text)
             return l
 
         def per_interact(self):

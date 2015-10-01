@@ -57,6 +57,7 @@ label new_conflict:
     $ test_table = Table(player_deck)
     screen test_screen:
         add test_table
+        modal True
         zorder 10
     show screen test_screen
     jump start
