@@ -26,10 +26,10 @@ init -2 python:
             self.t_text = Text(tooltip, size = 12, color = '#6A3819', font='Hangyaboly.ttf')
             self.bg = (self.spendable == True and Solid(SPENDABLE_COLOR) or Solid(PERMANENT_COLOR))
             #  Coordinates for new conflict; not referenced outside it
-            self.x = 0
-            self.y = 0
-            self.x_offset = 0
-            self.y_offset = 0
+            #self.x = 0
+            #self.y = 0
+            #self.x_offset = 0
+            #self.y_offset = 0
 
         def __str__(self):
             return(u' '.join([unicode(self.number), self.suit]).encode('utf-8'))
@@ -43,9 +43,6 @@ init -2 python:
             render.blit(text_render, (10,10))
             render.blit(t_text_render,(10,40))
             return render
-
-        def per_interact(self):
-            renpy.redraw(self,0)
 
         def visit(self):
             return [self.text, self.t_text, self.bg]
@@ -381,6 +378,43 @@ init -2 python:
     #New card screen displayable and other event-capable shit#
     ##########################################################
     import pygame
+    class Stack(renpy.Displayable):
+        def __init__(self, card_list, **kwargs):
+            super(renpy.Displayable, self).__init__(**kwargs)
+            self.render_object=None
+            self.card_list = card_list
+            p_adjustment = ui.adjustment()
+            self.viewport = Viewport(id = 'hand_view', xfill = False, yfill=False, xmaximum = 220, mousewheel=True, \
+                            draggable = True, yadjustment = p_adjustment, scrollbars='vertical',\
+                            xysize=(220, 600),\
+                            child = LiveTile('images/Tmp_frame.png', xysize=(200, 10000)))
+
+
+
+
+        def render(self, width, height, st, at):
+            self.render_object = renpy.Render(width, height, st, at)
+            vp_render = renpy.render(self.viewport, 220, 600, st, at)
+            self.render_object.blit(vp_render, (0,0))
+            return self.render_object
+
+        def visit(self):
+            return [self.viewport]
+            pass
+        def event(self, ev, x, y, st):
+            return self.viewport.event(ev,x,y,st)
+        def per_interact(self):
+            renpy.redraw(self, 0)
+            pass
+
+        def append(self, card):
+            pass
+
+        def remove(self, card):
+            pass
+    class Jumpback():
+        def __init__ (self):
+            pass
 
     class Table(renpy.Displayable):
         def __init__(self, player_deck, **kwargs):
@@ -398,19 +432,22 @@ init -2 python:
                 card.x = 50
                 card.y = card_y
                 card_y += 130
+            #  Test hand stack
+            self.stack = Stack(player_deck)
 
         def render(self, width, height, st, at):
-            render_object = renpy.Render(width, height, st, at)
+            self.render_object = renpy.Render(width, height, st, at)
             bg_render = renpy.render(self.bg, width, height, st, at)
-            render_object.blit(bg_render, (0,0))
+            self.render_object.blit(bg_render, (0,0))
             card_renders = []
             card_ypos = 0
             for card in self.player_deck:
                 tmp_render = card.render(200, 120, st, at)
                 card_renders.append(tmp_render)
-                render_object.blit(tmp_render, (card.x, card.y))
-                #card_ypos += 300
-
+                self.render_object.blit(tmp_render, (card.x, card.y))
+            #  Stack render
+            stack_render = self.stack.render(width, height, st, at)
+            self.render_object.blit(stack_render, (800,0))
             #  Debug text
             text_ypos = 10
             if self.dragged is not None:
@@ -419,11 +456,11 @@ init -2 python:
                 self.drag_text = Text('None dragged')
             for x in self.text:
                 text_render = renpy.render(x, width, height, st, at)
-                render_object.blit(text_render, (500, text_ypos))
+                self.render_object.blit(text_render, (500, text_ypos))
                 text_ypos += 25
             drag_render = renpy.render(self.drag_text, width, height, st, at)
-            render_object.blit(drag_render, (500, 600))
-            return render_object
+            self.render_object.blit(drag_render, (500, 600))
+            return self.render_object
             pass
 
         def event(self, ev, x, y, st):
@@ -455,13 +492,14 @@ init -2 python:
                 self.dragged = None
                 self.drag_state == False
                 renpy.redraw(self,0)
-            pass
+            self.stack.event(ev, x, y, st)
 
         def visit(self):
             l = self.player_deck[:3]
             l.extend(self.text)
             l.append(self.bg)
             l.append(self.drag_text)
+            l.append(self.stack)
             return l
 
         def per_interact(self):
