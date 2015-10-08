@@ -26,10 +26,10 @@ init -2 python:
             self.t_text = Text(tooltip, size = 12, color = '#6A3819', font='Hangyaboly.ttf')
             self.bg = (self.spendable == True and Solid(SPENDABLE_COLOR) or Solid(PERMANENT_COLOR))
             #  Coordinates for new conflict; not referenced outside it
-            #self.x = 0
-            #self.y = 0
-            #self.x_offset = 0
-            #self.y_offset = 0
+            self.x = 0
+            self.y = 0
+            self.x_offset = 0
+            self.y_offset = 0
 
         def __str__(self):
             return(u'{0} {1}'.format(self.suit, self.number))
@@ -381,62 +381,59 @@ init -2 python:
     #New card screen displayable and other event-capable shit#
     ##########################################################
     import pygame
-    class Stack(renpy.Displayable):
-        def __init__(self, card_list, **kwargs):
-            super(renpy.Displayable, self).__init__(**kwargs)
-            self.render_object=None
+    class Cardbox(object):
+        def __init__(self, card_list, x=0, y=0, xsize=300, ysize=300, **kwargs):
+            self.x = x
+            self.y = y
+            self.xsize = xsize
+            self.ysize = ysize
+
             self.card_list = card_list
-            p_adjustment = ui.adjustment()
-            self.viewport = Viewport(id = 'hand_view', xfill = False, yfill=False, xmaximum = 220, mousewheel=True, \
-                            draggable = True, yadjustment = p_adjustment, scrollbars='vertical',\
-                            xysize=(220, 600),\
-                            child = LiveTile('images/Tmp_frame.png', xysize=(200, 10000)))
+            self._position_cards()
 
-
-
-
-        def render(self, width, height, st, at):
-            self.render_object = renpy.Render(width, height, st, at)
-            vp_render = renpy.render(self.viewport, 220, 600, st, at)
-            self.render_object.blit(vp_render, (0,0))
-            return self.render_object
-
-        def visit(self):
-            return [self.viewport]
-            pass
-        def event(self, ev, x, y, st):
-            return self.viewport.event(ev,x,y,st)
-        def per_interact(self):
-            renpy.redraw(self, 0)
-            pass
+        def _position_cards(self):
+            #CARDHEIGHT = 120
+            mid = int(self.x + self.xsize/2)
+            start_y = self.y
+            step = int(self.ysize/len(self.card_list))
+            y = self.y
+            for card in self.card_list:
+                card.x = mid
+                card.y = y
+                y += step
 
         def append(self, card):
             pass
 
         def remove(self, card):
             pass
+
     class Jumpback():
         def __init__ (self):
             pass
 
     class Table(renpy.Displayable):
-        def __init__(self, player_deck, **kwargs):
+        def __init__(self, stacks = [], **kwargs):
             if gl_no_rollback:
                 renpy.block_rollback()
             super(renpy.Displayable, self).__init__(xfill=True, yfill=True, **kwargs)
             self.bg = Solid('#DDD')
             self.player_deck = player_deck
+            self.stacks = stacks
+            self.cards = []
+            for x in self.stacks:
+                self.cards.extend(x.card_list)
             self.text = [Text('Start of the log')]
             self.drag_text = Text('None dragged')
             self.dragging = False
             self.dragged = None
-            card_y = 0
-            for card in self.player_deck:
-                card.x = 50
-                card.y = card_y
-                card_y += 130
+            #card_y = 0
+            #for card in self.cards:
+            #    card.x = 50
+            #    card.y = card_y
+            #    card_y += 130
             #  Test hand stack
-            self.stack = Stack(player_deck)
+            #self.stack = Cardbox(player_deck)
 
         def render(self, width, height, st, at):
             self.render_object = renpy.Render(width, height, st, at)
@@ -444,13 +441,10 @@ init -2 python:
             self.render_object.blit(bg_render, (0,0))
             card_renders = []
             card_ypos = 0
-            for card in self.player_deck:
+            for card in self.cards:
                 tmp_render = card.render(200, 120, st, at)
                 card_renders.append(tmp_render)
                 self.render_object.blit(tmp_render, (card.x, card.y))
-            #  Stack render
-            stack_render = self.stack.render(width, height, st, at)
-            self.render_object.blit(stack_render, (800,0))
             #  Debug text
             text_ypos = 10
             if self.dragged is not None:
@@ -472,7 +466,7 @@ init -2 python:
                 self.drag_state = True
                 self.drag_start = (x,y)
                 #  Checking if we have clicked any cards:
-                for card in self.player_deck:
+                for card in self.cards:
                     if x>card.x and y >card.y and x - card.x < 200 and y - card.y < 120:
                         self.dragged = card
                         self.dragged.x_offset = self.dragged.x - x
@@ -495,14 +489,13 @@ init -2 python:
                 self.dragged = None
                 self.drag_state == False
                 renpy.redraw(self,0)
-            self.stack.event(ev, x, y, st)
+#            self.stack.event(ev, x, y, st)
 
         def visit(self):
             l = self.player_deck[:3]
             l.extend(self.text)
             l.append(self.bg)
             l.append(self.drag_text)
-            l.append(self.stack)
             return l
 
         def per_interact(self):

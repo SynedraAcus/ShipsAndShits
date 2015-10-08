@@ -53,7 +53,7 @@ label start:
 
 label new_conflict:
     "Включаем"
-    $ test_table = Table(player_deck)
+    $ test_table = Table(stacks=[Cardbox(player_deck, x = 0, y = 0, xsize = 300, ysize = 1000)])
     screen test_screen:
         add test_table
         modal True
