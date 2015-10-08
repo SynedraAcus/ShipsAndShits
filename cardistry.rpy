@@ -364,7 +364,10 @@ init -2 python:
                        yminimum=50,
                        action=Function(p_adjustment.change, p_adjustment.range))
         ui.close()
-        ui.text(u'Продаём {0} за {1}'.format(str(sell_card), str(price)), xalign=0.85, yalign=0.3, color = '#6A3819', font='Hangyaboly.ttf')
+        ui.text(u'Продаём {0} {1} за {2}'.format(str(sell_card.number), sell_card.suit, str(price)),\
+                xalign=0.85, yalign=0.3, color = '#6A3819', font='Hangyaboly.ttf')
+        ui.text(u'Уплочено {0}'.format(str(sum((x.number for x in trade_stack)))),
+                xalign=0.85, yalign = 0.35, color = '#6A3819', font='Hangyaboly.ttf')
         ui.textbutton(u'Купить', action=Sell(price, sell_card), xalign=0.8, yalign=0.4)
         ui.textbutton(u'Отмена', action=DontSell(), xalign=0.8, yalign=0.5)
 
