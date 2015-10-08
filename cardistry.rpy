@@ -32,7 +32,7 @@ init -2 python:
             #self.y_offset = 0
 
         def __str__(self):
-            return(u' '.join([unicode(self.number), self.suit]).encode('utf-8'))
+            return(u'{0} {1}'.format(self.suit, self.number))
 
         def render(self, width, height, st, at):
             bg_render = renpy.render(self.bg, width, height, st, at)
@@ -364,9 +364,9 @@ init -2 python:
                        yminimum=50,
                        action=Function(p_adjustment.change, p_adjustment.range))
         ui.close()
-        ui.text(u'Продаём {0} за {1}'.format(str(sell_card), str(price)), xalign=0.85, yalign=0.3)
-        ui.textbutton('Купить', action=Sell(price, sell_card), xalign=0.8, yalign=0.4)
-        ui.textbutton('Отмена', action=DontSell(), xalign=0.8, yalign=0.5)
+        ui.text(u'Продаём {0} за {1}'.format(str(sell_card), str(price)), xalign=0.85, yalign=0.3, color = '#6A3819', font='Hangyaboly.ttf')
+        ui.textbutton(u'Купить', action=Sell(price, sell_card), xalign=0.8, yalign=0.4)
+        ui.textbutton(u'Отмена', action=DontSell(), xalign=0.8, yalign=0.5)
 
     # Screen definitions
     # Predict disabled because otherwise block_rollback shoots any time it likes

@@ -50,14 +50,6 @@ label start:
         "Включить новый экран конфликта":
             nvl clear
             jump new_conflict
-        "Нарисовать пару карт":
-            $ CD = Card(u'З', 7, spendable = True, tooltip = u'Эта карта не перманентна; в отличие от прочих она серая')
-            screen ASD:
-                add CD:
-                    xalign 0.5
-                    yalign 0.5
-            call screen ASD
-    #nvl clear
 
 label new_conflict:
     "Включаем"
