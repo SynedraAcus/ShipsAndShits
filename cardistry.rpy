@@ -364,15 +364,15 @@ init -2 python:
                        yminimum=50,
                        action=Function(p_adjustment.change, p_adjustment.range))
         ui.close()
-        ui.text(u'Продаём {0} за {1}'.format(sell_card.__str__(), str(price)), xalign=0.85, yalign=0.3)
+        ui.text(u'Продаём {0} за {1}'.format(str(sell_card), str(price)), xalign=0.85, yalign=0.3)
         ui.textbutton('Купить', action=Sell(price, sell_card), xalign=0.8, yalign=0.4)
         ui.textbutton('Отмена', action=DontSell(), xalign=0.8, yalign=0.5)
 
     # Screen definitions
     # Predict disabled because otherwise block_rollback shoots any time it likes
-    renpy.define_screen('conf', conflict, modal='True', zorder=10, predict=False)
-    renpy.define_screen('collection', card_collection, modal = 'True', zorder=10)
-    renpy.define_screen('trade', trade, modal='True', zorder=10, predict=False)
+    renpy.define_screen('conf', conflict, modal='True', zorder='10', predict=False)
+    renpy.define_screen('collection', card_collection, modal = 'True', zorder='10')
+    renpy.define_screen('trade', trade, modal='True', zorder='10', predict=False)
 
     ##########################################################
     #New card screen displayable and other event-capable shit#
