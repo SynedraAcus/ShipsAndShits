@@ -387,7 +387,6 @@ init -2 python:
             self.y = y
             self.xsize = xsize
             self.ysize = ysize
-
             self.card_list = card_list
             self._position_cards()
 
