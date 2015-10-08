@@ -382,11 +382,13 @@ init -2 python:
     ##########################################################
     import pygame
     class Cardbox(object):
-        def __init__(self, card_list, x=0, y=0, xsize=300, ysize=300, **kwargs):
+        def __init__(self, card_list, x=0, y=0, xsize=300, ysize=300, accept_function = None, give_function = None, **kwargs):
             self.x = x
             self.y = y
             self.xsize = xsize
             self.ysize = ysize
+            self.accept_function = accept_function
+            self.give_function = give_function
             self.card_list = card_list
             self._position_cards()
 
