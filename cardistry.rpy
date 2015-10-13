@@ -25,11 +25,12 @@ init -2 python:
             self.text = Text(u'{0} {1}'.format(self.suit, number), color = '#6A3819', font='Hangyaboly.ttf')
             self.t_text = Text(tooltip, size = 12, color = '#6A3819', font='Hangyaboly.ttf')
             self.bg = (self.spendable == True and Solid(SPENDABLE_COLOR) or Solid(PERMANENT_COLOR))
-            #  Coordinates for new conflict; not referenced outside it
+            #  Stuff for new conflict; not referenced outside it
             self.x = 0
             self.y = 0
             self.x_offset = 0
             self.y_offset = 0
+            self.stack = 0
 
         def __str__(self):
             return(u'{0} {1}'.format(self.suit, self.number))
@@ -382,15 +383,20 @@ init -2 python:
     ##########################################################
     import pygame
     class Cardbox(object):
-        def __init__(self, card_list, x=0, y=0, xsize=300, ysize=300, accept_function = None, give_function = None, **kwargs):
+        def __init__(self, card_list, x=0, y=0, xsize=300, ysize=300,\
+                    accept_function = None, give_function = None, autoaccept = False, **kwargs):
+            # Position on screen
             self.x = x
             self.y = y
             self.xsize = xsize
             self.ysize = ysize
+            # Give/accept relationships
             self.accept_function = accept_function
             self.give_function = give_function
+            # Rest of it
             self.card_list = card_list
-            self._position_cards()
+            if len(self.card_list) > 0:
+                self._position_cards()
 
         def _position_cards(self):
             #CARDHEIGHT = 120
@@ -399,9 +405,22 @@ init -2 python:
             step = int(self.ysize/len(self.card_list))
             y = self.y
             for card in self.card_list:
+                card.stack = self
                 card.x = mid
                 card.y = y
                 y += step
+
+        def give(self, card):
+            '''
+            Return True if this stack is willing to give card away, False otherwise
+            '''
+            return self.give_function(card)
+
+        def accept(self, card):
+            '''
+            Return True if this stack accepts this card, False otherwise
+            '''
+            return self.accept_function(card)
 
         def append(self, card):
             pass
@@ -424,24 +443,19 @@ init -2 python:
             self.cards = []
             for x in self.stacks:
                 self.cards.extend(x.card_list)
+            self.sticky_box = Solid('#FF0000')
             self.text = [Text('Start of the log')]
             self.drag_text = Text('None dragged')
             self.dragging = False
             self.dragged = None
-            #card_y = 0
-            #for card in self.cards:
-            #    card.x = 50
-            #    card.y = card_y
-            #    card_y += 130
-            #  Test hand stack
-            #self.stack = Cardbox(player_deck)
 
         def render(self, width, height, st, at):
             self.render_object = renpy.Render(width, height, st, at)
             bg_render = renpy.render(self.bg, width, height, st, at)
             self.render_object.blit(bg_render, (0,0))
+            sticky_render = renpy.render(self.sticky_box, 300, 1000, st, at)
+            self.render_object.blit(sticky_render, (400, 0))
             card_renders = []
-            card_ypos = 0
             for card in self.cards:
                 tmp_render = card.render(200, 120, st, at)
                 card_renders.append(tmp_render)
@@ -458,33 +472,51 @@ init -2 python:
                 text_ypos += 25
             drag_render = renpy.render(self.drag_text, width, height, st, at)
             self.render_object.blit(drag_render, (500, 600))
+
             return self.render_object
             pass
 
         def event(self, ev, x, y, st):
             if ev.type == pygame.MOUSEBUTTONDOWN and ev.button == 1:
-                #self.text.append(Text('Click at {0};{1}'.format(x,y)))
-                self.drag_state = True
-                self.drag_start = (x,y)
+                self.text.append(Text('Click at {0};{1}'.format(x,y)))
                 #  Checking if we have clicked any cards:
                 for card in self.cards:
                     if x>card.x and y >card.y and x - card.x < 200 and y - card.y < 120:
+                        self.drag_state = True
+                        self.drag_start = (x,y)
                         self.dragged = card
                         self.dragged.x_offset = self.dragged.x - x
                         self.dragged.y_offset = self.dragged.y - y
                         break
-                renpy.redraw(self,0)
+
             if ev.type == pygame.MOUSEMOTION and self.dragged is not None:
+                #  Just redrawing card in hand
                 self.dragged.x = x + self.dragged.x_offset
                 self.dragged.y = y + self.dragged.y_offset
                 renpy.redraw(self, 0)
+
             if ev.type == pygame.MOUSEBUTTONUP and ev.button == 1:
                 if (abs(x-self.drag_start[0]>10) or abs(y-self.drag_start[1]>10)):
                     #  If it was a long enough drag
                     self.text.append(Text('Drag from {0};{1} to {2};{3}'.format(self.drag_start[0], self.drag_start[1], x, y)))
-                    if not self.dragged == None:
-                        self.dragged.x = x + self.dragged.x_offset
-                        self.dragged.y = y + self.dragged.y_offset
+                    # If the card was dragged:
+                    if self.dragged is not None:
+                        #  Check if there is accepting stack and transfer is possible
+                        for accepting_stack in self.stacks:
+                            if x>accepting_stack.x and x < accepting_stack.x+accepting_stack.xsize:
+                                if not accepting_stack is self.dragged.stack:
+                                    if self.dragged.stack.give(self.dragged) and accepting_stack.accept(self.dragged):
+                                        self.dragged.stack = accepting_stack
+                                        self.dragged.stack.remove(self.dragged)
+                                        accepting_stack.append(self.dragged)
+                                    else:
+                                        self.dragged.x = self.drag_start[0] + self.dragged.x_offset
+                                        self.dragged.y = self.drag_start[1] + self.dragged.y_offset
+                        #  Dragging has ended somehow anyway
+                        self.dragged = None
+                        self.drag_state = False
+                        renpy.redraw(self, 0)
+
                 else:
                     self.text.append(Text('Click at {0};{1}'.format(x,y)))
                 self.dragged = None
@@ -497,6 +529,7 @@ init -2 python:
             l.extend(self.text)
             l.append(self.bg)
             l.append(self.drag_text)
+            l.append(self.sticky_box)
             return l
 
         def per_interact(self):
