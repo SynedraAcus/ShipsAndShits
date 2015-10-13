@@ -383,11 +383,12 @@ init -2 python:
     ##########################################################
     import pygame
     class Cardbox(object):
-        def __init__(self, card_list, x=0, y=0, xsize=300, ysize=300,\
-                    accept_function = None, give_function = None, autoaccept = False, **kwargs):
+        def __init__(self, card_list, stack_id='NO ID', x=0, y=0, xsize=300, ysize=300,
+                     accept_function=None, give_function=None, autoaccept = False, **kwargs):
             # Position on screen
             self.x = x
             self.y = y
+            self.id = stack_id
             self.xsize = xsize
             self.ysize = ysize
             # Give/accept relationships
@@ -395,17 +396,17 @@ init -2 python:
             self.give_function = give_function
             # Rest of it
             self.card_list = card_list
+            for card in self.card_list:
+                card.stack = stack_id
             if len(self.card_list) > 0:
                 self._position_cards()
 
         def _position_cards(self):
             #CARDHEIGHT = 120
             mid = int(self.x + self.xsize/2)
-            start_y = self.y
             step = int(self.ysize/len(self.card_list))
             y = self.y
             for card in self.card_list:
-                card.stack = self
                 card.x = mid
                 card.y = y
                 y += step
@@ -423,10 +424,10 @@ init -2 python:
             return self.accept_function(card)
 
         def append(self, card):
-            pass
+            self.card_list.append(card)
 
         def remove(self, card):
-            pass
+            self.card_list.remove(card)
 
     class Jumpback():
         def __init__ (self):
@@ -440,14 +441,14 @@ init -2 python:
             self.bg = Solid('#DDD')
             self.player_deck = player_deck
             self.stacks = stacks
+            self.stack_dict = {x.id: x for x in self.stacks}
             self.cards = []
             for x in self.stacks:
                 self.cards.extend(x.card_list)
             self.sticky_box = Solid('#FF0000')
-            self.text = [Text('Start of the log')]
             self.drag_text = Text('None dragged')
-            self.dragging = False
             self.dragged = None
+            self.drag_start = None
 
         def render(self, width, height, st, at):
             self.render_object = renpy.Render(width, height, st, at)
@@ -463,13 +464,9 @@ init -2 python:
             #  Debug text
             text_ypos = 10
             if self.dragged is not None:
-                self.drag_text = Text('{0}'.format(self.dragged.number))
+                self.drag_text = Text('{0}'.format(self.dragged.stack))
             else:
                 self.drag_text = Text('None dragged')
-            for x in self.text:
-                text_render = renpy.render(x, width, height, st, at)
-                self.render_object.blit(text_render, (500, text_ypos))
-                text_ypos += 25
             drag_render = renpy.render(self.drag_text, width, height, st, at)
             self.render_object.blit(drag_render, (500, 600))
 
@@ -478,12 +475,10 @@ init -2 python:
 
         def event(self, ev, x, y, st):
             if ev.type == pygame.MOUSEBUTTONDOWN and ev.button == 1:
-                self.text.append(Text('Click at {0};{1}'.format(x,y)))
                 #  Checking if we have clicked any cards:
                 for card in self.cards:
-                    if x>card.x and y >card.y and x - card.x < 200 and y - card.y < 120:
-                        self.drag_state = True
-                        self.drag_start = (x,y)
+                    if x>card.x and y >card.y and x - card.x < 200 and y - card.y < 120 and self.get_stack_by_id(card.stack).give(card):
+                        self.drag_start = (card.x,card.y)
                         self.dragged = card
                         self.dragged.x_offset = self.dragged.x - x
                         self.dragged.y_offset = self.dragged.y - y
@@ -498,35 +493,42 @@ init -2 python:
             if ev.type == pygame.MOUSEBUTTONUP and ev.button == 1:
                 if (abs(x-self.drag_start[0]>10) or abs(y-self.drag_start[1]>10)):
                     #  If it was a long enough drag
-                    self.text.append(Text('Drag from {0};{1} to {2};{3}'.format(self.drag_start[0], self.drag_start[1], x, y)))
-                    # If the card was dragged:
                     if self.dragged is not None:
+                        # If the card was dragged:
                         #  Check if there is accepting stack and transfer is possible
+                        is_accepted = False
                         for accepting_stack in self.stacks:
-                            if x>accepting_stack.x and x < accepting_stack.x+accepting_stack.xsize:
-                                if not accepting_stack is self.dragged.stack:
-                                    if self.dragged.stack.give(self.dragged) and accepting_stack.accept(self.dragged):
-                                        self.dragged.stack = accepting_stack
-                                        self.dragged.stack.remove(self.dragged)
+                            if x > accepting_stack.x and x < accepting_stack.x + accepting_stack.xsize:
+                                #  ADD PROPER OVERLAP CHECK
+                                if not self.dragged.stack == accepting_stack.id:
+                                    if accepting_stack.accept(self.dragged):
+                                        is_accepted = True
+                                        self.get_stack_by_id(self.dragged.stack).remove(self.dragged)
                                         accepting_stack.append(self.dragged)
+                                        self.dragged.stack = accepting_stack.id
                                     else:
-                                        self.dragged.x = self.drag_start[0] + self.dragged.x_offset
-                                        self.dragged.y = self.drag_start[1] + self.dragged.y_offset
+                                        self.dragged.x = self.drag_start[0]
+                                        self.dragged.y = self.drag_start[1]
+                                else:
+                                    #  Why not rearrange cards within stack
+                                    is_accepted = True
+                        if not is_accepted:
+                            #  If no stack accepted card, it should be returned where it belongs
+                            self.dragged.x = self.drag_start[0]
+                            self.dragged.y = self.drag_start[1]
                         #  Dragging has ended somehow anyway
                         self.dragged = None
-                        self.drag_state = False
                         renpy.redraw(self, 0)
 
                 else:
-                    self.text.append(Text('Click at {0};{1}'.format(x,y)))
-                self.dragged = None
-                self.drag_state == False
+                    #  Things to do upon click
+                    #  Do not carry a card, for instance
+                    self.dragged = None
                 renpy.redraw(self,0)
 #            self.stack.event(ev, x, y, st)
 
         def visit(self):
             l = self.player_deck[:3]
-            l.extend(self.text)
             l.append(self.bg)
             l.append(self.drag_text)
             l.append(self.sticky_box)
@@ -534,3 +536,6 @@ init -2 python:
 
         def per_interact(self):
             renpy.redraw(self, 0)
+
+        def get_stack_by_id(self, stack_id):
+            return self.stack_dict[stack_id]

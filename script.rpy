@@ -53,7 +53,7 @@ label start:
 
 label new_conflict:
     "Включаем"
-    $ test_table = Table(stacks=[Cardbox(player_deck, x = 0, y = 0, xsize = 300, ysize = 1000, give_function = lambda a: False, accept_function = lambda a: True), Cardbox([], x=400, y=0, xsize=300, ysize=1000, give_function=lambda a: False, accept_function = lambda a: True)])
+    $ test_table = Table(stacks=[Cardbox(player_deck, stack_id='LEFT', x = 10, y = 0, xsize = 300, ysize = 1000, give_function = lambda a: True, accept_function = lambda a: True), Cardbox([], stack_id='RIGHT', x=400, y=0, xsize=300, ysize=1000, give_function = lambda a: False, accept_function = lambda a: True)])
     screen test_screen:
         add test_table
         modal True
