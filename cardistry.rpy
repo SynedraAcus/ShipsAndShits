@@ -28,6 +28,8 @@ init -3 python:
             #  Stuff for new conflict; not referenced outside it
             self.x = 0
             self.y = 0
+            self.xsize = 200
+            self.ysize = 120
             self.x_offset = 0
             self.y_offset = 0
             self.stack = 0
@@ -382,6 +384,24 @@ init -3 python:
     #New card screen displayable and other event-capable shit#
     ##########################################################
     import pygame
+
+    #  Various utility functions
+
+    def inside(click, box):
+        """
+        Check whether a point is within a box
+        :param click: 2-element tuple (x,y)
+        :param box: 4-element tuple: (x,y,xsize,ysize)
+        :return:
+        """
+        if not(click[0]<box[0] or click[0]>box[0]+box[2]):
+            if not (click[1]<box[1] or click[1]>box[1]+box[3]):
+                return True
+        return False
+
+    #  Cardbox and its children
+
+
     class Cardbox(object):
         def __init__(self, card_list, stack_id='NO ID', x=0, y=0, xsize=300, ysize=300,
                      autoaccept = False, **kwargs):
@@ -500,7 +520,9 @@ init -3 python:
             pass
 
 
+
     class Table(renpy.Displayable):
+
         def __init__(self, stacks = [], **kwargs):
             if gl_no_rollback:
                 renpy.block_rollback()
@@ -512,22 +534,20 @@ init -3 python:
             self.cards = []
             for x in self.stacks:
                 self.cards.extend(x.card_list)
-            self.sticky_box = Solid('#FF0000')
             self.drag_text = Text('None dragged')
             self.dragged = None
-            self.drag_start = None
+            self.drag_start = (0,0)
+            #  Debug Cardboxes
+            self.cardboxes = []
+            for x in self.stacks:
+                self.cardboxes.append(Solid('#FF0000'))
+
 
         def render(self, width, height, st, at):
             self.render_object = renpy.Render(width, height, st, at)
             bg_render = renpy.render(self.bg, width, height, st, at)
             self.render_object.blit(bg_render, (0,0))
-            sticky_render = renpy.render(self.sticky_box, 300, 1000, st, at)
-            self.render_object.blit(sticky_render, (400, 0))
-            card_renders = []
-            for card in self.cards:
-                tmp_render = card.render(200, 120, st, at)
-                card_renders.append(tmp_render)
-                self.render_object.blit(tmp_render, (card.x, card.y))
+            #  DEBUG DRAG TEXT
             if self.dragged is not None:
                 self.drag_text = Text('{0}'.format(self.dragged.stack))
             else:
@@ -535,14 +555,28 @@ init -3 python:
             drag_render = renpy.render(self.drag_text, width, height, st, at)
             self.render_object.blit(drag_render, (500, 600))
 
+            #  DEBUG STACK BOXES
+            box_renders = []
+            for x in range(len(self.stacks)):
+                tmp_render = self.cardboxes[x].render(self.stacks[x].xsize, self.stacks[x].ysize, st, at)
+                box_renders.append(tmp_render)
+                self.render_object.blit(tmp_render, (self.stacks[x].x, self.stacks[x].y))
+
+            #  CARDS
+            card_renders = []
+            for card in self.cards:
+                tmp_render = card.render(200, 120, st, at)
+                card_renders.append(tmp_render)
+                self.render_object.blit(tmp_render, (card.x, card.y))
             return self.render_object
-            pass
+
+
 
         def event(self, ev, x, y, st):
             if ev.type == pygame.MOUSEBUTTONDOWN and ev.button == 1:
                 #  Checking if we have clicked any cards:
                 for card in self.cards:
-                    if x>card.x and y >card.y and x - card.x < 200 and y - card.y < 120 and self.get_stack_by_id(card.stack).give(card):
+                    if inside((x,y), (card.x, card.y, card.xsize, card.ysize)) and self.get_stack_by_id(card.stack).give(card):
                         self.drag_start = (card.x,card.y)
                         self.dragged = card
                         self.dragged.x_offset = self.dragged.x - x
@@ -563,7 +597,8 @@ init -3 python:
                         #  Check if there is accepting stack and transfer is possible
                         is_accepted = False
                         for accepting_stack in self.stacks:
-                            if x > accepting_stack.x and x < accepting_stack.x + accepting_stack.xsize:
+                            if inside((x,y), (accepting_stack.x, accepting_stack.y, accepting_stack.xsize, accepting_stack.ysize)):
+                            # if x > accepting_stack.x and x < accepting_stack.x + accepting_stack.xsize:
                                 #  ADD PROPER OVERLAP CHECK
                                 if not self.dragged.stack == accepting_stack.id:
                                     if accepting_stack.accept(self.dragged):
@@ -596,7 +631,7 @@ init -3 python:
             l = self.player_deck[:3]
             l.append(self.bg)
             l.append(self.drag_text)
-            l.append(self.sticky_box)
+            l+=self.cardboxes
             return l
 
         def per_interact(self):
@@ -612,6 +647,6 @@ init -1 python:
         p_stack.replace_cards(player_deck)
         p_stack._position_cards()
 
-    acc_stack = Money_acceptor_stack([], stack_id='RIGHT', x=400, y=0, xsize=300, ysize=1000)
-    p_stack = Player_stack(player_deck, stack_id='HAND', x=10, y=0, xsize=300, ysize=1000)
+    acc_stack = Money_acceptor_stack([], stack_id='RIGHT', x=400, y=100, xsize=300, ysize=500)
+    p_stack = Player_stack(player_deck, stack_id='HAND', x=10, y=100, xsize=300, ysize=500)
     test_table = Table(stacks=[p_stack, acc_stack])

@@ -17,7 +17,7 @@ init -2 python:
     price = '0'
     # Initialising starting position
     current_port = monet
-    player_deck = deck(u'0С1С4Д0С1С4Д0С1С4Д0С1С4Д')
+    player_deck = deck(u'0С1С4Д1С')
     player_deck.append(Card(u'З', 7, spendable = True, tooltip = u'Эта карта не перманентна; в отличие от прочих она серая'))
 
 
