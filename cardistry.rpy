@@ -587,7 +587,9 @@ init -3 python:
                         self.dragged = card
                         self.dragged.x_offset = self.dragged.x - x
                         self.dragged.y_offset = self.dragged.y - y
-                        break
+                        #  Show dragged on the top of other cards
+                        self.cards.append(self.cards.pop(self.cards.index(self.dragged)))
+                        break  #  No need to move two cards at the same time
 
             if ev.type == pygame.MOUSEMOTION and self.dragged is not None:
                 #  Just redrawing card in hand
@@ -617,8 +619,6 @@ init -3 python:
                                 else:
                                     #  Why not rearrange cards within stack
                                     is_accepted = True
-                                    #  Basically remove card from stack and put it at its end
-                                    self.cards.append(self.cards.pop(self.cards.index(self.dragged)))
                         if not is_accepted:
                             #  If card was not accepted, it should be returned where it belongs
                             self.dragged.x = self.drag_start[0]
