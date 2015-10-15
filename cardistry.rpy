@@ -433,20 +433,26 @@ init -3 python:
             Return True if this stack is willing to give card away, False otherwise
             '''
             raise NotImplementedError
-            #return self.give_function(card)
 
         def accept(self, card):
             '''
             Return True if this stack accepts this card, False otherwise
             '''
             raise NotImplementedError
-            # return self.accept_function(card)
 
+        #  Defining those here creates less messy code than
+        #  inheriting from list ABC. Maybe even quicker
         def append(self, card):
             self.card_list.append(card)
 
         def remove(self, card):
             self.card_list.remove(card)
+
+        def pop(self, index):
+            return self.card_list.pop(index)
+
+        def index(self, card):
+            return self.card_list.index(card)
 
         def replace_cards(self, l):
             """
@@ -575,7 +581,7 @@ init -3 python:
         def event(self, ev, x, y, st):
             if ev.type == pygame.MOUSEBUTTONDOWN and ev.button == 1:
                 #  Checking if we have clicked any cards:
-                for card in self.cards:
+                for card in reversed(self.cards):
                     if inside((x,y), (card.x, card.y, card.xsize, card.ysize)) and self.get_stack_by_id(card.stack).give(card):
                         self.drag_start = (card.x,card.y)
                         self.dragged = card
@@ -598,9 +604,8 @@ init -3 python:
                         is_accepted = False
                         for accepting_stack in self.stacks:
                             if inside((x,y), (accepting_stack.x, accepting_stack.y, accepting_stack.xsize, accepting_stack.ysize)):
-                            # if x > accepting_stack.x and x < accepting_stack.x + accepting_stack.xsize:
-                                #  ADD PROPER OVERLAP CHECK
                                 if not self.dragged.stack == accepting_stack.id:
+                                    #  If a card is moved to the other stack
                                     if accepting_stack.accept(self.dragged):
                                         is_accepted = True
                                         self.get_stack_by_id(self.dragged.stack).remove(self.dragged)
@@ -612,8 +617,10 @@ init -3 python:
                                 else:
                                     #  Why not rearrange cards within stack
                                     is_accepted = True
+                                    #  Basically remove card from stack and put it at its end
+                                    self.cards.append(self.cards.pop(self.cards.index(self.dragged)))
                         if not is_accepted:
-                            #  If no stack accepted card, it should be returned where it belongs
+                            #  If card was not accepted, it should be returned where it belongs
                             self.dragged.x = self.drag_start[0]
                             self.dragged.y = self.drag_start[1]
                         #  Dragging has ended somehow anyway
@@ -625,10 +632,10 @@ init -3 python:
                     #  Do not carry a card, for instance
                     self.dragged = None
                 renpy.redraw(self,0)
-#            self.stack.event(ev, x, y, st)
 
         def visit(self):
-            l = self.player_deck[:3]
+            l = []
+            l+=self.cards
             l.append(self.bg)
             l.append(self.drag_text)
             l+=self.cardboxes
