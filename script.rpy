@@ -6,13 +6,14 @@
 # Declare characters used by this game.
 define narrator = Character(None, kind = nvl, what_color="#000000", size = 10)
 
-init python:
+init -2 python:
     menu = nvl_menu
     gl_no_rollback = True
     # Initialising global conflict variables so they exist when we call init_conflict()
     stack = []
     opponent_deck = []
     ret = ''
+
     price = '0'
     # Initialising starting position
     current_port = monet
@@ -53,11 +54,7 @@ label start:
 
 label new_conflict:
     "Включаем"
-    $ test_table = Table(stacks=[Cardbox(player_deck, stack_id='LEFT', x = 10, y = 0, xsize = 300, ysize = 1000, give_function = lambda a: True, accept_function = lambda a: True), Cardbox([], stack_id='RIGHT', x=400, y=0, xsize=300, ysize=1000, give_function = lambda a: False, accept_function = lambda a: True)])
-    screen test_screen:
-        add test_table
-        modal True
-        zorder 10
+    $ init_new_conflict()
     show screen test_screen
     jump start
 

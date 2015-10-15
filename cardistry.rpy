@@ -1,6 +1,6 @@
 # Everything related to the card conflict mechanics
 
-init -2 python:
+init -3 python:
     import random
     import math
     SUITS={u'С':u'Сила',
@@ -384,16 +384,13 @@ init -2 python:
     import pygame
     class Cardbox(object):
         def __init__(self, card_list, stack_id='NO ID', x=0, y=0, xsize=300, ysize=300,
-                     accept_function=None, give_function=None, autoaccept = False, **kwargs):
+                     autoaccept = False, **kwargs):
             # Position on screen
             self.x = x
             self.y = y
             self.id = stack_id
             self.xsize = xsize
             self.ysize = ysize
-            # Give/accept relationships
-            self.accept_function = accept_function
-            self.give_function = give_function
             # Rest of it
             self.card_list = card_list
             for card in self.card_list:
@@ -415,13 +412,15 @@ init -2 python:
             '''
             Return True if this stack is willing to give card away, False otherwise
             '''
-            return self.give_function(card)
+            raise NotImplementedError
+            #return self.give_function(card)
 
         def accept(self, card):
             '''
             Return True if this stack accepts this card, False otherwise
             '''
-            return self.accept_function(card)
+            raise NotImplementedError
+            # return self.accept_function(card)
 
         def append(self, card):
             self.card_list.append(card)
@@ -429,9 +428,77 @@ init -2 python:
         def remove(self, card):
             self.card_list.remove(card)
 
+        def replace_cards(self, l):
+            """
+            Set this stack's card_list as l
+            """
+            self.card_list = l
+
+
+    class Player_stack(Cardbox):
+        """
+        The player hand stack that always gives and accepts cards
+        """
+        def __init__(self, card_list=[], stack_id='NO ID', x=0, y=0, xsize=300,
+                     ysize=300, autoaccept = False, **kwargs):
+            self.x = x
+            self.y = y
+            self.id = stack_id
+            self.xsize = xsize
+            self.ysize = ysize
+            # Rest of it
+            self.card_list = card_list
+            for card in self.card_list:
+                card.stack = stack_id
+
+        def accept(self, card):
+            return True
+
+        def give(self, card):
+            return True
+
+    class Money_acceptor_stack(Cardbox):
+        """
+        The stack that only accepts money cards and gives nothing away
+        """
+        def __init__(self, card_list=[], stack_id='NO ID', x=0, y=0, xsize=300,
+                     ysize=300, autoaccept = False, **kwargs):
+            self.x = x
+            self.y = y
+            self.id = stack_id
+            self.xsize = xsize
+            self.ysize = ysize
+            # Rest of it
+            self.card_list = card_list
+            for card in self.card_list:
+                card.stack = stack_id
+
+        def accept(self, card):
+            if card.suit==u'Деньги':
+                return True
+            else:
+                return False
+
+        def give(self, card):
+            return False
+
+        def __init__(self, card_list=[], stack_id='NO ID', x=0, y=0, xsize=300,
+                     ysize=300, autoaccept = False, **kwargs):
+            self.x = x
+            self.y = y
+            self.id = stack_id
+            self.xsize = xsize
+            self.ysize = ysize
+            # Rest of it
+            self.card_list = card_list
+            for card in self.card_list:
+                card.stack = stack_id
+
+
     class Jumpback():
         def __init__ (self):
             pass
+
 
     class Table(renpy.Displayable):
         def __init__(self, stacks = [], **kwargs):
@@ -461,8 +528,6 @@ init -2 python:
                 tmp_render = card.render(200, 120, st, at)
                 card_renders.append(tmp_render)
                 self.render_object.blit(tmp_render, (card.x, card.y))
-            #  Debug text
-            text_ypos = 10
             if self.dragged is not None:
                 self.drag_text = Text('{0}'.format(self.dragged.stack))
             else:
@@ -539,3 +604,14 @@ init -2 python:
 
         def get_stack_by_id(self, stack_id):
             return self.stack_dict[stack_id]
+
+init -1 python:
+
+    def init_new_conflict():
+        global player_deck
+        p_stack.replace_cards(player_deck)
+        p_stack._position_cards()
+
+    acc_stack = Money_acceptor_stack([], stack_id='RIGHT', x=400, y=0, xsize=300, ysize=1000)
+    p_stack = Player_stack(player_deck, stack_id='HAND', x=10, y=0, xsize=300, ysize=1000)
+    test_table = Table(stacks=[p_stack, acc_stack])

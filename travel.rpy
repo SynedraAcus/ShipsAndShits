@@ -57,7 +57,7 @@ transform slow:
 #        ypos y1
 #        linear time xpos x2 ypos y2
 
-init -2 python:
+init -5 python:
     class Travel(Action):
         def __init__(self, map_point, **kwargs):
             super(Action, self).__init__(**kwargs)
