@@ -13,7 +13,6 @@ init -2 python:
     stack = []
     opponent_deck = []
     ret = ''
-    
     price = '0'
     # Initialising starting position
     current_port = monet
@@ -56,12 +55,10 @@ label start:
         "Включить новый экран конфликта":
             nvl clear
             jump new_conflict
-        #nvl clear
-
+        
 label new_conflict:
     "Включаем"
     $ init_new_conflict()
-
     show screen test_screen
     jump start
 
