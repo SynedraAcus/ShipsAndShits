@@ -13,7 +13,7 @@ init -2 python:
     stack = []
     opponent_deck = []
     ret = ''
-
+    
     price = '0'
     # Initialising starting position
     current_port = monet
@@ -25,7 +25,12 @@ init -2 python:
 label start:
     $ vortex_firsttime = 0
     $ gl_cargo = []
+    # List of stuff you can append to gl_cargo: monetload, jerry, hurricane_blueprints
     $ gl_knowhow = []
+    # List of stuff you can append to gl_knowhow: howtodive
+    $ node_lost_in_sea_interview = []
+    $ node_lost_in_sea_interview.append("firstofficer")
+    $ node_lost_in_sea_interview.append("walkthrough")
     $ gl_cargo_jerry = 0
     $ gl_you_are_terrible = 0
     $ useless_variable = 0
@@ -51,10 +56,12 @@ label start:
         "Включить новый экран конфликта":
             nvl clear
             jump new_conflict
+        #nvl clear
 
 label new_conflict:
     "Включаем"
     $ init_new_conflict()
+
     show screen test_screen
     jump start
 
