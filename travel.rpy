@@ -152,7 +152,8 @@ init -5 python:
     node11 = Map_point('node11', (727, 392))
     node12 = Map_point('node12', (105, 366))
     node13 = Map_point('node13', (394, 316))
-    node14 = Map_point('node14', (492, 344))
+    node14 = Map_point('node14', (492, 344),
+                       label_list=(('node14_lost_in_sea', 1), ('node14_quit', 2)))
     node15 = Map_point('node15', (864, 319))
     node16 = Map_point('node16', (147, 149))
     node17 = Map_point('node17', (328, 197))

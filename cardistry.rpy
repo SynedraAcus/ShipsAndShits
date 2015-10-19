@@ -403,8 +403,7 @@ init -3 python:
 
 
     class Cardbox(object):
-        def __init__(self, card_list, stack_id='NO ID', x=0, y=0, xsize=300, ysize=300,
-                     autoaccept = False, **kwargs):
+        def __init__(self, card_list, stack_id='NO ID', x=0, y=0, xsize=300, ysize=300):
             # Position on screen
             self.x = x
             self.y = y
@@ -431,12 +430,14 @@ init -3 python:
         def give(self, card):
             '''
             Return True if this stack is willing to give card away, False otherwise
+            Should be defined by child classes
             '''
             raise NotImplementedError
 
         def accept(self, card):
             '''
             Return True if this stack accepts this card, False otherwise
+            Should be defined by child classes
             '''
             raise NotImplementedError
 
@@ -466,7 +467,7 @@ init -3 python:
         The player hand stack that always gives and accepts cards
         """
         def __init__(self, card_list=[], stack_id='NO ID', x=0, y=0, xsize=300,
-                     ysize=300, autoaccept = False, **kwargs):
+                     ysize=300, **kwargs):
             self.x = x
             self.y = y
             self.id = stack_id
@@ -488,7 +489,7 @@ init -3 python:
         The stack that only accepts money cards and gives nothing away
         """
         def __init__(self, card_list=[], stack_id='NO ID', x=0, y=0, xsize=300,
-                     ysize=300, autoaccept = False, **kwargs):
+                     ysize=300, **kwargs):
             self.x = x
             self.y = y
             self.id = stack_id
@@ -507,19 +508,6 @@ init -3 python:
 
         def give(self, card):
             return False
-
-        def __init__(self, card_list=[], stack_id='NO ID', x=0, y=0, xsize=300,
-                     ysize=300, autoaccept = False, **kwargs):
-            self.x = x
-            self.y = y
-            self.id = stack_id
-            self.xsize = xsize
-            self.ysize = ysize
-            # Rest of it
-            self.card_list = card_list
-            for card in self.card_list:
-                card.stack = stack_id
-
 
     class Jumpback():
         def __init__ (self):
