@@ -50,15 +50,6 @@ init -3 python:
         def visit(self):
             return [self.text, self.t_text, self.bg]
 
-        def __eq__(self, other):
-            if not type(other) is Card:
-                return False
-            elif other.suit==self.suit and other.number==self.number \
-                and other.tooltip==self.tooltip and other.spendable==self.spendable:
-                return True
-            else:
-                return False
-
     class CardMove(Action):
         '''
         Class for card button action in a conflict screen
