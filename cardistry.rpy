@@ -468,6 +468,8 @@ init -3 python:
             self.card_list = card_list
             for card in self.card_list:
                 card.stack = stack_id
+            if len(self.card_list) > 0:
+                self._position_cards()
 
         def accept(self, card):
             return True
@@ -632,7 +634,20 @@ init -1 python:
         global player_deck
         p_stack.replace_cards(player_deck)
         p_stack._position_cards()
+    def init_new_table():
+        """
+        Initialisation of acc_stack, p_stack and test_table
+        :return:
+        """
+        global p_stack
+        global acc_stack
+        global test_table
+        acc_stack = Money_acceptor_stack([], stack_id='RIGHT', x=400, y=100, xsize=300, ysize=500)
+        p_stack = Player_stack(player_deck, stack_id='HAND', x=10, y=100, xsize=300, ysize=500)
+        test_table = Table(stacks=[p_stack, acc_stack])
 
-    acc_stack = Money_acceptor_stack([], stack_id='RIGHT', x=400, y=100, xsize=300, ysize=500)
-    p_stack = Player_stack(player_deck, stack_id='HAND', x=10, y=100, xsize=300, ysize=500)
-    test_table = Table(stacks=[p_stack, acc_stack])
+init:
+    screen test_screen():
+        modal True
+        zorder 10
+        add test_table

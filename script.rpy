@@ -16,10 +16,7 @@ init -2 python:
     price = '0'
     # Initialising starting position
     current_port = monet
-    player_deck = []
-    player_deck.append(Card(u'З', 3, spendable = False, tooltip = u'Сказки и истории, которые вы слышали с детства'))
-    player_deck.append(Card(u'С', 2, spendable = False, tooltip = u'Ваш фирменный обманный маневр, сопровождаемый ударом'))
-    player_deck.append(Card(u'С', 3, spendable = True, tooltip = u'Кусок стекла, который вы зачем-то носите в кармане'))
+
 #  This is the beginning, from the very start to the first trip from Monet
 label start:
     $ start_robbery_for_shipboy = 0
@@ -35,6 +32,11 @@ label start:
     $ gl_you_are_terrible = 0
     $ useless_variable = 0
     $ useless_variable_2 = 0
+    $ player_deck = []
+    $ player_deck.append(Card(u'З', 3, spendable = False, tooltip = u'Сказки и истории, которые вы слышали с детства'))
+    $ player_deck.append(Card(u'С', 2, spendable = False, tooltip = u'Ваш фирменный обманный маневр, сопровождаемый ударом'))
+    $ player_deck.append(Card(u'С', 3, spendable = True, tooltip = u'Кусок стекла, который вы зачем-то носите в кармане'))
+    $ init_new_table() #  Initialising stack objects and other such crap
     image bg solid_bg = Solid('#EEE')
     show bg solid_bg
     menu:
