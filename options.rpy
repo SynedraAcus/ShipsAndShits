@@ -97,7 +97,6 @@ init -1 python hide:
     ## respectively.
 
     style.nvl_window.background = Frame("images/Tmp_frame.png", 5, 5)
-
     ## Margin is space surrounding the window, where the background
     ## is not drawn.
 
@@ -109,10 +108,11 @@ init -1 python hide:
     ## Padding is space inside the window, where the background is
     ## drawn.
 
-    style.nvl_window.left_padding = 5
-    style.nvl_window.right_padding = 5
-    style.nvl_window.top_padding = 5
-    style.nvl_window.bottom_padding = 5
+
+    # style.nvl_window.left_padding = 45
+    # style.nvl_window.right_padding = 45
+    # style.nvl_window.top_padding = 45
+    # style.nvl_window.bottom_padding = 45
 
     ## NVL menu text
 
@@ -121,7 +121,9 @@ init -1 python hide:
 
     ## NVL text
     style.nvl_dialogue.font = 'OldStandard-Regular.ttf'
-
+    style.nvl_vbox.ypadding = 30
+    style.nvl_entry.left_margin = 25
+    style.nvl_entry.right_margin = 50
     ## This is the minimum height of the window, including the margins
     ## and padding.
 
