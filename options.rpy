@@ -314,6 +314,10 @@ python early:
     #config.nvl_paged_rollback = False
     config.mode_callbacks = []
 
+## Disabling rollforward key because rollforward may break conflict screens every once in a while
+init python:
+    config.keymap['rollforward'] = []
+
 
 
 ## This section contains information about how to build your project into
