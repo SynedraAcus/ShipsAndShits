@@ -121,7 +121,6 @@ init -1 python hide:
 
     ## NVL text
     style.nvl_dialogue.font = 'OldStandard-Regular.ttf'
-    style.nvl_vbox.ypadding = 30
     style.nvl_entry.left_margin = 25
     style.nvl_entry.right_margin = 50
     ## This is the minimum height of the window, including the margins

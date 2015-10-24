@@ -23,7 +23,7 @@ init -3 python:
             self.spendable = spendable
             self.tooltip = tooltip
             self.text = Text(u'{0} {1}'.format(self.suit, number), color = '#6A3819', font='Hangyaboly.ttf')
-            self.t_text = Text(tooltip, size = 12, color = '#6A3819', font='Hangyaboly.ttf')
+            self.t_text = Text(tooltip, size = 14, color = '#6A3819', font='Hangyaboly.ttf')
             self.bg = (self.spendable == True and Solid(SPENDABLE_COLOR) or Solid(PERMANENT_COLOR))
             #  Stuff for new conflict; not referenced outside it
             self.x = 0
