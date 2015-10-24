@@ -1,4 +1,4 @@
-﻿﻿#Main game script. All card-related python is in cardistry.rpy
+﻿# Main game script. All card-related python is in cardistry.rpy
 
 # Declare images below this line, using the image statement.
 # eg. image eileen happy = "eileen_happy.png"
