@@ -14,6 +14,9 @@ init -2 python:
     opponent_deck = []
     ret = ''
     price = '0'
+    # Initialising new conflict variables
+    test_table = None #  If no init_* functions were called before new screens, this will break
+
     # Initialising starting position
     current_port = monet
 
@@ -37,7 +40,7 @@ label start:
     $ player_deck.append(Card(u'С', 2, spendable = False, tooltip = u'Ваш фирменный обманный маневр, сопровождаемый ударом'))
     $ player_deck.append(Card(u'С', 3, spendable = True, tooltip = u'Кусок стекла, который вы зачем-то носите в кармане'))
     $ player_deck.append(Card(u'С', 10, spendable = False, tooltip = u'Спецоружие для Птицы, которая очень хочет избить невинного вахтовика'))
-    $ init_new_table() #  Initialising stack objects and other such crap
+    #$ init_new_table() #  Initialising stack objects and other such crap
     image bg solid_bg = Solid('#EEE')
     show bg solid_bg
     menu:
@@ -148,13 +151,20 @@ label start:
                 "Включить торговый экран":
                     nvl clear
                     jump trade_test
-                "Включить новый экран конфликта":
+                "Включить новый экран торговли":
                     nvl clear
                     jump new_conflict
         
 label new_conflict:
+
+    $ test_card = Card(u'Д', 10, spendable=True, tooltip='Эта карта была куплена при тестировании магазина')
+    $ player_deck.append(Card(u'Д', 7, spendable = True))
+    $ player_deck.append(Card(u'Д', 8, spendable = True))
+    $ player_deck.append(Card(u'Д', 8, spendable = True))
+    $ player_deck.append(Card(u'Д', 8, spendable = True))
+    $ init_trade_table([test_card])
     "Включаем"
-    $ init_new_conflict()
+    #$ init_new_conflict()
     show screen test_screen
     jump start
 

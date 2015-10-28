@@ -11,6 +11,7 @@ init -3 python:
     DEFAULT_HISTORY = u'Тебе не известна история этой карты'
     SPENDABLE_COLOR = '#AAA'
     PERMANENT_COLOR = '#DEC666'
+    COST_QOTIENT = 1.5 #  Cost-to-nominal ratio for trading system
     # Card-related classes: card itself and an action
 
     class Card(renpy.Displayable):
@@ -477,7 +478,7 @@ init -3 python:
         def give(self, card):
             return True
 
-    class Money_acceptor_stack(Cardbox):
+    class Shop_stack(Cardbox):
         """
         The stack that only accepts money cards and gives nothing away
         """
@@ -492,15 +493,44 @@ init -3 python:
             self.card_list = card_list
             for card in self.card_list:
                 card.stack = stack_id
+            #  Trading-related variables
+            self.paid = 0  #  Amount of money player paid
+            self.withheld = 0  #  Amount of money trader won't give back
+            self.player_cards = []
 
         def accept(self, card):
-            if card.suit==u'Деньги':
+            if card.suit == u'Деньги':
                 return True
             else:
                 return False
 
         def give(self, card):
+            if card not in self.player_cards and self.paid >= card.number*COST_QOTIENT:
+                #  Selling cards from initial stack
+                return True
+            if card in self.player_cards and card.number <= self.paid - self.withheld:
+                #  Return his cards. Like he doesn't want to pay or something
+                return True
             return False
+
+        def append(self, card):
+            self.card_list.append(card)
+            self.player_cards.append(card)
+            self.paid += card.number
+
+        def remove(self, card):
+            #  Let player take back his card if he has right to
+            if card in self.player_cards:
+                self.player_cards.remove(card)
+                self.paid -= card.number
+                # if self.withheld > 0:
+                #     self.withheld -= card.number
+            #  What if he actually bought it?
+            else:
+                #self.paid -= card.number*COST_QOTIENT
+                self.withheld += int(card.number*COST_QOTIENT)  #  No taking money back!
+            self.card_list.remove(card)
+
 
     class Jumpback():
         def __init__ (self):
@@ -634,17 +664,17 @@ init -1 python:
         global player_deck
         p_stack.replace_cards(player_deck)
         p_stack._position_cards()
-    def init_new_table():
-        """
-        Initialisation of acc_stack, p_stack and test_table
-        :return:
-        """
-        global p_stack
-        global acc_stack
+
+    def init_trade_table(stock):
+        global player_deck
+        #global acc_stack
         global test_table
-        acc_stack = Money_acceptor_stack([], stack_id='RIGHT', x=400, y=100, xsize=300, ysize=500)
+        acc_stack = Shop_stack(stock, stack_id='SHOP', x=400, y=100, xsize=300, ysize=500)
         p_stack = Player_stack(player_deck, stack_id='HAND', x=10, y=100, xsize=300, ysize=500)
+        acc_stack._position_cards()
+        p_stack._position_cards()
         test_table = Table(stacks=[p_stack, acc_stack])
+
 
 init:
     screen test_screen():
