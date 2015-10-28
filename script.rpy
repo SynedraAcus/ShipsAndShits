@@ -158,11 +158,12 @@ label start:
 label new_conflict:
 
     $ test_card = Card(u'Д', 10, spendable=True, tooltip='Эта карта была куплена при тестировании магазина')
+    $ test_card2 = Card(u'Д', 10, spendable=True, tooltip='Эта карта тоже была куплена при тестировании магазина')
     $ player_deck.append(Card(u'Д', 7, spendable = True))
     $ player_deck.append(Card(u'Д', 8, spendable = True))
     $ player_deck.append(Card(u'Д', 8, spendable = True))
     $ player_deck.append(Card(u'Д', 8, spendable = True))
-    $ init_trade_table([test_card])
+    $ init_trade_table([test_card, test_card2])
     "Включаем"
     #$ init_new_conflict()
     show screen test_screen

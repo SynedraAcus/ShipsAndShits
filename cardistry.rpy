@@ -505,7 +505,7 @@ init -3 python:
                 return False
 
         def give(self, card):
-            if card not in self.player_cards and self.paid >= card.number*COST_QOTIENT:
+            if card not in self.player_cards and self.paid - self.withheld >= card.number*COST_QOTIENT:
                 #  Selling cards from initial stack
                 return True
             if card in self.player_cards and card.number <= self.paid - self.withheld:
