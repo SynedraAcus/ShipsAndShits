@@ -15,7 +15,7 @@ init -3 python:
     # Card-related classes: card itself and an action
 
     class Card(renpy.Displayable):
-        def __init__(self, suit, number, spendable = False, tooltip = DEFAULT_HISTORY, **kwargs):
+        def __init__(self, suit, number, spendable = False, tooltip = DEFAULT_HISTORY, cost=None, **kwargs):
             super(Card, self).__init__(xysize=(200, 120), xfill=False, yfill=False, **kwargs)
             self.suit = SUITS[suit]
             if number == 0:
@@ -26,6 +26,10 @@ init -3 python:
             self.text = Text(u'{0} {1}'.format(self.suit, number), color = '#6A3819', font='Hangyaboly.ttf')
             self.t_text = Text(tooltip, size = 14, color = '#6A3819', font='Hangyaboly.ttf')
             self.bg = (self.spendable == True and Solid(SPENDABLE_COLOR) or Solid(PERMANENT_COLOR))
+            if cost is None:
+                self.cost = self.number
+            else:
+                self.cost = cost
             #  Stuff for new conflict; not referenced outside it
             self.x = 0
             self.y = 0
@@ -505,7 +509,7 @@ init -3 python:
                 return False
 
         def give(self, card):
-            if card not in self.player_cards and self.paid - self.withheld >= card.number*COST_QOTIENT:
+            if card not in self.player_cards and self.paid - self.withheld >= card.cost:
                 #  Selling cards from initial stack
                 return True
             if card in self.player_cards and card.number <= self.paid - self.withheld:

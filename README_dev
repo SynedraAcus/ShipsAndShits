@@ -32,6 +32,19 @@ Conflict must be initialised, then shown, then you may get results. The followin
         "Returned success
         jump success
 
+CARD DEFINITIONS
+
+    More powerful way to design cards is creating them directly, one by one, like this:
+
+    c = Card(u'Д', 2, spendable=False, tooltip='Tooltip', cost = 8)
+    player_deck.append(c)
+
+    First two arguments are suit letter and a value. Keyword arguments are:
+    spendable (boolean): whether the card is lost after being played
+    tooltip (str): card description
+    cost (int): cost of this card in gold.
+
+
 TRADING SCREEN
 You currently can add only "Sell card for money"-type actions. The screen is much like previous one.
     $ test_card = Card(u'Д', 10, spendable=True, tooltip='Эта карта была куплена при тестировании магазина')
