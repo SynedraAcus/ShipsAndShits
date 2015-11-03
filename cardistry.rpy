@@ -399,7 +399,7 @@ init -3 python:
 
 
     class Cardbox(object):
-        def __init__(self, card_list, stack_id='NO ID', x=0, y=0, xsize=300, ysize=300):
+        def __init__(self, card_list=[], stack_id='NO ID', x=0, y=0, xsize=300, ysize=300):
             # Position on screen
             self.x = x
             self.y = y
@@ -412,6 +412,13 @@ init -3 python:
                 card.stack = stack_id
             if len(self.card_list) > 0:
                 self._position_cards()
+
+        def _position_next_card(self):
+            """
+            Return position of the next card to be added
+            """
+            max_y = max((c.y for c in self.card_list))
+            return(int(self.x+self.xsize/2), max_y+50)
 
         def _position_cards(self):
             #CARDHEIGHT = 120
@@ -535,7 +542,19 @@ init -3 python:
                 self.withheld += int(card.number*COST_QOTIENT)  #  No taking money back!
             self.card_list.remove(card)
 
+    class NullStack(Cardbox):
+        """
+        Stack that accepts and gives all cards, but contains no more logic.
+        For testing purposes
+        """
+        def __init__(self, **kwargs):
+            super(NullStack, self).__init__(**kwargs)
 
+        def accept(self, card):
+            return True
+
+        def give(self, card):
+            return True
     class Jumpback():
         def __init__ (self):
             pass
@@ -544,21 +563,24 @@ init -3 python:
 
     class Table(renpy.Displayable):
 
-        def __init__(self, stacks = [], **kwargs):
+        def __init__(self, stacks = [], automove = {}, **kwargs):
             if gl_no_rollback:
                 renpy.block_rollback()
             super(renpy.Displayable, self).__init__(xfill=True, yfill=True, **kwargs)
             self.bg = Solid('#DDD')
             self.player_deck = player_deck
             self.stacks = stacks
+            self.automove = automove  #  Dict of stacks that will be used automatically upon click
+            #  ADD KEY CORRECTNESS ASSERT
             self.stack_dict = {x.id: x for x in self.stacks}
             self.cards = []
             for x in self.stacks:
                 self.cards.extend(x.card_list)
             self.drag_text = Text('None dragged')
             self.dragged = None
-            self.drag_start = (0,0)
-            #  Debug Cardboxes
+            self.drag_start = (0, 0)
+            self.initial_card_position = (0,0)
+            #  Debug Cardbox highlighters
             self.cardboxes = []
             for x in self.stacks:
                 self.cardboxes.append(Solid('#FF0000'))
@@ -598,7 +620,8 @@ init -3 python:
                 #  Checking if we have clicked any cards:
                 for card in reversed(self.cards):
                     if inside((x,y), (card.x, card.y, card.xsize, card.ysize)) and self.get_stack_by_id(card.stack).give(card):
-                        self.drag_start = (card.x,card.y)
+                        self.drag_start = (x, y)
+                        self.initial_card_position = (card.x, card.y)
                         self.dragged = card
                         self.dragged.x_offset = self.dragged.x - x
                         self.dragged.y_offset = self.dragged.y - y
@@ -613,7 +636,7 @@ init -3 python:
                 renpy.redraw(self, 0)
 
             if ev.type == pygame.MOUSEBUTTONUP and ev.button == 1:
-                if (abs(x-self.drag_start[0]>10) or abs(y-self.drag_start[1]>10)):
+                if abs(x - self.drag_start[0]) > 7 or abs(y - self.drag_start[1]) > 7:
                     #  If it was a long enough drag
                     if self.dragged is not None:
                         # If the card was dragged:
@@ -628,23 +651,28 @@ init -3 python:
                                         self.get_stack_by_id(self.dragged.stack).remove(self.dragged)
                                         accepting_stack.append(self.dragged)
                                         self.dragged.stack = accepting_stack.id
-                                    else:
-                                        self.dragged.x = self.drag_start[0]
-                                        self.dragged.y = self.drag_start[1]
                                 else:
                                     #  Why not rearrange cards within stack
                                     is_accepted = True
                         if not is_accepted:
                             #  If card was not accepted, it should be returned where it belongs
-                            self.dragged.x = self.drag_start[0]
-                            self.dragged.y = self.drag_start[1]
+                            self.dragged.x = self.initial_card_position[0]
+                            self.dragged.y = self.initial_card_position[1]
                         #  Dragging has ended somehow anyway
                         self.dragged = None
                         renpy.redraw(self, 0)
 
                 else:
                     #  Things to do upon click
-                    #  Do not carry a card, for instance
+                    if self.dragged is not None and self.dragged.stack in self.automove.keys():
+                        #  Remove dragged card from its initial stack and move it to acceptor
+                        #  ADD CHECKS FOR GIVE/ACCEPT
+                        self.get_stack_by_id(self.dragged.stack).remove(self.dragged)
+                        self.get_stack_by_id(self.automove[self.dragged.stack]).append(self.dragged)
+                        # Position card in a new stack
+                        (self.dragged.x, self.dragged.y) = self.get_stack_by_id(self.automove[self.dragged.stack])._position_next_card()
+                        self.dragged.stack = self.automove[self.dragged.stack]
+                    #  Release dragged card anyway
                     self.dragged = None
                 renpy.redraw(self,0)
 
@@ -675,9 +703,11 @@ init -1 python:
         global test_table
         acc_stack = Shop_stack(stock, stack_id='SHOP', x=400, y=100, xsize=300, ysize=500)
         p_stack = Player_stack(player_deck, stack_id='HAND', x=10, y=100, xsize=300, ysize=500)
+        n_stack = NullStack(stack_id='NULL', x=750, xsize=300, y=100, ysize=500)
+        a = {'HAND': 'NULL', 'NULL': 'HAND', 'SHOP': 'HAND'}
         acc_stack._position_cards()
         p_stack._position_cards()
-        test_table = Table(stacks=[p_stack, acc_stack])
+        test_table = Table(stacks=[p_stack, acc_stack, n_stack], automove=a)
 
 
 init:
