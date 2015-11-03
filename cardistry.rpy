@@ -413,6 +413,21 @@ init -3 python:
             if len(self.card_list) > 0:
                 self._position_cards()
 
+        def _position_next_card(self):
+            """
+            Return position of the next card to be added
+            Takes current card positions into account
+            """
+            #max_y = max((c.y for c in self.card_list))
+            #return(int(self.x+self.xsize/2), max_y+50)
+            # If there is no card list, add card to the top
+            if self.card_list == []:
+                return int(self.x+self.xsize/2-100), self.y + 50
+            # Get coordinates, sorted by y
+            coords = sorted(((c.x, c.y) for c in self.card_list), key=lambda c: c[1])
+            #  Add the next card 50 px under the lowest one
+            return coords[-1][0], coords[-1][1]+50
+
         def _position_cards(self):
             #CARDHEIGHT = 120
             mid = int(self.x + self.xsize/2) - 100
@@ -661,10 +676,12 @@ init -3 python:
                         #  Remove dragged card from its initial stack and move it to acceptor
                         #  ADD CHECKS FOR GIVE/ACCEPT
                         self.get_stack_by_id(self.dragged.stack).remove(self.dragged)
+                        #  Positioning card should happen before appending
+                        #  Because it uses the accepting stack's card_list to define card position
+                        (self.dragged.x, self.dragged.y) = self.get_stack_by_id(self.automove[self.dragged.stack])._position_next_card()
                         self.get_stack_by_id(self.automove[self.dragged.stack]).append(self.dragged)
                         self.dragged.stack = self.automove[self.dragged.stack]
                         # Position card in a new stack
-                        self.get_stack_by_id(self.dragged.stack)._position_cards()
                     #  Release dragged card anyway
                     self.dragged = None
                 renpy.redraw(self,0)
