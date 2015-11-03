@@ -413,16 +413,9 @@ init -3 python:
             if len(self.card_list) > 0:
                 self._position_cards()
 
-        def _position_next_card(self):
-            """
-            Return position of the next card to be added
-            """
-            max_y = max((c.y for c in self.card_list))
-            return(int(self.x+self.xsize/2), max_y+50)
-
         def _position_cards(self):
             #CARDHEIGHT = 120
-            mid = int(self.x + self.xsize/2)
+            mid = int(self.x + self.xsize/2) - 100
             step = int(self.ysize/len(self.card_list))
             y = self.y
             for card in self.card_list:
@@ -435,14 +428,14 @@ init -3 python:
             Return True if this stack is willing to give card away, False otherwise
             Should be defined by child classes
             '''
-            raise NotImplementedError
+            raise NotImplementedError('Give function should be overridden')
 
         def accept(self, card):
             '''
             Return True if this stack accepts this card, False otherwise
             Should be defined by child classes
             '''
-            raise NotImplementedError
+            raise NotImplementedError('Accept function should be overridden')
 
         #  Defining those here creates less messy code than
         #  inheriting from list ABC. Maybe even quicker
@@ -669,9 +662,9 @@ init -3 python:
                         #  ADD CHECKS FOR GIVE/ACCEPT
                         self.get_stack_by_id(self.dragged.stack).remove(self.dragged)
                         self.get_stack_by_id(self.automove[self.dragged.stack]).append(self.dragged)
-                        # Position card in a new stack
-                        (self.dragged.x, self.dragged.y) = self.get_stack_by_id(self.automove[self.dragged.stack])._position_next_card()
                         self.dragged.stack = self.automove[self.dragged.stack]
+                        # Position card in a new stack
+                        self.get_stack_by_id(self.dragged.stack)._position_cards()
                     #  Release dragged card anyway
                     self.dragged = None
                 renpy.redraw(self,0)
