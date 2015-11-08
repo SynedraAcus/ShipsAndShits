@@ -579,7 +579,7 @@ init -3 python:
             self.player_deck = player_deck
             self.stacks = stacks
             self.automove = automove  #  Dict of stacks that will be used automatically upon click
-            #  ADD KEY CORRECTNESS ASSERT
+            #  ADD KEY CORRECTNESS ASSERT FOR AUTOMOVE
             self.stack_dict = {x.id: x for x in self.stacks}
             self.cards = []
             for x in self.stacks:
