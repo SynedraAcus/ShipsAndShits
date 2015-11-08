@@ -23,7 +23,7 @@ init -3 python:
             self.number = number
             self.spendable = spendable
             self.tooltip = tooltip
-            self.text = Text(u'{0} {1}'.format(self.suit, number), color = '#6A3819', font='Hangyaboly.ttf')
+            self.text = Text(u'{0} {1}'.format(number, self.suit), color = '#6A3819', font='Hangyaboly.ttf')
             self.t_text = Text(tooltip, size = 14, color = '#6A3819', font='Hangyaboly.ttf')
             self.bg = (self.spendable == True and Solid(SPENDABLE_COLOR) or Solid(PERMANENT_COLOR))
             if cost is None:
@@ -400,13 +400,15 @@ init -3 python:
 
 
     class Cardbox(object):
-        def __init__(self, card_list=[], stack_id='NO ID', x=0, y=0, xsize=300, ysize=300):
+        def __init__(self, card_list=[], stack_id='NO ID', accept_from = [], x=0, y=0, xsize=300, ysize=300):
             # Position on screen
             self.x = x
             self.y = y
             self.id = stack_id
             self.xsize = xsize
             self.ysize = ysize
+            if accept_from != []:
+                self.accept_from = accept_from
             # Rest of it
             self.card_list = card_list
             for card in self.card_list:
@@ -449,7 +451,7 @@ init -3 python:
             '''
             raise NotImplementedError('Give function should be overridden')
 
-        def accept(self, card):
+        def accept(self, card, origin=None):
             '''
             Return True if this stack accepts this card, False otherwise
             Should be defined by child classes
@@ -481,21 +483,11 @@ init -3 python:
         """
         The player hand stack that always gives and accepts cards
         """
-        def __init__(self, card_list=[], stack_id='NO ID', x=0, y=0, xsize=300,
-                     ysize=300, **kwargs):
-            self.x = x
-            self.y = y
-            self.id = stack_id
-            self.xsize = xsize
-            self.ysize = ysize
-            # Rest of it
-            self.card_list = card_list
-            for card in self.card_list:
-                card.stack = stack_id
-            if len(self.card_list) > 0:
-                self._position_cards()
+        def __init__(self, **kwargs):
+            super(Player_stack, self).__init__(**kwargs)
 
-        def accept(self, card):
+
+        def accept(self, card, origin=None):
             return True
 
         def give(self, card):
@@ -505,23 +497,14 @@ init -3 python:
         """
         The stack that only accepts money cards and gives nothing away
         """
-        def __init__(self, card_list=[], stack_id='NO ID', x=0, y=0, xsize=300,
-                     ysize=300, **kwargs):
-            self.x = x
-            self.y = y
-            self.id = stack_id
-            self.xsize = xsize
-            self.ysize = ysize
-            # Rest of it
-            self.card_list = card_list
-            for card in self.card_list:
-                card.stack = stack_id
+        def __init__(self, **kwargs):
+            super(Shop_stack, self).__init__(**kwargs)
             #  Trading-related variables
             self.paid = 0  #  Amount of money player paid
             self.withheld = 0  #  Amount of money trader won't give back
             self.player_cards = []
 
-        def accept(self, card):
+        def accept(self, card, origin=None):
             if card.suit == u'Деньги':
                 return True
             else:
@@ -562,8 +545,11 @@ init -3 python:
         def __init__(self, **kwargs):
             super(NullStack, self).__init__(**kwargs)
 
-        def accept(self, card):
-            return True
+        def accept(self, card, origin=None):
+            if origin in self.accept_from:
+                return True
+            else:
+                return False
 
         def give(self, card):
             return True
@@ -660,7 +646,7 @@ init -3 python:
                             if inside((x,y), (accepting_stack.x, accepting_stack.y, accepting_stack.xsize, accepting_stack.ysize)):
                                 if not self.dragged.stack == accepting_stack.id:
                                     #  If a card is moved to the other stack
-                                    if accepting_stack.accept(self.dragged):
+                                    if accepting_stack.accept(self.dragged, origin=self.dragged.stack):
                                         is_accepted = True
                                         self.get_stack_by_id(self.dragged.stack).remove(self.dragged)
                                         accepting_stack.append(self.dragged)
@@ -690,7 +676,6 @@ init -3 python:
                         self.dragged.transform.update()
                     #  Release dragged card anyway
                     self.dragged = None
-                #renpy.redraw(self,0)
 
         def visit(self):
             l = []
@@ -717,9 +702,9 @@ init -1 python:
         global player_deck
         #global acc_stack
         global test_table
-        acc_stack = Shop_stack(stock, stack_id='SHOP', x=400, y=100, xsize=300, ysize=500)
-        p_stack = Player_stack(player_deck, stack_id='HAND', x=10, y=100, xsize=300, ysize=500)
-        n_stack = NullStack(stack_id='NULL', x=750, xsize=300, y=100, ysize=500)
+        acc_stack = Shop_stack(card_list=stock, stack_id='SHOP', x=400, y=100, xsize=300, ysize=500)
+        p_stack = Player_stack(card_list=player_deck, stack_id='HAND', x=10, y=100, xsize=300, ysize=500)
+        n_stack = NullStack(stack_id='NULL', accept_from='HAND', x=750, xsize=300, y=100, ysize=500)
         a = {'HAND': 'NULL', 'NULL': 'HAND', 'SHOP': 'HAND'}
         #acc_stack._position_cards()
         #p_stack._position_cards()
