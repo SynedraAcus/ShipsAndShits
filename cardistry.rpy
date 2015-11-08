@@ -38,7 +38,7 @@ init -3 python:
             self.x_offset = 0
             self.y_offset = 0
             self.stack = 0
-            self.transform = Transform(child=self) ##, xpos=self.xpos, ypos=self.ypos)
+            self.transform = Transform(child=self) #, xpos=self.xpos, ypos=self.ypos)
 
         def __str__(self):
             return(u'{0} {1}'.format(self.suit, self.number))
@@ -424,25 +424,32 @@ init -3 python:
             #max_y = max((c.y for c in self.card_list))
             #return(int(self.x+self.xsize/2), max_y+50)
             # If there is no card list, add card to the top
-            if self.card_list == []:
-                return int(self.x+self.xsize/2-100), self.y + 50
-            # Get coordinates, sorted by y
-            coords = sorted(((c.transform.xpos, c.transform.ypos) for c in self.card_list), key=lambda c: c[1])
-            #  Add the next card 50 px under the lowest one
-            return coords[-1][0], coords[-1][1]+50
+            if len(self.card_list) == 0:
+                return int(self.x+self.xsize/2-100), self.y + 10
+            else:
+                # Get coordinates, sorted by y
+                coords = max(((c.transform.xpos, c.transform.ypos) for c in self.card_list), key=lambda c: c[1])
+                #  Add the next card 50 px under the lowest one
+                return coords[0], coords[1]+50
 
         def _position_cards(self):
-            if self.card_list == []:
-                #  No use positioning no cards
-                return
-            mid = int(self.x + self.xsize/2) - 100
-            step = int(self.ysize/len(self.card_list))
-            y = self.y
-            for card in self.card_list:
-                card.transform.xpos = mid
-                card.transform.ypos = y
+            """
+            Position all the cards in stack. This is to be called only when
+            initialising Cardbox for display
+            """
+            self.card_list[0].transform.xpos = int(self.x+self.xsize/2-100)
+            self.card_list[0].transform.ypos = self.y + 10
+            for card in self.card_list[1:]:
+                (card.transform.xpos, card.transform.ypos) = self.position_next_card()
                 card.transform.update()
-                y += step
+                # mid = int(self.x + self.xsize/2) - 100
+                # step = int(self.ysize/len(self.card_list))
+                # y = self.y
+                # for card in self.card_list:
+                #     card.transform.xpos = mid
+                #     card.transform.ypos = y
+                #     card.transform.update()
+                #     y += step
 
         def give(self, card):
             '''
@@ -530,6 +537,21 @@ init -3 python:
             paid -= card.number
             super(PlayerOfferStack, self).remove(card)
 
+        def position_next_card(self):
+            """
+            Return position of the next card to be added
+            Takes current card positions into account
+            """
+            #max_y = max((c.y for c in self.card_list))
+            #return(int(self.x+self.xsize/2), max_y+50)
+            # If there is no card list, add card to the top
+            if self.card_list == []:
+                return int(self.x+self.xsize/2-100), self.y + 50
+            # Get coordinates, sorted by y
+            coords = sorted(((c.transform.xpos, c.transform.ypos) for c in self.card_list), key=lambda c: c[1])
+            #  Add the next card 50 px under the lowest one
+            return coords[-1][0], coords[-1][1]+50
+
     class TraderOfferStack(Cardbox):
         """
         Stack for trader-sold cards during trade
@@ -546,10 +568,33 @@ init -3 python:
         def give(self, card):
             return True
 
-        def remove(self, card):
+        def append(self, card):
             global withheld
             withheld += card.cost
             super(TraderOfferStack, self).append(card)
+
+    class TraderHandStack(Cardbox):
+        """
+        Stack for trader hand.
+        Overloaded .remove decreases withheld if card moved back from T_OFFER
+        """
+        def __init__(self, **kwargs):
+            super(TraderHandStack, self).__init__(**kwargs)
+
+        def append(self, card):
+            global withheld
+            withheld -= card.cost
+            super(TraderHandStack, self).append(card)
+
+        def give(self, card):
+            return True
+
+        def accept(self, card, origin=None):
+            if origin in self.accept_from:
+                return True
+            else:
+                return False
+
 
     class BasicStack(Cardbox):
         """
@@ -584,7 +629,7 @@ init -3 python:
             self.cards = []
             for x in self.stacks:
                 self.cards.extend(x.card_list)
-                x._position_cards()
+                # x._position_cards()
             self.drag_text = Text('None dragged')
             self.dragged = None
             self.drag_start = (0, 0)
@@ -699,6 +744,7 @@ init -3 python:
             l+=(x.transform for x in self.cards)
             #l.append(self.bg)
             l.append(self.drag_text)
+            l.append(self.paid_text)
             l+=self.cardboxes
             return l
 
@@ -729,7 +775,7 @@ init -1 python:
                                    x=400, y=400, xsize=300, ysize=200)
         p_hand_stack = PlayerShoppingStack(card_list=player_deck, stack_id='P_HAND', accept_from=['T_OFFER', 'P_OFFER'],
                                     x=10, y=100, xsize=300, ysize=500)
-        t_hand_stack = BasicStack(card_list=stock, stack_id='T_HAND', accept_from=['T_OFFER'],
+        t_hand_stack = TraderHandStack(card_list=stock, stack_id='T_HAND', accept_from=['T_OFFER'],
                                   x=800, y=100, xsize=300, ysize=500)
         #n_stack = NullStack(stack_id='NULL', accept_from=['HAND'], x=750, xsize=300, y=100, ysize=500)
         a = {'P_HAND': 'P_OFFER', 'T_HAND': 'T_OFFER', 'T_OFFER': 'P_HAND'}
