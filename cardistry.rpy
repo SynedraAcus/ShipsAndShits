@@ -38,6 +38,7 @@ init -3 python:
             self.x_offset = 0
             self.y_offset = 0
             self.stack = 0
+            self.transform = Transform(child=self) ##, xpos=self.xpos, ypos=self.ypos)
 
         def __str__(self):
             return(u'{0} {1}'.format(self.suit, self.number))
@@ -424,18 +425,21 @@ init -3 python:
             if self.card_list == []:
                 return int(self.x+self.xsize/2-100), self.y + 50
             # Get coordinates, sorted by y
-            coords = sorted(((c.xpos, c.ypos) for c in self.card_list), key=lambda c: c[1])
+            coords = sorted(((c.transform.xpos, c.transform.ypos) for c in self.card_list), key=lambda c: c[1])
             #  Add the next card 50 px under the lowest one
             return coords[-1][0], coords[-1][1]+50
 
         def _position_cards(self):
-            #CARDHEIGHT = 120
+            if self.card_list == []:
+                #  No use positioning no cards
+                return
             mid = int(self.x + self.xsize/2) - 100
             step = int(self.ysize/len(self.card_list))
             y = self.y
             for card in self.card_list:
-                card.xpos = mid
-                card.ypos = y
+                card.transform.xpos = mid
+                card.transform.ypos = y
+                card.transform.update()
                 y += step
 
         def give(self, card):
@@ -584,6 +588,7 @@ init -3 python:
             self.cards = []
             for x in self.stacks:
                 self.cards.extend(x.card_list)
+                x._position_cards()
             self.drag_text = Text('None dragged')
             self.dragged = None
             self.drag_start = (0, 0)
@@ -614,12 +619,12 @@ init -3 python:
                 self.render_object.blit(tmp_render, (self.stacks[x].x, self.stacks[x].y))
 
             #  CARDS
-            card_renders = []
+            #card_renders = []
             for card in self.cards:
-                tmp_render = card.render(200, 120, st, at)
-                card_renders.append(tmp_render)
-                self.render_object.blit(tmp_render, (card.xpos, card.ypos))
-                #self.render_object.place(card)
+                # tmp_render = card.render(200, 120, st, at)
+                # card_renders.append(tmp_render)
+                # self.render_object.blit(tmp_render, (card.xpos, card.ypos))
+                self.render_object.place(card.transform)
             return self.render_object
 
 
@@ -628,21 +633,21 @@ init -3 python:
             if ev.type == pygame.MOUSEBUTTONDOWN and ev.button == 1:
                 #  Checking if we have clicked any cards:
                 for card in reversed(self.cards):
-                    if inside((x,y), (card.xpos, card.ypos, card.xsize, card.ysize)) and self.get_stack_by_id(card.stack).give(card):
+                    if inside((x,y), (card.transform.xpos, card.transform.ypos, card.xsize, card.ysize)) and self.get_stack_by_id(card.stack).give(card):
                         self.drag_start = (x, y)
-                        self.initial_card_position = (card.xpos, card.ypos)
+                        self.initial_card_position = (card.transform.xpos, card.transform.ypos)
                         self.dragged = card
-                        self.dragged.x_offset = self.dragged.xpos - x
-                        self.dragged.y_offset = self.dragged.ypos - y
+                        self.dragged.x_offset = self.dragged.transform.xpos - x
+                        self.dragged.y_offset = self.dragged.transform.ypos - y
                         #  Show dragged on the top of other cards
                         self.cards.append(self.cards.pop(self.cards.index(self.dragged)))
                         break  #  No need to move two cards at the same time
 
             if ev.type == pygame.MOUSEMOTION and self.dragged is not None:
                 #  Just redrawing card in hand
-                self.dragged.xpos = x + self.dragged.x_offset
-                self.dragged.ypos = y + self.dragged.y_offset
-                renpy.redraw(self, 0)
+                self.dragged.transform.xpos = x + self.dragged.x_offset
+                self.dragged.transform.ypos = y + self.dragged.y_offset
+                self.dragged.transform.update()
 
             if ev.type == pygame.MOUSEBUTTONUP and ev.button == 1:
                 if abs(x - self.drag_start[0]) > 7 or abs(y - self.drag_start[1]) > 7:
@@ -665,11 +670,11 @@ init -3 python:
                                     is_accepted = True
                         if not is_accepted:
                             #  If card was not accepted, it should be returned where it belongs
-                            self.dragged.xpos = self.initial_card_position[0]
-                            self.dragged.ypos = self.initial_card_position[1]
+                            self.dragged.transform.xpos = self.initial_card_position[0]
+                            self.dragged.transform.ypos = self.initial_card_position[1]
+                            self.dragged.transform.update()
                         #  Dragging has ended somehow anyway
                         self.dragged = None
-                        renpy.redraw(self, 0)
 
                 else:
                     #  Things to do upon click
@@ -679,17 +684,17 @@ init -3 python:
                         self.get_stack_by_id(self.dragged.stack).remove(self.dragged)
                         #  Positioning card should happen before appending
                         #  Because it uses the accepting stack's card_list to define card position
-                        (self.dragged.xpos, self.dragged.ypos) = self.get_stack_by_id(self.automove[self.dragged.stack])._position_next_card()
+                        (self.dragged.transform.xpos, self.dragged.transform.ypos) = self.get_stack_by_id(self.automove[self.dragged.stack])._position_next_card()
                         self.get_stack_by_id(self.automove[self.dragged.stack]).append(self.dragged)
                         self.dragged.stack = self.automove[self.dragged.stack]
-                        # Position card in a new stack
+                        self.dragged.transform.update()
                     #  Release dragged card anyway
                     self.dragged = None
-                renpy.redraw(self,0)
+                #renpy.redraw(self,0)
 
         def visit(self):
             l = []
-            l+=self.cards
+            l+=(x.transform for x in self.cards)
             l.append(self.bg)
             l.append(self.drag_text)
             l+=self.cardboxes
@@ -716,8 +721,8 @@ init -1 python:
         p_stack = Player_stack(player_deck, stack_id='HAND', x=10, y=100, xsize=300, ysize=500)
         n_stack = NullStack(stack_id='NULL', x=750, xsize=300, y=100, ysize=500)
         a = {'HAND': 'NULL', 'NULL': 'HAND', 'SHOP': 'HAND'}
-        acc_stack._position_cards()
-        p_stack._position_cards()
+        #acc_stack._position_cards()
+        #p_stack._position_cards()
         test_table = Table(stacks=[p_stack, acc_stack, n_stack], automove=a)
 
 

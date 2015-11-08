@@ -45,17 +45,17 @@ screen map_screen():
         id 'ship'
         #at ship_d
 
-transform ship_d(new_pos):
-    linear 1.0 pos new_pos
-
-transform slow:
-    pause 5.0
-
-#transform move_ship(x1, y1, x2, y2, time):
-#    on update:
-#        xpos x1
-#        ypos y1
-#        linear time xpos x2 ypos y2
+# transform ship_d(new_pos):
+#     linear 1.0 pos new_pos
+#
+# transform slow:
+#     pause 5.0
+#
+# transform move_ship(x1, y1, x2, y2, time):
+#     on update:
+#         xpos x1
+#         ypos y1
+#         linear time xpos x2 ypos y2
 
 init -5 python:
     class Travel(Action):
