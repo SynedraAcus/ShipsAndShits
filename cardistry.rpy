@@ -8,7 +8,7 @@ init -3 python:
         u'З':u'Знания',
         u'И':u'Интриги'}
 
-    DEFAULT_HISTORY = u'Тебе не известна история этой карты'
+    DEFAULT_HISTORY = u'Вам не известна история этой карты'
     SPENDABLE_COLOR = '#AAA'
     PERMANENT_COLOR = '#DEC666'
     COST_QOTIENT = 1.5 #  Cost-to-nominal ratio for trading system
@@ -593,7 +593,8 @@ init -3 python:
             self.cardboxes = []
             for x in self.stacks:
                 self.cardboxes.append(Solid('#FF0000'))
-
+            #  Debug paid/withheld
+            self.paid_text = Text('Paid {0}/Withheld {1}'.format(str(paid), str(withheld)))
 
         def render(self, width, height, st, at):
             self.render_object = renpy.Render(width, height, st, at)
@@ -606,6 +607,9 @@ init -3 python:
                 self.drag_text = Text('None dragged')
             drag_render = renpy.render(self.drag_text, width, height, st, at)
             self.render_object.blit(drag_render, (500, 600))
+            self.paid_text = Text('Paid {0}/Withheld {1}'.format(str(paid), str(withheld)))
+            paid_render = renpy.render(self.paid_text, width, height, st, at)
+            self.render_object.blit(paid_render, (450, 630))
 
             #  DEBUG STACK BOXES
             box_renders = []
@@ -613,7 +617,7 @@ init -3 python:
                 tmp_render = self.cardboxes[x].render(self.stacks[x].xsize, self.stacks[x].ysize, st, at)
                 box_renders.append(tmp_render)
                 self.render_object.blit(tmp_render, (self.stacks[x].x, self.stacks[x].y))
-
+            #  PLACEHOLDER PAID/WITHHELD VALUES
             #  CARDS
             #card_renders = []
             for card in self.cards:
@@ -675,15 +679,18 @@ init -3 python:
                 else:
                     #  Things to do upon click
                     if self.dragged is not None and self.dragged.stack in self.automove.keys():
-                        #  Positioning card should happen before appending
-                        #  Because it uses the accepting stack's card_list to define card position
-                        (self.dragged.transform.xpos, self.dragged.transform.ypos) = self.get_stack_by_id(self.automove[self.dragged.stack]).position_next_card()
-                        self.dragged.transform.update()
-                        #  Remove dragged card from its initial stack and move it to acceptor
-                        #  ADD CHECKS FOR GIVE/ACCEPT
-                        self.get_stack_by_id(self.dragged.stack).remove(self.dragged)
-                        self.get_stack_by_id(self.automove[self.dragged.stack]).append(self.dragged)
-                        self.dragged.stack = self.automove[self.dragged.stack]
+                        #  First of all check whether transfer is possible
+                        if self.get_stack_by_id(self.dragged.stack).give(self.dragged) and \
+                                self.get_stack_by_id(self.automove[self.dragged.stack]).accept(self.dragged, origin=self.dragged.stack):
+                            #  Positioning card should happen before appending
+                            #  Because it uses the accepting stack's card_list to define card position
+                            new_coords = self.get_stack_by_id(self.automove[self.dragged.stack]).position_next_card()
+                            (self.dragged.transform.xpos, self.dragged.transform.ypos) = new_coords
+                            self.dragged.transform.update()
+                            #  Remove dragged card from its initial stack and move it to acceptor
+                            self.get_stack_by_id(self.dragged.stack).remove(self.dragged)
+                            self.get_stack_by_id(self.automove[self.dragged.stack]).append(self.dragged)
+                            self.dragged.stack = self.automove[self.dragged.stack]
                     #  Release dragged card anyway
                     self.dragged = None
 
