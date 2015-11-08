@@ -416,7 +416,7 @@ init -3 python:
             if len(self.card_list) > 0:
                 self._position_cards()
 
-        def _position_next_card(self):
+        def position_next_card(self):
             """
             Return position of the next card to be added
             Takes current card positions into account
@@ -479,71 +479,85 @@ init -3 python:
             self.card_list = l
 
 
-    class Player_stack(Cardbox):
+    class PlayerShoppingStack(Cardbox):
         """
-        The player hand stack that always gives and accepts cards
+        The player hand stack for trading. Contains actual trade logic
         """
         def __init__(self, **kwargs):
-            super(Player_stack, self).__init__(**kwargs)
+            super(PlayerShoppingStack, self).__init__(**kwargs)
 
 
         def accept(self, card, origin=None):
-            return True
-
-        def give(self, card):
-            return True
-
-    class Shop_stack(Cardbox):
-        """
-        The stack that only accepts money cards and gives nothing away
-        """
-        def __init__(self, **kwargs):
-            super(Shop_stack, self).__init__(**kwargs)
-            #  Trading-related variables
-            self.paid = 0  #  Amount of money player paid
-            self.withheld = 0  #  Amount of money trader won't give back
-            self.player_cards = []
-
-        def accept(self, card, origin=None):
-            if card.suit == u'Деньги':
+            if origin not in self.accept_from:
+                #  Wrong source? No accept
+                return False
+            global paid
+            global withheld
+            if origin == 'T_OFFER' and card.cost <= paid-withheld:
+                #  Accept bought card, if it was paid for
+                return True
+            elif origin == 'P_OFFER' and card.number <= paid-withheld:
                 return True
             else:
                 return False
 
         def give(self, card):
-            if card not in self.player_cards and self.paid - self.withheld >= card.cost:
-                #  Selling cards from initial stack
-                return True
-            if card in self.player_cards and card.number <= self.paid - self.withheld:
-                #  Return his cards. Like he doesn't want to pay or something
+            return True
+
+    class PlayerOfferStack(Cardbox):
+        '''
+        Stack for player-sold cards during trade
+        Overloaded .append and .remove change global paid
+        '''
+        def __init__(self, **kwargs):
+            super(PlayerOfferStack, self).__init__(**kwargs)
+
+        def accept(self, card, origin):
+            if origin in self.accept_from:
                 return True
             return False
 
+        def give(self, card):
+            return True
+
         def append(self, card):
-            self.card_list.append(card)
-            self.player_cards.append(card)
-            self.paid += card.number
+            global paid
+            paid += card.number
+            super(PlayerOfferStack, self).append(card)
 
         def remove(self, card):
-            #  Let player take back his card if he has right to
-            if card in self.player_cards:
-                self.player_cards.remove(card)
-                self.paid -= card.number
-                # if self.withheld > 0:
-                #     self.withheld -= card.number
-            #  What if he actually bought it?
-            else:
-                #self.paid -= card.number*COST_QOTIENT
-                self.withheld += int(card.number*COST_QOTIENT)  #  No taking money back!
-            self.card_list.remove(card)
+            global paid
+            paid -= card.number
+            super(PlayerOfferStack, self).remove(card)
 
-    class NullStack(Cardbox):
+    class TraderOfferStack(Cardbox):
         """
-        Stack that accepts and gives all cards, but contains no more logic.
-        For testing purposes
+        Stack for trader-sold cards during trade
+        Overloaded .append and .remove change global withheld
         """
         def __init__(self, **kwargs):
-            super(NullStack, self).__init__(**kwargs)
+            super(TraderOfferStack, self).__init__(**kwargs)
+
+        def accept(self, card, origin=None):
+            if origin in self.accept_from:
+                return True
+            return False
+
+        def give(self, card):
+            return True
+
+        def remove(self, card):
+            global withheld
+            withheld += card.cost
+            super(TraderOfferStack, self).append(card)
+
+    class BasicStack(Cardbox):
+        """
+        Stack that accepts and gives all cards, but contains no more logic.
+        Useful every once in a while
+        """
+        def __init__(self, **kwargs):
+            super(BasicStack, self).__init__(**kwargs)
 
         def accept(self, card, origin=None):
             if origin in self.accept_from:
@@ -553,10 +567,6 @@ init -3 python:
 
         def give(self, card):
             return True
-    class Jumpback():
-        def __init__ (self):
-            pass
-
 
 
     class Table(renpy.Displayable):
@@ -665,15 +675,15 @@ init -3 python:
                 else:
                     #  Things to do upon click
                     if self.dragged is not None and self.dragged.stack in self.automove.keys():
+                        #  Positioning card should happen before appending
+                        #  Because it uses the accepting stack's card_list to define card position
+                        (self.dragged.transform.xpos, self.dragged.transform.ypos) = self.get_stack_by_id(self.automove[self.dragged.stack]).position_next_card()
+                        self.dragged.transform.update()
                         #  Remove dragged card from its initial stack and move it to acceptor
                         #  ADD CHECKS FOR GIVE/ACCEPT
                         self.get_stack_by_id(self.dragged.stack).remove(self.dragged)
-                        #  Positioning card should happen before appending
-                        #  Because it uses the accepting stack's card_list to define card position
-                        (self.dragged.transform.xpos, self.dragged.transform.ypos) = self.get_stack_by_id(self.automove[self.dragged.stack])._position_next_card()
                         self.get_stack_by_id(self.automove[self.dragged.stack]).append(self.dragged)
                         self.dragged.stack = self.automove[self.dragged.stack]
-                        self.dragged.transform.update()
                     #  Release dragged card anyway
                     self.dragged = None
 
@@ -702,13 +712,23 @@ init -1 python:
         global player_deck
         #global acc_stack
         global test_table
-        acc_stack = Shop_stack(card_list=stock, stack_id='SHOP', x=400, y=100, xsize=300, ysize=500)
-        p_stack = Player_stack(card_list=player_deck, stack_id='HAND', x=10, y=100, xsize=300, ysize=500)
-        n_stack = NullStack(stack_id='NULL', accept_from='HAND', x=750, xsize=300, y=100, ysize=500)
-        a = {'HAND': 'NULL', 'NULL': 'HAND', 'SHOP': 'HAND'}
+        global paid
+        global withheld
+        paid = 0
+        withheld = 0
+        t_offer_stack = TraderOfferStack(stack_id='T_OFFER', accept_from=['T_HAND'],
+                                   x=400, y=100, xsize=300, ysize=200)
+        p_offer_stack = PlayerOfferStack(stack_id='P_OFFER', accept_from=['P_HAND'],
+                                   x=400, y=400, xsize=300, ysize=200)
+        p_hand_stack = PlayerShoppingStack(card_list=player_deck, stack_id='P_HAND', accept_from=['T_OFFER', 'P_OFFER'],
+                                    x=10, y=100, xsize=300, ysize=500)
+        t_hand_stack = BasicStack(card_list=stock, stack_id='T_HAND', accept_from=['T_OFFER'],
+                                  x=800, y=100, xsize=300, ysize=500)
+        #n_stack = NullStack(stack_id='NULL', accept_from=['HAND'], x=750, xsize=300, y=100, ysize=500)
+        a = {'P_HAND': 'P_OFFER', 'T_HAND': 'T_OFFER', 'T_OFFER': 'P_HAND'}
         #acc_stack._position_cards()
         #p_stack._position_cards()
-        test_table = Table(stacks=[p_stack, acc_stack, n_stack], automove=a)
+        test_table = Table(stacks=[p_hand_stack, t_hand_stack, p_offer_stack, t_offer_stack], automove=a)
 
 
 init:

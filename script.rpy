@@ -16,7 +16,9 @@ init -2 python:
     price = '0'
     # Initialising new conflict variables
     test_table = None #  If no init_* functions were called before new screens, this will break
-
+    # Globals for new trade system
+    paid = 0
+    withheld = 0
     # Initialising starting position
     current_port = monet
 
