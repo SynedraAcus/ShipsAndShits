@@ -31,8 +31,8 @@ init -3 python:
             else:
                 self.cost = cost
             #  Stuff for new conflict; not referenced outside it
-            self.x = 0
-            self.y = 0
+            self.xpos = 0
+            self.ypos = 0
             self.xsize = 200
             self.ysize = 120
             self.x_offset = 0
@@ -424,7 +424,7 @@ init -3 python:
             if self.card_list == []:
                 return int(self.x+self.xsize/2-100), self.y + 50
             # Get coordinates, sorted by y
-            coords = sorted(((c.x, c.y) for c in self.card_list), key=lambda c: c[1])
+            coords = sorted(((c.xpos, c.ypos) for c in self.card_list), key=lambda c: c[1])
             #  Add the next card 50 px under the lowest one
             return coords[-1][0], coords[-1][1]+50
 
@@ -434,8 +434,8 @@ init -3 python:
             step = int(self.ysize/len(self.card_list))
             y = self.y
             for card in self.card_list:
-                card.x = mid
-                card.y = y
+                card.xpos = mid
+                card.ypos = y
                 y += step
 
         def give(self, card):
@@ -618,7 +618,8 @@ init -3 python:
             for card in self.cards:
                 tmp_render = card.render(200, 120, st, at)
                 card_renders.append(tmp_render)
-                self.render_object.blit(tmp_render, (card.x, card.y))
+                self.render_object.blit(tmp_render, (card.xpos, card.ypos))
+                #self.render_object.place(card)
             return self.render_object
 
 
@@ -627,20 +628,20 @@ init -3 python:
             if ev.type == pygame.MOUSEBUTTONDOWN and ev.button == 1:
                 #  Checking if we have clicked any cards:
                 for card in reversed(self.cards):
-                    if inside((x,y), (card.x, card.y, card.xsize, card.ysize)) and self.get_stack_by_id(card.stack).give(card):
+                    if inside((x,y), (card.xpos, card.ypos, card.xsize, card.ysize)) and self.get_stack_by_id(card.stack).give(card):
                         self.drag_start = (x, y)
-                        self.initial_card_position = (card.x, card.y)
+                        self.initial_card_position = (card.xpos, card.ypos)
                         self.dragged = card
-                        self.dragged.x_offset = self.dragged.x - x
-                        self.dragged.y_offset = self.dragged.y - y
+                        self.dragged.x_offset = self.dragged.xpos - x
+                        self.dragged.y_offset = self.dragged.ypos - y
                         #  Show dragged on the top of other cards
                         self.cards.append(self.cards.pop(self.cards.index(self.dragged)))
                         break  #  No need to move two cards at the same time
 
             if ev.type == pygame.MOUSEMOTION and self.dragged is not None:
                 #  Just redrawing card in hand
-                self.dragged.x = x + self.dragged.x_offset
-                self.dragged.y = y + self.dragged.y_offset
+                self.dragged.xpos = x + self.dragged.x_offset
+                self.dragged.ypos = y + self.dragged.y_offset
                 renpy.redraw(self, 0)
 
             if ev.type == pygame.MOUSEBUTTONUP and ev.button == 1:
@@ -664,8 +665,8 @@ init -3 python:
                                     is_accepted = True
                         if not is_accepted:
                             #  If card was not accepted, it should be returned where it belongs
-                            self.dragged.x = self.initial_card_position[0]
-                            self.dragged.y = self.initial_card_position[1]
+                            self.dragged.xpos = self.initial_card_position[0]
+                            self.dragged.ypos = self.initial_card_position[1]
                         #  Dragging has ended somehow anyway
                         self.dragged = None
                         renpy.redraw(self, 0)
@@ -678,7 +679,7 @@ init -3 python:
                         self.get_stack_by_id(self.dragged.stack).remove(self.dragged)
                         #  Positioning card should happen before appending
                         #  Because it uses the accepting stack's card_list to define card position
-                        (self.dragged.x, self.dragged.y) = self.get_stack_by_id(self.automove[self.dragged.stack])._position_next_card()
+                        (self.dragged.xpos, self.dragged.ypos) = self.get_stack_by_id(self.automove[self.dragged.stack])._position_next_card()
                         self.get_stack_by_id(self.automove[self.dragged.stack]).append(self.dragged)
                         self.dragged.stack = self.automove[self.dragged.stack]
                         # Position card in a new stack
