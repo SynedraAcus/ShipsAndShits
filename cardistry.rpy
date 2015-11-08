@@ -579,7 +579,7 @@ init -3 python:
             if gl_no_rollback:
                 renpy.block_rollback()
             super(renpy.Displayable, self).__init__(xfill=True, yfill=True, **kwargs)
-            self.bg = Solid('#DDD')
+            #self.bg = Solid('#DDD')
             self.player_deck = player_deck
             self.stacks = stacks
             self.automove = automove  #  Dict of stacks that will be used automatically upon click
@@ -601,8 +601,8 @@ init -3 python:
 
         def render(self, width, height, st, at):
             self.render_object = renpy.Render(width, height, st, at)
-            bg_render = renpy.render(self.bg, width, height, st, at)
-            self.render_object.blit(bg_render, (0,0))
+            # bg_render = renpy.render(self.bg, width, height, st, at)
+            # self.render_object.blit(bg_render, (0,0))
             #  DEBUG DRAG TEXT
             if self.dragged is not None:
                 self.drag_text = Text('{0}'.format(self.dragged.stack))
@@ -695,7 +695,7 @@ init -3 python:
         def visit(self):
             l = []
             l+=(x.transform for x in self.cards)
-            l.append(self.bg)
+            #l.append(self.bg)
             l.append(self.drag_text)
             l+=self.cardboxes
             return l
