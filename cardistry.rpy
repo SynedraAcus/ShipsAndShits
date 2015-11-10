@@ -400,14 +400,14 @@ init -3 python:
 
 
     class Cardbox(object):
-        def __init__(self, card_list=[], stack_id='NO ID', accept_from = [], x=0, y=0, xsize=300, ysize=300):
+        def __init__(self, card_list=[], stack_id='NO ID', accept_from = None, x=0, y=0, xsize=300, ysize=300):
             # Position on screen
             self.x = x
             self.y = y
             self.id = stack_id
             self.xsize = xsize
             self.ysize = ysize
-            if accept_from != []:
+            if accept_from is not None:
                 self.accept_from = accept_from
             # Rest of it
             self.card_list = card_list
@@ -629,7 +629,6 @@ init -3 python:
             self.cards = []
             for x in self.stacks:
                 self.cards.extend(x.card_list)
-                # x._position_cards()
             self.drag_text = Text('None dragged')
             self.dragged = None
             self.drag_start = (0, 0)
@@ -725,17 +724,18 @@ init -3 python:
                     #  Things to do upon click
                     if self.dragged is not None and self.dragged.stack in self.automove.keys():
                         #  First of all check whether transfer is possible
-                        if self.get_stack_by_id(self.dragged.stack).give(self.dragged) and \
-                                self.get_stack_by_id(self.automove[self.dragged.stack]).accept(self.dragged, origin=self.dragged.stack):
+                        old_stack = self.get_stack_by_id(self.dragged.stack)
+                        new_stack = self.get_stack_by_id(self.automove[old_stack.id])
+                        if old_stack.give(self.dragged) and new_stack.accept(self.dragged, origin=old_stack.id):
                             #  Positioning card should happen before appending
                             #  Because it uses the accepting stack's card_list to define card position
-                            new_coords = self.get_stack_by_id(self.automove[self.dragged.stack]).position_next_card()
+                            new_coords = new_stack.position_next_card()
                             (self.dragged.transform.xpos, self.dragged.transform.ypos) = new_coords
                             self.dragged.transform.update()
                             #  Remove dragged card from its initial stack and move it to acceptor
-                            self.get_stack_by_id(self.dragged.stack).remove(self.dragged)
-                            self.get_stack_by_id(self.automove[self.dragged.stack]).append(self.dragged)
-                            self.dragged.stack = self.automove[self.dragged.stack]
+                            old_stack.remove(self.dragged)
+                            new_stack.append(self.dragged)
+                            self.dragged.stack = new_stack.id
                     #  Release dragged card anyway
                     self.dragged = None
 
@@ -769,16 +769,16 @@ init -1 python:
         global withheld
         paid = 0
         withheld = 0
-        t_offer_stack = TraderOfferStack(stack_id='T_OFFER', accept_from=['T_HAND'],
+        t_offer_stack = TraderOfferStack(card_list=[], stack_id='T_OFFER', accept_from=['T_HAND'],
                                    x=400, y=100, xsize=300, ysize=200)
-        p_offer_stack = PlayerOfferStack(stack_id='P_OFFER', accept_from=['P_HAND'],
+        p_offer_stack = PlayerOfferStack(card_list=[], stack_id='P_OFFER', accept_from=['P_HAND'],
                                    x=400, y=400, xsize=300, ysize=200)
         p_hand_stack = PlayerShoppingStack(card_list=player_deck, stack_id='P_HAND', accept_from=['T_OFFER', 'P_OFFER'],
                                     x=10, y=100, xsize=300, ysize=500)
         t_hand_stack = TraderHandStack(card_list=stock, stack_id='T_HAND', accept_from=['T_OFFER'],
                                   x=800, y=100, xsize=300, ysize=500)
         #n_stack = NullStack(stack_id='NULL', accept_from=['HAND'], x=750, xsize=300, y=100, ysize=500)
-        a = {'P_HAND': 'P_OFFER', 'T_HAND': 'T_OFFER', 'T_OFFER': 'P_HAND'}
+        a = {'P_HAND': 'P_OFFER', 'T_HAND': 'T_OFFER', 'T_OFFER': 'P_HAND', 'P_OFFER': 'P_HAND'}
         #acc_stack._position_cards()
         #p_stack._position_cards()
         test_table = Table(stacks=[p_hand_stack, t_hand_stack, p_offer_stack, t_offer_stack], automove=a)
