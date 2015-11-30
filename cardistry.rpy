@@ -442,14 +442,6 @@ init -3 python:
             for card in self.card_list[1:]:
                 (card.transform.xpos, card.transform.ypos) = self.position_next_card()
                 card.transform.update()
-                # mid = int(self.x + self.xsize/2) - 100
-                # step = int(self.ysize/len(self.card_list))
-                # y = self.y
-                # for card in self.card_list:
-                #     card.transform.xpos = mid
-                #     card.transform.ypos = y
-                #     card.transform.update()
-                #     y += step
 
         def give(self, card):
             '''
@@ -500,7 +492,7 @@ init -3 python:
                 return False
             global paid
             global withheld
-            if origin == 'T_OFFER' and card.cost <= paid-withheld:
+            if origin == 'T_OFFER' and paid-withheld >= 0:
                 #  Accept bought card, if it was paid for
                 return True
             elif origin == 'P_OFFER' and card.number <= paid-withheld:
@@ -510,6 +502,7 @@ init -3 python:
 
         def give(self, card):
             return True
+
 
     class PlayerOfferStack(Cardbox):
         '''
@@ -662,8 +655,6 @@ init -3 python:
                 box_renders.append(tmp_render)
                 self.render_object.blit(tmp_render, (self.stacks[x].x, self.stacks[x].y))
             #  PLACEHOLDER PAID/WITHHELD VALUES
-            #  CARDS
-            #card_renders = []
             for card in self.cards:
                 # tmp_render = card.render(200, 120, st, at)
                 # card_renders.append(tmp_render)
@@ -739,6 +730,8 @@ init -3 python:
                             self.dragged.stack = new_stack.id
                     #  Release dragged card anyway
                     self.dragged = None
+                #  Restart interaction to check for success, flip exit button state, etc.
+                renpy.restart_interaction()
 
         def visit(self):
             l = []
@@ -750,17 +743,37 @@ init -3 python:
             return l
 
         def per_interact(self):
+            #  In children this method also checks for exit conditions,
+            #  Makes opponent moves and so on
+            raise NotImplementedError
             renpy.redraw(self, 0)
 
         def get_stack_by_id(self, stack_id):
             return self.stack_dict[stack_id]
 
+    #  Specific table classes. Overload per_interact to check for exit conditions, if any.
+    class TradeTable(Table):
+        """
+        Table that facilitates trade
+        """
+        def __init__(self, **kwargs):
+            super(TradeTable, self).__init__(**kwargs)
+
+        def per_interact(self):
+            if not self.get_stack_by_id('T_HAND').card_list:
+                #self.fin_text = Text(u'ХУЙПИЗДА')
+                renpy.hide_screen('test_screen')
+            renpy.redraw(self, 0)
+
+
 init -1 python:
 
-    def init_new_conflict():
-        global player_deck
-        p_stack.replace_cards(player_deck)
-        p_stack._position_cards()
+    # def init_new_conflict():
+    #     global player_deck
+    #     p_stack.replace_cards(player_deck)
+    #     p_stack._position_cards()
+
+    import copy
 
     def init_trade_table(stock):
         global player_deck
@@ -782,7 +795,7 @@ init -1 python:
         a = {'P_HAND': 'P_OFFER', 'T_HAND': 'T_OFFER', 'T_OFFER': 'P_HAND', 'P_OFFER': 'P_HAND'}
         #acc_stack._position_cards()
         #p_stack._position_cards()
-        test_table = Table(stacks=[p_hand_stack, t_hand_stack, p_offer_stack, t_offer_stack], automove=a)
+        test_table = TradeTable(stacks=[p_hand_stack, t_hand_stack, p_offer_stack, t_offer_stack], automove=a)
 
 
 init:
