@@ -716,9 +716,10 @@ init -3 python:
                             #  If card was not accepted, it should be returned where it belongs
                             self.dragged.transform.xpos = self.initial_card_position[0]
                             self.dragged.transform.ypos = self.initial_card_position[1]
-                            self.dragged.transform.update()
                         #  Dragging has ended somehow anyway
+                        self.dragged.transform.update()
                         self.dragged = None
+
 
                 else:
                     #  Things to do upon click
