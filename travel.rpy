@@ -58,6 +58,71 @@ screen map_screen():
 #         linear time xpos x2 ypos y2
 
 init -5 python:
+
+    import random
+    def leave_node():
+        """
+        A simple function that calls current node's _quit label
+        :return:
+        """
+        global current_port
+        quit_label = '{0}_quit'.format(current_port.name)
+        renpy.jump(quit_label)
+
+    class MapEvent(object):
+        """
+        A simple class that contains event Ren'Py label, its weight
+        and a list of nodes it can be issued at
+        """
+        def __init__(self, label = None, weight = 1, node_list = None):
+            if label is None:
+                raise ValueError('MapEvent cannot be created without a label')
+            self.label = label
+            self.weight = weight
+            if node_list:
+                self.node_list = node_list
+                self.universal = False
+            else:
+                self.universal = True
+
+    class EventDispatcher(object):
+        """
+        A singleton that gives nodes the MapEvent they should point to.
+        Doesn't check for basic event probability, assumes node did that
+        :param basic_probability: float
+        """
+        def __init__(self):
+            self.visited = []  # A list of already visited nodes
+            self.event_list = []
+
+        def get_label(self, node):
+            """
+            Return a label eligible for a given node
+            :param node: str
+            """
+            #  Generating the list of available events for this node
+            avail = [x for x in self.event_list if x.universal or node in x.node_list if x not in self.visited]
+            if avail:
+                r = renpy.random.randint(0, sum(x.weight for x in avail))
+                s = 0
+                for label in avail:
+                    s += label.weight
+                    if r<s:
+                        ret = label
+                ret = label # In case the very highest possible value was rolled
+                self.visited.append(ret)
+                return ret.label
+            else:
+                return node
+
+        def load_events(self, event_list):
+            """
+            Here for possible future extension, like loading from external file or something
+            """
+            if any(type(x) is not MapEvent for x in event_list):
+                raise ValueError('Can only take MapEvent objects!')
+            self.event_list = event_list
+
     class Travel(Action):
         def __init__(self, map_point, **kwargs):
             super(Action, self).__init__(**kwargs)
@@ -79,7 +144,7 @@ init -5 python:
                 return False
 
     class Map_point():
-        def __init__(self, name, coordinates, label_list = None, connected = [], hotspot_size=50):
+        def __init__(self, name, coordinates, label_list = None, connected = [], hotspot_size=50, random_events=True):
             '''
             Create a map_point object. If label is not specified,
             it is the same as name of that object
@@ -93,6 +158,7 @@ init -5 python:
                            hotspot_size,
                            hotspot_size)
             self.hotspot_size=hotspot_size
+            self.random_events = random_events
             self.label_list = label_list
             if not label_list is None:
                 self.label_prob_sum = sum((x[1] for x in self.label_list))
@@ -111,35 +177,39 @@ init -5 python:
             """
             Return a label that the game must jump to upon entering port
             """
-            if self.label_list is None:
+            if not self.random_events:
                 return self.name
-            import random
-            r=random.uniform(0, self.label_prob_sum)
-            s = 0.0
-            for label in self.label_list:
-                s += label[1]
-                if r<s:
-                    return label[0]
-            return label[0]
+            else:
+                #  Checking for random events
+                global basic_event_probability
+                global event_dispatcher
+                if renpy.random.random() <= basic_event_probability:
+                    l = event_dispatcher.get_label(self.name)
+                else:
+                    l = self.name
+            return l
+
+
+    ############################################
+    # DATA
+    ############################################
 
 
     # Map points initialization
 
     #  Cities
-    monet = Map_point('monet', (150, 628))
-    tartari = Map_point('tartari', (259, 103))
-    plains = Map_point('plains', (584, 109))
-    vein = Map_point('vein', (134, 267))
-    poop = Map_point('poop', (642, 333))
-    office = Map_point('office', (909, 377))
-    yankee = Map_point('yankee', (365, 431))
-    vortex = Map_point('vortex', (645, 518))
-    monastery = Map_point('monastery', (594, 674))
+    monet = Map_point('monet', (150, 628), random_events=False)
+    tartari = Map_point('tartari', (259, 103), random_events=False)
+    plains = Map_point('plains', (584, 109), random_events=False)
+    vein = Map_point('vein', (134, 267), random_events=False)
+    poop = Map_point('poop', (642, 333), random_events=False)
+    office = Map_point('office', (909, 377), random_events=False)
+    yankee = Map_point('yankee', (365, 431), random_events=False)
+    vortex = Map_point('vortex', (645, 518), random_events=False)
+    monastery = Map_point('monastery', (594, 674), random_events=False)
 
     #  Nodes
-    node1 = Map_point('node1', (137, 713),
-            label_list = (('node1_event1', 1), ('node1_event2', 2),
-                ('node1_event3', 2), ('node1_quit', 5)))
+    node1 = Map_point('node1', (137, 713))
     node2 = Map_point('node2', (296, 700))
     node3 = Map_point('node3', (210, 557))
     node4 = Map_point('node4', (394, 572))
@@ -191,3 +261,12 @@ init -5 python:
     node1.connected=[monet, node2]
     node2.connected=[node1, node4]
 
+    # Random events and related stuff
+    basic_event_probability = 0.5
+    event_list = [MapEvent(label='node_rock_me_mama'),
+                  MapEvent(label='node14_lost_in_sea', node_list=['node14']),
+                  MapEvent(label='node_event1'),
+                  MapEvent(label='node_event2', weight=2),
+                  MapEvent(label='node_event3', weight=3)]
+    event_dispatcher = EventDispatcher()
+    event_dispatcher.load_events(event_list=event_list)

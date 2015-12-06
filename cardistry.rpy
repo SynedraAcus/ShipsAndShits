@@ -744,9 +744,8 @@ init -3 python:
 
         def per_interact(self):
             #  In children this method also checks for exit conditions,
-            #  Makes opponent moves and so on
+            #  Makes opponent moves and so on, so it's disabled here
             raise NotImplementedError
-            renpy.redraw(self, 0)
 
         def get_stack_by_id(self, stack_id):
             return self.stack_dict[stack_id]
@@ -761,19 +760,12 @@ init -3 python:
 
         def per_interact(self):
             if not self.get_stack_by_id('T_HAND').card_list:
-                #self.fin_text = Text(u'ХУЙПИЗДА')
                 renpy.hide_screen('test_screen')
             renpy.redraw(self, 0)
 
 
 init -1 python:
 
-    # def init_new_conflict():
-    #     global player_deck
-    #     p_stack.replace_cards(player_deck)
-    #     p_stack._position_cards()
-
-    import copy
 
     def init_trade_table(stock):
         global player_deck
