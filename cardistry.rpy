@@ -606,6 +606,25 @@ init -3 python:
         def give(self, card):
             return True
 
+    class TestExit(Action):
+        """
+        Test exit button for trade screen
+        """
+
+        def __init__(self):
+            pass
+
+        def __call__(self):
+            renpy.hide_screen('test_screen')
+
+        def get_sensitive(self):
+            global paid
+            global withheld
+            if paid >= withheld:
+                return True
+            else:
+                return False
+
 
     class Table(renpy.Displayable):
 
@@ -625,13 +644,14 @@ init -3 python:
             self.drag_text = Text('None dragged')
             self.dragged = None
             self.drag_start = (0, 0)
-            self.initial_card_position = (0,0)
             #  Debug Cardbox highlighters
             self.cardboxes = []
             for x in self.stacks:
                 self.cardboxes.append(Solid('#FF0000'))
             #  Debug paid/withheld
             self.paid_text = Text('Paid {0}/Withheld {1}'.format(str(paid), str(withheld)))
+            #  Test "Exit" button
+            self.exit_button = renpy.display.behavior.ImageButton(renpy.displayable('images/STRELKAH_VNEESE.png'),  action=TestExit())
 
         def render(self, width, height, st, at):
             self.render_object = renpy.Render(width, height, st, at)
@@ -646,7 +666,7 @@ init -3 python:
             self.render_object.blit(drag_render, (500, 600))
             self.paid_text = Text('Paid {0}/Withheld {1}'.format(str(paid), str(withheld)))
             paid_render = renpy.render(self.paid_text, width, height, st, at)
-            self.render_object.blit(paid_render, (450, 630))
+            self.render_object.blit(paid_render, (480, 630))
 
             #  DEBUG STACK BOXES
             box_renders = []
@@ -661,7 +681,9 @@ init -3 python:
                 # self.render_object.blit(tmp_render, (card.xpos, card.ypos))
                 self.render_object.place(card.transform)
             return self.render_object
-
+            #  EXIT button
+            button_render = renpy.render(self.exit_button)
+            self.render_object.blit(button_render, (0, 0))
 
 
         def event(self, ev, x, y, st):
@@ -759,8 +781,8 @@ init -3 python:
             super(TradeTable, self).__init__(**kwargs)
 
         def per_interact(self):
-            if not self.get_stack_by_id('T_HAND').card_list:
-                renpy.hide_screen('test_screen')
+            # if not self.get_stack_by_id('T_HAND').card_list:
+            #     renpy.hide_screen('test_screen')
             renpy.redraw(self, 0)
 
 
