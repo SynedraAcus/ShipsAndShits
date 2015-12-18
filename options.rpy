@@ -116,7 +116,7 @@ init -1 python hide:
 
     ## NVL menu text
 
-    style.nvl_menu_choice.color = '#000'
+    style.nvl_menu_choice.color = '#600000'
     style.nvl_menu_choice.font = 'OldStandard-Regular.ttf'
 
     ## NVL text
