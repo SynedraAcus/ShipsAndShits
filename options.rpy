@@ -316,8 +316,12 @@ python early:
     config.mode_callbacks = []
 
 ## Disabling rollforward key because rollforward may break conflict screens every once in a while
+## Also some additional non-screen-specific keymap fixes
 init python:
     config.keymap['rollforward'] = []
+    config.keymap['game_menu'] = ['K_ESCAPE', 'K_MENU']
+    config.keymap['hide_windows'] = ['mouseup_2', 'mouseup_3', 'h']
+
 
 
 
