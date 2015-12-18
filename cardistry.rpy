@@ -793,9 +793,10 @@ init -3 python:
 
         def __call__(self, *args, **kwargs):
             #  Do trading magic
-            renpy.hide_screen('test_screen')
-            renpy.hide_screen('trade_buttons')
+            renpy.hide_screen('trade_screen')
+            renpy.hide_screen('trade_buttons_screen')
             renpy.restart_interaction()
+            return None
 
         def get_sensitive(self):
             global paid
@@ -807,13 +808,14 @@ init -3 python:
         Return all cards where they belong and hide screens
         """
         def __init__(self, **kwargs):
-           Action.__init__(self, **kwargs)
+           pass
 
         def __call__(self):
             # Do not-trading magic
-            renpy.hide_screen('test_screen')
-            renpy.hide_screen('trade_buttons')
+            renpy.hide_screen('trade_screen')
+            renpy.hide_screen('trade_buttons_screen')
             renpy.restart_interaction()
+            return None
 
         def get_sensitive(self):
             return True
