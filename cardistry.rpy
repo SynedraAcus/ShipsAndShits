@@ -653,8 +653,6 @@ init -3 python:
                 self.cardboxes.append(Solid('#FF0000'))
             #  Debug paid/withheld
             self.paid_text = Text('Paid {0}/Withheld {1}'.format(str(paid), str(withheld)))
-            #  Test "Exit" button
-            self.exit_button = renpy.display.behavior.ImageButton(renpy.displayable('images/STRELKAH_VNEESE.png'),  action=TestExit())
 
         def render(self, width, height, st, at):
             self.render_object = renpy.Render(width, height, st, at)
@@ -684,10 +682,6 @@ init -3 python:
                 # self.render_object.blit(tmp_render, (card.xpos, card.ypos))
                 self.render_object.place(card.transform)
             return self.render_object
-            #  EXIT button
-            button_render = renpy.render(self.exit_button)
-            self.render_object.blit(button_render, (0, 0))
-
 
         def event(self, ev, x, y, st):
             if ev.type == pygame.MOUSEBUTTONDOWN and ev.button == 1:
@@ -775,7 +769,7 @@ init -3 python:
         def get_stack_by_id(self, stack_id):
             return self.stack_dict[stack_id]
 
-    #  Specific table classes. Overload per_interact to check for exit conditions, if any.
+    #  Specific table classes. Overload per_interact to check for exit conditions or enemy moves, if any.
     class TradeTable(Table):
         """
         Table that facilitates trade
@@ -788,6 +782,58 @@ init -3 python:
             #     renpy.hide_screen('test_screen')
             renpy.redraw(self, 0)
 
+    #  Action classes for button screens
+
+    class DoSell(Action):
+        """
+        Move user's offer to trader hand and vice versa. Hide screens
+        """
+        def __init__(self, **kwargs):
+            pass
+
+        def __call__(self, *args, **kwargs):
+            #  Do trading magic
+            renpy.hide_screen('test_screen')
+            renpy.hide_screen('trade_buttons')
+            renpy.restart_interaction()
+
+        def get_sensitive(self):
+            global paid
+            global withheld
+            return paid >= withheld
+
+    class DoNotSell(Action):
+        """
+        Return all cards where they belong and hide screens
+        """
+        def __init__(self, **kwargs):
+           Action.__init__(self, **kwargs)
+
+        def __call__(self):
+            # Do not-trading magic
+            renpy.hide_screen('test_screen')
+            renpy.hide_screen('trade_buttons')
+            renpy.restart_interaction()
+
+        def get_sensitive(self):
+            return True
+
+#  Table button screens. Separate because buttons inside CDD are a godawful mess
+
+screen trade_buttons_screen():
+    zorder 10
+    textbutton u"Торговать":
+        action DoSell()
+        xpos 350
+        ypos 350
+    textbutton u"Не торговать":
+        action DoNotSell()
+        xpos 550
+        ypos 350
+
+
+
+
 
 init -1 python:
 
@@ -795,7 +841,7 @@ init -1 python:
     def init_trade_table(stock):
         global player_deck
         #global acc_stack
-        global test_table
+        global trade_table
         global paid
         global withheld
         paid = 0
@@ -812,11 +858,11 @@ init -1 python:
         a = {'P_HAND': 'P_OFFER', 'T_HAND': 'T_OFFER', 'T_OFFER': 'P_HAND', 'P_OFFER': 'P_HAND'}
         #acc_stack._position_cards()
         #p_stack._position_cards()
-        test_table = TradeTable(stacks=[p_hand_stack, t_hand_stack, p_offer_stack, t_offer_stack], automove=a)
+        trade_table = TradeTable(stacks=[p_hand_stack, t_hand_stack, p_offer_stack, t_offer_stack], automove=a)
 
 
 init:
-    screen test_screen():
+    screen trade_screen():
         modal True
-        zorder 10
-        add test_table
+        zorder 9
+        add trade_table

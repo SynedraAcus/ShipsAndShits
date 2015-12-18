@@ -15,7 +15,7 @@ init -2 python:
     ret = ''
     price = '0'
     # Initialising new conflict variables
-    test_table = None #  If no init_* functions were called before new screens, this will break
+    trade_table = None #  If no init_* functions were called before new screens, this will break
     # Globals for new trade system
     paid = 0
     withheld = 0
@@ -282,7 +282,9 @@ label new_conflict:
     $ init_trade_table([test_card, test_card2])
     "Включаем"
     #$ init_new_conflict()
-    show screen test_screen
+    show screen trade_screen
+    show screen trade_buttons_screen
+    $renpy.restart_interaction()
     jump start
 
 label trade_test:
