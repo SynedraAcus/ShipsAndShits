@@ -24,8 +24,9 @@ init -3 python:
             self.spendable = spendable
             self.tooltip = tooltip
             self.text = Text(u'{0} {1}'.format(number, self.suit), color = '#6A3819', font='Hangyaboly.ttf')
-            self.t_text = Text(tooltip, size = 14, color = '#6A3819', font='Hangyaboly.ttf')
+            self.t_text = Text(self.tooltip, size = 14, color = '#6A3819', font='Hangyaboly.ttf')
             self.bg = (self.spendable == True and Solid(SPENDABLE_COLOR) or Solid(PERMANENT_COLOR))
+            self.frame = Solid('#6A3819')
             if cost is None:
                 self.cost = self.number
             else:
@@ -44,13 +45,15 @@ init -3 python:
             return(u'{0} {1}'.format(self.suit, self.number))
 
         def render(self, width, height, st, at):
-            bg_render = renpy.render(self.bg, width, height, st, at)
+            frame_render = renpy.render(self.frame, width, height, st, at)
+            bg_render = renpy.render(self.bg, 196, 116, st, at)
             text_render = renpy.render(self.text, width, height, st, at)
             t_text_render = renpy.render(self.t_text, width, height, st, at)
             render = renpy.Render(width, height, st, at)
-            render.blit(bg_render, (0,0))
-            render.blit(text_render, (10,10))
-            render.blit(t_text_render,(10,40))
+            render.blit(frame_render, (0, 0))
+            render.blit(bg_render, (2, 2))
+            render.blit(text_render, (10, 10))
+            render.blit(t_text_render, (10, 40))
             return render
 
         def visit(self):
