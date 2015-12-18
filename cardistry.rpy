@@ -419,6 +419,8 @@ init -3 python:
             if len(self.card_list) > 0:
                 self._position_cards()
 
+        # Card positioning methods
+
         def position_next_card(self):
             """
             Return position of the next card to be added
@@ -446,6 +448,8 @@ init -3 python:
                 (card.transform.xpos, card.transform.ypos) = self.position_next_card()
                 card.transform.update()
 
+        # Card transfer methods
+
         def give(self, card):
             '''
             Return True if this stack is willing to give card away, False otherwise
@@ -462,6 +466,7 @@ init -3 python:
 
         #  Defining those here creates less messy code than
         #  inheriting from list ABC. Maybe even quicker
+
         def append(self, card):
             self.card_list.append(card)
 
@@ -792,7 +797,19 @@ init -3 python:
             pass
 
         def __call__(self, *args, **kwargs):
-            #  Do trading magic
+            #  Transfer cards
+            global trade_table
+            global player_deck
+            for card in trade_table.get_stack_by_id('T_OFFER').card_list:
+                if card not in player_deck:
+                    player_deck.append(card)
+            for card in trade_table.get_stack_by_id('P_OFFER').card_list:
+                if card in player_deck:
+                    player_deck.remove(card)
+            # Remove card references from table stacks
+            trade_table.get_stack_by_id('P_OFFER').replace_cards([])
+            trade_table.get_stack_by_id('T_OFFER').replace_cards([])
+            trade_table.get_stack_by_id('T_HAND').replace_cards([])
             renpy.hide_screen('trade_screen')
             renpy.hide_screen('trade_buttons_screen')
             renpy.restart_interaction()
@@ -805,7 +822,7 @@ init -3 python:
 
     class DoNotSell(Action):
         """
-        Return all cards where they belong and hide screens
+        Return all cards where they belonged originally and hide screens
         """
         def __init__(self, **kwargs):
            pass

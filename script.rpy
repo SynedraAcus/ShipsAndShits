@@ -285,6 +285,7 @@ label new_conflict:
     show screen trade_screen
     show screen trade_buttons_screen
     $renpy.restart_interaction()
+    "Надеемся, вы что-нибудь купили"
     jump start
 
 label trade_test:
