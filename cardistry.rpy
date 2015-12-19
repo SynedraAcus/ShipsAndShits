@@ -673,8 +673,6 @@ init -3 python:
             self.cardboxes = []
             for x in self.stacks:
                 self.cardboxes.append(Solid('#FF0000'))
-            #  Debug paid/withheld
-            self.paid_text = Text('Paid {0}/Withheld {1}'.format(str(paid), str(withheld)))
 
         def render(self, width, height, st, at):
             self.render_object = renpy.Render(width, height, st, at)
@@ -685,17 +683,12 @@ init -3 python:
                 self.drag_text = Text('None dragged')
             drag_render = renpy.render(self.drag_text, width, height, st, at)
             self.render_object.blit(drag_render, (500, 600))
-            self.paid_text = Text('Paid {0}/Withheld {1}'.format(str(paid), str(withheld)))
-            paid_render = renpy.render(self.paid_text, width, height, st, at)
-            self.render_object.blit(paid_render, (480, 630))
-
             #  DEBUG STACK BOXES
             box_renders = []
             for x in range(len(self.stacks)):
                 tmp_render = self.cardboxes[x].render(self.stacks[x].xsize, self.stacks[x].ysize, st, at)
                 box_renders.append(tmp_render)
                 self.render_object.blit(tmp_render, (self.stacks[x].x, self.stacks[x].y))
-            #  PLACEHOLDER PAID/WITHHELD VALUES
             for card in self.cards:
                 self.render_object.place(card.transform)
             return self.render_object
@@ -773,7 +766,6 @@ init -3 python:
             l+=(x.transform for x in self.cards)
             #l.append(self.bg)
             l.append(self.drag_text)
-            l.append(self.paid_text)
             l+=self.cardboxes
             return l
 
@@ -804,10 +796,26 @@ init -3 python:
         """
         def __init__(self, **kwargs):
             super(TradeTable, self).__init__(**kwargs)
+            self.paid_text = Text('{0}'.format(paid), color='#6A3819', size=30)
+            self.withheld_text = Text('{0}'.format(withheld), color='#6A3819', size=30)
+        #
+        def render(self, width, height, st, at):
+            r = super(TradeTable, self).render(width, height, st, at)
+            paid_render = renpy.render(self.paid_text, width, height, st, at)
+            r.blit(paid_render, (720, 500))
+            withheld_render = renpy.render(self.withheld_text, width, height, st, at)
+            r.blit(withheld_render, (720, 200))
+            return self.render_object
+
+        def visit(self):
+            r = super(TradeTable, self).visit()
+            r += [self.paid_text, self.withheld_text]
+            return r
 
         def per_interact(self):
-            # if not self.get_stack_by_id('T_HAND').card_list:
-            #     renpy.hide_screen('test_screen')
+            # Update text fields
+            self.paid_text = Text('{0}'.format(paid), color='#6A3819', size=30)
+            self.withheld_text = Text('{0}'.format(withheld), color='#6A3819', size=30)
             renpy.redraw(self, 0)
 
         def finalize_success(self):
