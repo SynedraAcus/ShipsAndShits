@@ -40,19 +40,19 @@ init -3 python:
             self.stack = None
             self.transform = Transform(child=self) #, xpos=self.xpos, ypos=self.ypos)
 
-        def init_transform(self):
+        def reinit_transform(self):
             """
             Renitialise card Transform that contains its position and stack it belongs to.
             Should be called any time screen is initialized, currently called from Cardbox.__init__()
             """
-            self.xpos = 0
-            self.ypos = 0
-            self.xsize = 200
-            self.ysize = 120
+            self.transform.xpos = 0
+            self.transform.ypos = 0
+            self.transform.xsize = 200
+            self.transform.ysize = 120
             self.x_offset = 0
             self.y_offset = 0
             self.stack = None
-            self.transform = Transform(child=self) #, xpos=self.xpos, ypos=self.ypos)
+            # self.transform = Transform(child=self) #, xpos=self.xpos, ypos=self.ypos)
 
         def __str__(self):
             return(u'{0} {1}'.format(self.suit, self.number))
@@ -428,7 +428,7 @@ init -3 python:
             # Rest of it
             self.card_list = card_list
             for card in self.card_list:
-                card.init_transform()
+                card.reinit_transform()
                 card.stack = stack_id
             if len(self.card_list) > 0:
                 self._position_cards()
@@ -660,7 +660,7 @@ init -3 python:
                 renpy.block_rollback()
             super(renpy.Displayable, self).__init__(xfill=True, yfill=True, **kwargs)
             #self.bg = Solid('#DDD')
-            self.player_deck = player_deck
+            # self.player_deck = player_deck
             self.stacks = stacks
             self.automove = automove  #  Dict of stacks that will be used automatically upon click
             #  ADD KEY CORRECTNESS ASSERT FOR AUTOMOVE
@@ -861,9 +861,10 @@ init -3 python:
             #  If that was not done already manually
             global trade_table
             trade_table.finalize_success()
+            renpy.hide_screen('trade_screen')
             renpy.hide_screen('trade_buttons_screen')
             renpy.restart_interaction()
-            return None
+            return
 
         def get_sensitive(self):
             global paid
@@ -883,7 +884,6 @@ init -3 python:
             renpy.hide_screen('trade_screen')
             renpy.hide_screen('trade_buttons_screen')
             renpy.restart_interaction()
-            return None
 
         def get_sensitive(self):
             global paid
