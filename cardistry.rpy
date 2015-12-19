@@ -913,6 +913,12 @@ init -1 python:
 
 
     def init_trade_table(stock, accepted_suits=[u'Сила', u'Деньги', u'Знания', u'Интриги']):
+        """
+        Initialize trade table and show it on screen.
+        :param stock: List of cards that are sold here
+        :param accepted_suits: List of suits that are accepted here
+        :return:
+        """
         global player_deck
         #global acc_stack
         global trade_table

@@ -64,6 +64,14 @@ You currently can add only "Sell card for money"-type actions. The screen is muc
         "Покупка отменена игроком"
         jump cancelled
 
+NEW TRADING SCREEN
+New trading screen is called by the following function:
+
+    $ init_trade_screen(stock, accepted_suits=[u'Деньги', u'Знания'])
+    The first argument is a list of cards sold in this shop
+    The second argument is a list of suits accepted in this shop
+
+Screen is shown and hidden automatically. It currently doesn't place anything into 'ret' variable.
 TRAVEL
 Unlike previous section, this is guidelines, not strict rules. As in, game won't crash if you violate it,
 but I'll personally rip your throat out if you mess label markup.
