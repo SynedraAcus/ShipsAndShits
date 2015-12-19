@@ -257,6 +257,7 @@ label start:
                         "HERE BE DEBUG LINE"
         "Зайти в меню разнообразного дебага":
             label debug_menu:
+            nvl clear
             "Вы попали в меню дебага. Тут можно посмотреть разные недоделанные фичи, но если Вы игрок, а не член команды, имейте в виду: они могут работать, не работать, ломать игру, оскорблять чувства верующих и плохо выглядеть. Если подумать, они сильно похожи на меня."
             menu:
                 "Вступить в беспричинный конфликт":
@@ -299,6 +300,13 @@ label new_conflict:
     $renpy.restart_interaction()
     "Надеемся, вы что-нибудь купили. Проверьте колоду и убедитесь, что торговля завершилась успешно"
     nvl clear
+    "Вы попали в тестовый магазин \"Второй номер\", который как первый, только там принимают любые масти."
+    $ test_card3 = Card(u'Д', 2, spendable=False, cost=10, tooltip='Неразменная монета')
+    $ test_card4 = Card(u'И', 4, spendable=True, cost=5, tooltip='История неразменной монеты')
+    $ init_trade_table([test_card3, test_card4])
+    show screen trade_screen
+    show screen trade_buttons_screen
+    $renpy.restart_interaction()
     jump debug_menu
 
 label trade_test:
