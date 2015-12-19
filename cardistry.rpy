@@ -31,14 +31,27 @@ init -3 python:
                 self.cost = self.number
             else:
                 self.cost = cost
-            #  Stuff for new conflict; not referenced outside it
             self.xpos = 0
             self.ypos = 0
             self.xsize = 200
             self.ysize = 120
             self.x_offset = 0
             self.y_offset = 0
-            self.stack = 0
+            self.stack = None
+            self.transform = Transform(child=self) #, xpos=self.xpos, ypos=self.ypos)
+
+        def init_transform(self):
+            """
+            Renitialise card Transform that contains its position and stack it belongs to.
+            Should be called any time screen is initialized, currently called from Cardbox.__init__()
+            """
+            self.xpos = 0
+            self.ypos = 0
+            self.xsize = 200
+            self.ysize = 120
+            self.x_offset = 0
+            self.y_offset = 0
+            self.stack = None
             self.transform = Transform(child=self) #, xpos=self.xpos, ypos=self.ypos)
 
         def __str__(self):
@@ -415,6 +428,7 @@ init -3 python:
             # Rest of it
             self.card_list = card_list
             for card in self.card_list:
+                card.init_transform()
                 card.stack = stack_id
             if len(self.card_list) > 0:
                 self._position_cards()
@@ -468,13 +482,17 @@ init -3 python:
         #  inheriting from list ABC. Maybe even quicker
 
         def append(self, card):
+            card.stack = self.id
             self.card_list.append(card)
 
         def remove(self, card):
+            card.stack = None
             self.card_list.remove(card)
 
         def pop(self, index):
-            return self.card_list.pop(index)
+            card = self.card_list[index]
+            self.remove(card)
+            return card
 
         def index(self, card):
             return self.card_list.index(card)
@@ -482,6 +500,7 @@ init -3 python:
         def replace_cards(self, l):
             """
             Set this stack's card_list as l
+            Release all cards from this stack
             """
             self.card_list = l
 
@@ -723,7 +742,6 @@ init -3 python:
                                         is_accepted = True
                                         self.get_stack_by_id(self.dragged.stack).remove(self.dragged)
                                         accepting_stack.append(self.dragged)
-                                        self.dragged.stack = accepting_stack.id
                                 else:
                                     #  Why not rearrange cards within stack
                                     is_accepted = True
@@ -843,18 +861,6 @@ init -3 python:
             #  If that was not done already manually
             global trade_table
             trade_table.finalize_success()
-            # global player_deck
-            # for card in trade_table.get_stack_by_id('T_OFFER').card_list:
-            #     if card not in player_deck:
-            #         player_deck.append(card)
-            # for card in trade_table.get_stack_by_id('P_OFFER').card_list:
-            #     if card in player_deck:
-            #         player_deck.remove(card)
-            # # Remove card references from table stacks
-            # trade_table.get_stack_by_id('P_OFFER').replace_cards([])
-            # trade_table.get_stack_by_id('T_OFFER').replace_cards([])
-            # trade_table.get_stack_by_id('T_HAND').replace_cards([])
-            renpy.hide_screen('trade_screen')
             renpy.hide_screen('trade_buttons_screen')
             renpy.restart_interaction()
             return None
@@ -872,7 +878,6 @@ init -3 python:
            pass
 
         def __call__(self):
-            # Do not-trading magic
             global trade_table
             trade_table.finalize_failure()
             renpy.hide_screen('trade_screen')
@@ -933,7 +938,6 @@ init -1 python:
 
 init:
     screen trade_screen():
-        no
         modal True
         zorder 9
         add trade_table
