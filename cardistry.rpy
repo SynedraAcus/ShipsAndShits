@@ -837,7 +837,8 @@ init -3 python:
             global player_deck
             # Return cards that are in P_OFFER back home
             for card in self.get_stack_by_id('P_OFFER').card_list:
-                player_deck.append(card)
+                if card not in player_deck:
+                    player_deck.append(card)
 
     #  Action classes for button screens
 
@@ -911,17 +912,17 @@ init -1 python:
         global withheld
         paid = 0
         withheld = 0
-        assert type(stock) is list and len(stock)>0
+        assert type(stock) is list and len(stock)>0 and all(lambda x: type(x) is Card for x in stock)
         assert type (accepted_suits) is list and all(x in accepted_suits in [u'Сила', u'Деньги', u'Знания', u'Интриги'])
         t_offer_stack = TraderOfferStack(card_list=[], stack_id='T_OFFER', accept_from=['T_HAND'],
-                                   x=400, y=100, xsize=300, ysize=200)
+                                         x=400, y=100, xsize=300, ysize=200)
         p_offer_stack = PlayerOfferStack(card_list=[], stack_id='P_OFFER', accept_from=['P_HAND'],
-                                   x=400, y=400, xsize=300, ysize=200)
+                                         x=400, y=400, xsize=300, ysize=200)
         p_hand_stack = PlayerShoppingStack(card_list=[x for x in player_deck if x.suit in accepted_suits],
                                            stack_id='P_HAND', accept_from=['T_OFFER', 'P_OFFER'],
-                                    x=10, y=100, xsize=300, ysize=500)
+                                           x=10, y=100, xsize=300, ysize=500)
         t_hand_stack = TraderHandStack(card_list=stock, stack_id='T_HAND', accept_from=['T_OFFER'],
-                                  x=800, y=100, xsize=300, ysize=500)
+                                       x=800, y=100, xsize=300, ysize=500)
         #n_stack = NullStack(stack_id='NULL', accept_from=['HAND'], x=750, xsize=300, y=100, ysize=500)
         a = {'P_HAND': 'P_OFFER', 'T_HAND': 'T_OFFER', 'T_OFFER': 'P_HAND', 'P_OFFER': 'P_HAND'}
         #acc_stack._position_cards()
