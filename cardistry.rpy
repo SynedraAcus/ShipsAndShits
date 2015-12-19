@@ -936,6 +936,8 @@ init -1 python:
         #acc_stack._position_cards()
         #p_stack._position_cards()
         trade_table = TradeTable(stacks=[p_hand_stack, t_hand_stack, p_offer_stack, t_offer_stack], automove=a)
+        renpy.show_screen('trade_screen')
+        renpy.show_screen('trade_buttons_screen')
 
 
 init:
