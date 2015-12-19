@@ -39,12 +39,14 @@ label start:
     $ gl_you_are_terrible = 0
     $ useless_variable = 0
     $ useless_variable_2 = 0
+    # Initial deck
     $ player_deck = []
     $ player_deck.append(Card(u'З', 3, spendable = False, tooltip = u'Сказки и истории, которые вы слышали с детства'))
     $ player_deck.append(Card(u'С', 2, spendable = False, tooltip = u'Ваш фирменный обманный маневр, сопровождаемый ударом'))
     $ player_deck.append(Card(u'С', 3, spendable = True, tooltip = u'Кусок стекла, который вы зачем-то носите в кармане'))
     $ player_deck.append(Card(u'С', 10, spendable = False, tooltip = u'Спецоружие для Птицы, которая очень хочет избить невинного вахтовика'))
     #$ init_new_table() #  Initialising stack objects and other such crap
+    $ debug_given_money = False
     image bg solid_bg = Solid('#EEE')
     show bg solid_bg
 
@@ -254,6 +256,8 @@ label start:
                         show screen map_screen
                         "HERE BE DEBUG LINE"
         "Зайти в меню разнообразного дебага":
+            label debug_menu:
+            "Вы попали в меню дебага. Тут можно посмотреть разные недоделанные фичи, но если Вы игрок, а не член команды, имейте в виду: они могут работать, не работать, ломать игру, оскорблять чувства верующих и плохо выглядеть. Если подумать, они сильно похожи на меня."
             menu:
                 "Вступить в беспричинный конфликт":
                     #nvl clear
@@ -275,18 +279,27 @@ label new_conflict:
 
     $ test_card = Card(u'Д', 10, spendable=True, tooltip='Эта карта была куплена при тестировании магазина')
     $ test_card2 = Card(u'Д', 10, spendable=True, cost = 8, tooltip='Эта карта тоже была куплена при тестировании магазина')
-    $ player_deck.append(Card(u'Д', 7, spendable = True))
-    $ player_deck.append(Card(u'Д', 8, spendable = True))
-    $ player_deck.append(Card(u'Д', 8, spendable = True))
-    $ player_deck.append(Card(u'Д', 8, spendable = True))
-    $ init_trade_table([test_card, test_card2])
-    "Включаем"
+    if not debug_given_money:
+        $ player_deck.append(Card(u'Д', 7, spendable = True))
+        $ player_deck.append(Card(u'Д', 8, spendable = True))
+        $ player_deck.append(Card(u'Д', 8, spendable = True))
+        $ player_deck.append(Card(u'Д', 8, spendable = True))
+        $ debug_given_money = True
+    $ init_trade_table([test_card, test_card2], accepted_suits=[u'Деньги'])
+    "Вы попали в тестовый магазин \"Первый номер\", в котором принимают деньги и продают тоже деньги."
+    "Наверное, это форекс или типа того. Биржа ворованных биткойнов. Микрокредитная организация. Серьёзно, зачем вас вообще сюда занесло? Есть же куда менее аморальные отрасли экономики."
+    "На витрине две десятки. Одна стоит десятку, другая восемь голдов, потому что разные цены тестировать тоже надо. Пока что цена никак не отображается, но вскоре я это исправлю."
+    "Пожалуйста, проверьте и запомните Вашу колоду перед тем, как начать торговлю. То есть прямо сейчас."
+    "Стэк слева -- карты, которые Вы можете продать, стэк справа -- те, которые вы можете купить. Для обмена их надо перетаскивать в нижний и верхний стэк посередине соответственно."
+    "Можно также кликать по картам и они переместятся куда надо."
+    "Торговля завершается кнопкой \"Торговать\". Кнопка \"Не торговать\" просто закрывает окно."
     #$ init_new_conflict()
     show screen trade_screen
     show screen trade_buttons_screen
     $renpy.restart_interaction()
-    "Надеемся, вы что-нибудь купили"
-    jump start
+    "Надеемся, вы что-нибудь купили. Проверьте колоду и убедитесь, что торговля завершилась успешно"
+    nvl clear
+    jump debug_menu
 
 label trade_test:
     $ test_card = Card(u'Д', 10, spendable=True, tooltip='Эта карта была куплена при тестировании магазина')

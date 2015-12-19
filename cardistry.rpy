@@ -774,6 +774,18 @@ init -3 python:
         def get_stack_by_id(self, stack_id):
             return self.stack_dict[stack_id]
 
+        def finalize_success(self):
+            """
+            Interact with globals upon success
+            """
+            raise NotImplementedError('Finalization methods must be overloaded')
+
+        def finalize_failure(self):
+            """
+            Interact with globals upon failure
+            """
+            raise NotImplementedError('Finalization methods must be overridden')
+
     #  Specific table classes. Overload per_interact to check for exit conditions or enemy moves, if any.
     class TradeTable(Table):
         """
@@ -787,6 +799,35 @@ init -3 python:
             #     renpy.hide_screen('test_screen')
             renpy.redraw(self, 0)
 
+        def finalize_success(self):
+            """
+            Success in this case is "Buy/sell stuff"
+            """
+            global player_deck
+            # Move cards from T_OFFER to global deck and remove cards in P_OFFER from there
+            for card in self.get_stack_by_id('T_OFFER').card_list:
+                player_deck.append(card)
+            for card in self.get_stack_by_id('P_OFFER').card_list:
+                if card in player_deck:
+                    player_deck.remove(card)
+            # Check that all cards from P_HAND are already in deck, add otherwise
+            for card in self.get_stack_by_id('P_HAND').card_list:
+                if card not in player_deck:
+                    player_deck.append(card)
+            # Clean stacks to clarify possible multiple pointer issues
+            # Stacks will be re-initialized by trade initialization, if any, later
+            for stack in self.stacks:
+                stack.replace_cards([])
+
+        def finalize_failure(self):
+            """
+            Failure in this case is "Do not sell stuff"
+            """
+            global player_deck
+            # Return cards that are in P_OFFER back home
+            for card in self.get_stack_by_id('P_OFFER').card_list:
+                player_deck.append(card)
+
     #  Action classes for button screens
 
     class DoSell(Action):
@@ -798,18 +839,21 @@ init -3 python:
 
         def __call__(self, *args, **kwargs):
             #  Transfer cards
+            #  Remove sold cards from player deck and add bought ones,
+            #  If that was not done already manually
             global trade_table
-            global player_deck
-            for card in trade_table.get_stack_by_id('T_OFFER').card_list:
-                if card not in player_deck:
-                    player_deck.append(card)
-            for card in trade_table.get_stack_by_id('P_OFFER').card_list:
-                if card in player_deck:
-                    player_deck.remove(card)
-            # Remove card references from table stacks
-            trade_table.get_stack_by_id('P_OFFER').replace_cards([])
-            trade_table.get_stack_by_id('T_OFFER').replace_cards([])
-            trade_table.get_stack_by_id('T_HAND').replace_cards([])
+            trade_table.finalize_success()
+            # global player_deck
+            # for card in trade_table.get_stack_by_id('T_OFFER').card_list:
+            #     if card not in player_deck:
+            #         player_deck.append(card)
+            # for card in trade_table.get_stack_by_id('P_OFFER').card_list:
+            #     if card in player_deck:
+            #         player_deck.remove(card)
+            # # Remove card references from table stacks
+            # trade_table.get_stack_by_id('P_OFFER').replace_cards([])
+            # trade_table.get_stack_by_id('T_OFFER').replace_cards([])
+            # trade_table.get_stack_by_id('T_HAND').replace_cards([])
             renpy.hide_screen('trade_screen')
             renpy.hide_screen('trade_buttons_screen')
             renpy.restart_interaction()
@@ -829,13 +873,17 @@ init -3 python:
 
         def __call__(self):
             # Do not-trading magic
+            global trade_table
+            trade_table.finalize_failure()
             renpy.hide_screen('trade_screen')
             renpy.hide_screen('trade_buttons_screen')
             renpy.restart_interaction()
             return None
 
         def get_sensitive(self):
-            return True
+            global paid
+            global withheld
+            return paid >= withheld
 
 #  Table button screens. Separate because buttons inside CDD are a godawful mess
 
@@ -857,7 +905,7 @@ screen trade_buttons_screen():
 init -1 python:
 
 
-    def init_trade_table(stock):
+    def init_trade_table(stock, accepted_suits=[u'Сила', u'Деньги', u'Знания', u'Интриги']):
         global player_deck
         #global acc_stack
         global trade_table
@@ -865,11 +913,14 @@ init -1 python:
         global withheld
         paid = 0
         withheld = 0
+        assert type(stock) is list and len(stock)>0
+        assert type (accepted_suits) is list and all(x in accepted_suits in [u'Сила', u'Деньги', u'Знания', u'Интриги'])
         t_offer_stack = TraderOfferStack(card_list=[], stack_id='T_OFFER', accept_from=['T_HAND'],
                                    x=400, y=100, xsize=300, ysize=200)
         p_offer_stack = PlayerOfferStack(card_list=[], stack_id='P_OFFER', accept_from=['P_HAND'],
                                    x=400, y=400, xsize=300, ysize=200)
-        p_hand_stack = PlayerShoppingStack(card_list=player_deck, stack_id='P_HAND', accept_from=['T_OFFER', 'P_OFFER'],
+        p_hand_stack = PlayerShoppingStack(card_list=[x for x in player_deck if x.suit in accepted_suits],
+                                           stack_id='P_HAND', accept_from=['T_OFFER', 'P_OFFER'],
                                     x=10, y=100, xsize=300, ysize=500)
         t_hand_stack = TraderHandStack(card_list=stock, stack_id='T_HAND', accept_from=['T_OFFER'],
                                   x=800, y=100, xsize=300, ysize=500)
@@ -882,6 +933,7 @@ init -1 python:
 
 init:
     screen trade_screen():
+        no
         modal True
         zorder 9
         add trade_table
