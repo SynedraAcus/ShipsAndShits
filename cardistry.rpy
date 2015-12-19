@@ -659,11 +659,9 @@ init -3 python:
             if gl_no_rollback:
                 renpy.block_rollback()
             super(renpy.Displayable, self).__init__(xfill=True, yfill=True, **kwargs)
-            #self.bg = Solid('#DDD')
-            # self.player_deck = player_deck
             self.stacks = stacks
             self.automove = automove  #  Dict of stacks that will be used automatically upon click
-            #  ADD KEY CORRECTNESS ASSERT FOR AUTOMOVE
+            assert all(x in (s.id for s in stacks) for x in automove.keys())
             self.stack_dict = {x.id: x for x in self.stacks}
             self.cards = []
             for x in self.stacks:
@@ -680,8 +678,6 @@ init -3 python:
 
         def render(self, width, height, st, at):
             self.render_object = renpy.Render(width, height, st, at)
-            # bg_render = renpy.render(self.bg, width, height, st, at)
-            # self.render_object.blit(bg_render, (0,0))
             #  DEBUG DRAG TEXT
             if self.dragged is not None:
                 self.drag_text = Text('{0}'.format(self.dragged.stack))
@@ -701,9 +697,6 @@ init -3 python:
                 self.render_object.blit(tmp_render, (self.stacks[x].x, self.stacks[x].y))
             #  PLACEHOLDER PAID/WITHHELD VALUES
             for card in self.cards:
-                # tmp_render = card.render(200, 120, st, at)
-                # card_renders.append(tmp_render)
-                # self.render_object.blit(tmp_render, (card.xpos, card.ypos))
                 self.render_object.place(card.transform)
             return self.render_object
 
