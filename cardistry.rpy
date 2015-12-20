@@ -633,25 +633,48 @@ init -3 python:
         def give(self, card):
             return True
 
-    class TestExit(Action):
+    class PlayerConflictStack(Cardbox):
+        #  Player hand for conflict screen
+        def __init__(self, **kwargs):
+            super(PlayerConflictStack, self).__init__(**kwargs)
+
+        def accept(self, card, origin=None):
+            return False
+
+        def give(self, card):
+            return True
+
+    class OpponentConflictStack(Cardbox):
         """
-        Test exit button for trade screen
+        Opponent hand for conflict
         """
+        def __init__(self, **kwargs):
+            super(OpponentConflictStack, self).__init__(**kwargs)
 
-        def __init__(self):
-            pass
+        def accept(self, card, origin=None):
+            return False
 
-        def __call__(self):
-            renpy.hide_screen('test_screen')
+        def give(self, card):
+            return True
 
-        def get_sensitive(self):
-            global paid
-            global withheld
-            if paid >= withheld:
+    class MidStack(Cardbox):
+        """
+        Central stack for the conflict
+        """
+        def __init__(self, **kwargs):
+            super(MidStack, self).__init__(**kwargs)
+
+        def accept(self, card, origin=None):
+            if origin not in self.accept_from:
+                #  Not that I mean to actually limit its accept_from
+                return False
+            if self.card_list==[] or card.suit == self.card_list[-1].suit and card.number >= self.card_list[-1].number:
                 return True
             else:
                 return False
 
+        def give(self, card):
+            return False
 
     class Table(renpy.Displayable):
 
@@ -848,6 +871,14 @@ init -3 python:
                 if card not in player_deck:
                     player_deck.append(card)
 
+    class ConflictTable(Table):
+        def __init__(self, **kwargs):
+            super(ConflictTable, self).__init__(**kwargs)
+
+        def per_interact(self):
+            renpy.redraw(self,0)
+
+
     #  Action classes for button screens
 
     class DoSell(Action):
@@ -907,10 +938,32 @@ screen trade_buttons_screen():
 
 
 
-
+## Table init procedures
 
 init -1 python:
-
+    def init_conflict_table(opponent_deck):
+        """
+        Initialize conflict table and show the corresponding screen
+        :param opponent_deck: A list of cards
+        :return:
+        """
+        global player_deck
+        global conflict_table
+        assert type(opponent_deck) is list and all(type(x) is Card for x in opponent_deck)
+        # List of acceptable suits
+        suits=set(x.suit for x in opponent_deck)
+        p_hand_stack = PlayerConflictStack(card_list=list(player_deck),
+                                           stack_id='P_HAND',
+                                           accept_from=[],
+                                           x=100, y=100, xsize=250, ysize=500)
+        mid_stack = MidStack(card_list=[], stack_id='M_STACK', accept_from=['P_HAND', 'O_HAND'],
+                             x=450, y=100, xsize=250, ysize=500)
+        o_hand_stack = OpponentConflictStack(card_list=opponent_deck, stack_id='O_HAND',
+                                             x=780, y=100, xsize=250, ysize=500)
+        a = {'P_HAND': 'M_STACK'}
+        conflict_table = ConflictTable(stacks=[p_hand_stack, mid_stack, o_hand_stack],
+                                       automove=a)
+        renpy.show_screen('conflict_screen')
 
     def init_trade_table(stock, accepted_suits=[u'Сила', u'Деньги', u'Знания', u'Интриги']):
         """
@@ -951,3 +1004,8 @@ init:
         modal True
         zorder 9
         add trade_table
+
+    screen conflict_screen():
+        modal True
+        zorder 9
+        add conflict_table

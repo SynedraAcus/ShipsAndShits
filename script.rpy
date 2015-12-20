@@ -16,6 +16,7 @@ init -2 python:
     price = '0'
     # Initialising new conflict variables
     trade_table = None #  If no init_* functions were called before new screens, this will break
+    conflict_table = None
     # Globals for new trade system
     paid = 0
     withheld = 0
@@ -274,9 +275,15 @@ label start:
                     jump trade_test
                 "Включить новый экран торговли":
                     nvl clear
+                    jump new_trade
+                "Включить новый экран конфликта":
+                    nvl clear
                     jump new_conflict
-        
+
 label new_conflict:
+    $ init_conflict_table([Card(u'Д', 10), Card(u'Д', 10)])
+
+label new_trade:
 
     $ test_card = Card(u'Д', 10, spendable=True, tooltip='Эта карта была куплена при тестировании магазина')
     $ test_card2 = Card(u'Д', 10, spendable=True, cost = 8, tooltip='Эта карта тоже была куплена при тестировании магазина')
