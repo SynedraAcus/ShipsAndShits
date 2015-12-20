@@ -671,13 +671,13 @@ init -3 python:
             if origin not in self.accept_from:
                 #  Not that I mean to actually limit its accept_from
                 return False
-            if self.card_list==[] or card.suit == self.card_list[-1].suit and card.number >= self.card_list[-1].number:
+            if self.card_list==[] or (card.suit == self.card_list[-1].suit and card.number >= self.card_list[-1].number):
                 return True
             else:
                 return False
 
         def give(self, card):
-            return False
+            return True
 
     class Table(renpy.Displayable):
 
@@ -723,7 +723,8 @@ init -3 python:
             if ev.type == pygame.MOUSEBUTTONDOWN and ev.button == 1:
                 #  Checking if we have clicked any cards:
                 for card in reversed(self.cards):
-                    if inside((x,y), (card.transform.xpos, card.transform.ypos, card.xsize, card.ysize)) and self.get_stack_by_id(card.stack).give(card):
+                    if inside((x,y), (card.transform.xpos, card.transform.ypos, card.xsize, card.ysize))\
+                            and self.get_stack_by_id(card.stack).give(card):
                         self.drag_start = (x, y)
                         self.initial_card_position = (card.transform.xpos, card.transform.ypos)
                         self.dragged = card
@@ -883,15 +884,37 @@ init -3 python:
             stack_len = len(self.get_stack_by_id('M_STACK'))
             if stack_len > 0 and stack_len % 2 == 1:
                 # It's opponent turn
-                if not any(self.get_stack_by_id('M_STACK').accept(x) for x in self.get_stack_by_id('O_HAND').card_list):
+                if not any(self.get_stack_by_id('M_STACK').accept(x, origin='O_HAND')
+                           for x in self.get_stack_by_id('O_HAND').card_list):
                     # Opponent cannot play, so player wins
+                    self.finalize_success()
                     renpy.hide_screen('conflict_table_screen')
-            if stack_len >0 and stack_len % 2 == 0:
+                    renpy.restart_interaction()
+                else:
+                    # Make opponent move
+                    moves = [x for x in self.get_stack_by_id('O_HAND').card_list
+                             if self.get_stack_by_id('M_STACK').accept(x, origin='O_HAND')]
+                    card = renpy.random.choice(moves)
+                    self.get_stack_by_id('O_HAND').remove(card)
+                    (card.transform.xpos, card.transform.ypos) = self.get_stack_by_id('M_STACK').position_next_card()
+                    self.get_stack_by_id('M_STACK').append(card)
+                    # Move newly played card to top
+                    self.cards.append(self.cards.pop(self.cards.index(card)))
+
+            elif stack_len > 0 and stack_len % 2 == 0:
                 # It's player turn
-                if not any(self.get_stack_by_id('M_STACk').accept(x) for x in self.get_stack_by_id('P_HAND').card_list):
+                if not any(self.get_stack_by_id('M_STACK').accept(x, origin='P_HAND')
+                           for x in self.get_stack_by_id('P_HAND').card_list):
                     # Player cannot play, so opponent wins
+                    self.finalize_failure()
                     renpy.hide_screen('conflict_table_screen')
             renpy.redraw(self,0)
+
+        def finalize_failure(self):
+            pass
+
+        def finalize_success(self):
+            pass
 
 
     #  Action classes for button screens
