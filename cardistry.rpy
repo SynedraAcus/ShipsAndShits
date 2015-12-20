@@ -860,7 +860,7 @@ init -3 python:
             for card in self.get_stack_by_id('P_HAND').card_list:
                 if card not in player_deck:
                     player_deck.append(card)
-            # Clean stacks to clarify possible multiple pointer issues
+            # Clean stacks to clarify possible multiple pointer issues and enable garbage collection
             # Stacks will be re-initialized by trade initialization, if any, later
             for stack in self.stacks:
                 stack.replace_cards([])
@@ -878,6 +878,7 @@ init -3 python:
     class ConflictTable(Table):
         def __init__(self, **kwargs):
             super(ConflictTable, self).__init__(**kwargs)
+            self.finalizing = False # Set to True when calling finalize_*
 
         def per_interact(self):
             # Check if the conflict has been won or lost
@@ -887,9 +888,8 @@ init -3 python:
                 if not any(self.get_stack_by_id('M_STACK').accept(x, origin='O_HAND')
                            for x in self.get_stack_by_id('O_HAND').card_list):
                     # Opponent cannot play, so player wins
-                    self.finalize_success()
-                    renpy.hide_screen('conflict_table_screen')
-                    renpy.restart_interaction()
+                    if not self.finalizing:
+                        self.finalize_success()
                 else:
                     # Make opponent move
                     moves = [x for x in self.get_stack_by_id('O_HAND').card_list
@@ -906,15 +906,27 @@ init -3 python:
                 if not any(self.get_stack_by_id('M_STACK').accept(x, origin='P_HAND')
                            for x in self.get_stack_by_id('P_HAND').card_list):
                     # Player cannot play, so opponent wins
-                    self.finalize_failure()
-                    renpy.hide_screen('conflict_table_screen')
+                    if not self.finalizing:
+                        self.finalize_failure()
             renpy.redraw(self,0)
 
         def finalize_failure(self):
-            pass
+            global ret
+            ret = u'F{0}'.format(self.get_stack_by_id('M_STACK').card_list[-1].suit)
+            global player_deck
+            #  Remove spent cards unless they are permanent
+            for card in self.get_stack_by_id('M_STACK').card_list:
+                if card in player_deck and card.spendable:
+                    player_deck.remove(card)
+            renpy.show_screen('conflict_failure_screen')
 
         def finalize_success(self):
-            pass
+            global ret
+            ret = u'S{0}'.format(self.get_stack_by_id('M_STACK').card_list[-1].suit)
+            for card in self.get_stack_by_id('M_STACK').card_list:
+                if card in player_deck and card.spendable:
+                    player_deck.remove(card)
+            renpy.show_screen('conflict_success_screen')
 
 
     #  Action classes for button screens
@@ -961,6 +973,17 @@ init -3 python:
             global withheld
             return paid >= withheld
 
+    # class HideConflictSuccess(Action):
+    #     def __init__(self):
+    #         pass
+    #
+    #     def get_sensitive(self):
+    #         return True
+    #
+    #     def __call__(self):
+    #         renpy.hide_screen('coflict_table_screen')
+    #         renpy.hide_screen('conflict_success_screen')
+
 #  Table button screens. Separate because buttons inside CDD are a godawful mess
 
 screen trade_buttons_screen():
@@ -974,7 +997,21 @@ screen trade_buttons_screen():
         xpos 550
         ypos 350
 
+screen conflict_success_screen():
+    modal True
+    zorder 100
+    textbutton u"Вы победили":
+        action [Hide('conflict_table_screen'), Hide('conflict_success_screen')]
+        xpos 480
+        ypos 350
 
+screen conflict_failure_screen():
+    modal True
+    zorder 10
+    textbutton u"Вы проиграли":
+        action [Hide('conflict_table_screen'), Hide('conflict_failure_screen')]
+        xpos 480
+        ypos 350
 
 ## Table init procedures
 

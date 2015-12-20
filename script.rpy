@@ -283,7 +283,8 @@ label start:
 label new_conflict:
     nvl clear
     "Вы попали в тестовый конфликт. У оппонента единица и тройка силы."
-    $ init_conflict_table([Card(u'С', 1), Card(u'С', 3), Card(u'С', 3), Card(u'С', 3)])
+    $ init_conflict_table([Card(u'С', 1), Card(u'С', 3)])
+    "ASDF"
     jump debug_menu
 
 label new_trade:
