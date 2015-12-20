@@ -884,8 +884,13 @@ init -3 python:
             if stack_len > 0 and stack_len % 2 == 1:
                 # It's opponent turn
                 if not any(self.get_stack_by_id('M_STACK').accept(x) for x in self.get_stack_by_id('O_HAND').card_list):
+                    # Opponent cannot play, so player wins
                     renpy.hide_screen('conflict_table_screen')
-                #
+            if stack_len >0 and stack_len % 2 == 0:
+                # It's player turn
+                if not any(self.get_stack_by_id('M_STACk').accept(x) for x in self.get_stack_by_id('P_HAND').card_list):
+                    # Player cannot play, so opponent wins
+                    renpy.hide_screen('conflict_table_screen')
             renpy.redraw(self,0)
 
 
