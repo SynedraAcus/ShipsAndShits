@@ -952,7 +952,7 @@ init -1 python:
         assert type(opponent_deck) is list and all(type(x) is Card for x in opponent_deck)
         # List of acceptable suits
         suits=set(x.suit for x in opponent_deck)
-        p_hand_stack = PlayerConflictStack(card_list=list(player_deck),
+        p_hand_stack = PlayerConflictStack(card_list=[x for x in player_deck if x.suit in suits],
                                            stack_id='P_HAND',
                                            accept_from=[],
                                            x=100, y=100, xsize=250, ysize=500)

@@ -281,7 +281,9 @@ label start:
                     jump new_conflict
 
 label new_conflict:
-    $ init_conflict_table([Card(u'Д', 10), Card(u'Д', 10)])
+    nvl clear
+    "Вы попали в тестовый конфликт. У оппонента две единички силы."
+    $ init_conflict_table([Card(u'С', 1), Card(u'С', 1)])
 
 label new_trade:
 
