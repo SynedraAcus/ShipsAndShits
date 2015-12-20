@@ -658,7 +658,7 @@ init -3 python:
             return False
 
         def give(self, card):
-            return True
+            return False
 
     class MidStack(Cardbox):
         """
