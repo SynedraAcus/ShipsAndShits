@@ -481,6 +481,9 @@ init -3 python:
         #  Defining those here creates less messy code than
         #  inheriting from list ABC. Maybe even quicker
 
+        def __len__(self):
+            return (len(self.card_list))
+
         def append(self, card):
             card.stack = self.id
             self.card_list.append(card)
@@ -876,6 +879,13 @@ init -3 python:
             super(ConflictTable, self).__init__(**kwargs)
 
         def per_interact(self):
+            # Check if the conflict has been won or lost
+            stack_len = len(self.get_stack_by_id('M_STACK'))
+            if stack_len > 0 and stack_len % 2 == 1:
+                # It's opponent turn
+                if not any(self.get_stack_by_id('M_STACK').accept(x) for x in self.get_stack_by_id('O_HAND').card_list):
+                    renpy.hide_screen('conflict_table_screen')
+                #
             renpy.redraw(self,0)
 
 
@@ -963,7 +973,7 @@ init -1 python:
         a = {'P_HAND': 'M_STACK'}
         conflict_table = ConflictTable(stacks=[p_hand_stack, mid_stack, o_hand_stack],
                                        automove=a)
-        renpy.show_screen('conflict_screen')
+        renpy.show_screen('conflict_table_screen')
 
     def init_trade_table(stock, accepted_suits=[u'Сила', u'Деньги', u'Знания', u'Интриги']):
         """
@@ -1005,7 +1015,7 @@ init:
         zorder 9
         add trade_table
 
-    screen conflict_screen():
+    screen conflict_table_screen():
         modal True
         zorder 9
         add conflict_table

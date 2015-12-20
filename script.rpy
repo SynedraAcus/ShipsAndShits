@@ -284,6 +284,7 @@ label new_conflict:
     nvl clear
     "Вы попали в тестовый конфликт. У оппонента две единички силы."
     $ init_conflict_table([Card(u'С', 1), Card(u'С', 1)])
+    jump debug_menu
 
 label new_trade:
 
