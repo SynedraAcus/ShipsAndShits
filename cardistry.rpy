@@ -901,7 +901,7 @@ init -3 python:
                     # Move newly played card to top
                     self.cards.append(self.cards.pop(self.cards.index(card)))
 
-            elif stack_len > 0 and stack_len % 2 == 0:
+            elif stack_len % 2 == 0:
                 # It's player turn
                 if not any(self.get_stack_by_id('M_STACK').accept(x, origin='P_HAND')
                            for x in self.get_stack_by_id('P_HAND').card_list):
@@ -912,7 +912,11 @@ init -3 python:
 
         def finalize_failure(self):
             global ret
-            ret = u'F{0}'.format(self.get_stack_by_id('M_STACK').card_list[-1].suit)
+            try:
+                ret = u'F{0}'.format(self.get_stack_by_id('M_STACK').card_list[-1].suit)
+            except IndexError:
+                # Consider the conflict lost with one of the suits in opponent hand
+                ret = u'F{0}'.format(self.get_stack_by_id('O_HAND').card_list[0].suit)
             global player_deck
             #  Remove spent cards unless they are permanent
             for card in self.get_stack_by_id('M_STACK').card_list:
