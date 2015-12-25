@@ -1,5 +1,5 @@
 # Everything related to the card conflict mechanics
-
+# ASDF
 init -3 python:
     import random
     import math
