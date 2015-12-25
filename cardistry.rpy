@@ -723,8 +723,7 @@ init -3 python:
             if ev.type == pygame.MOUSEBUTTONDOWN and ev.button == 1:
                 #  Checking if we have clicked any cards:
                 for card in reversed(self.cards):
-                    if inside((x,y), (card.transform.xpos, card.transform.ypos, card.xsize, card.ysize))\
-                            and self.get_stack_by_id(card.stack).give(card):
+                    if inside((x,y), (card.transform.xpos, card.transform.ypos, card.xsize, card.ysize)) and self.get_stack_by_id(card.stack).give(card):
                         self.drag_start = (x, y)
                         self.initial_card_position = (card.transform.xpos, card.transform.ypos)
                         self.dragged = card
