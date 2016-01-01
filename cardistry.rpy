@@ -16,14 +16,14 @@ init -3 python:
 
     class Card(renpy.Displayable):
         def __init__(self, suit, number, spendable = False, tooltip = DEFAULT_HISTORY, cost=None, **kwargs):
-            super(Card, self).__init__(xysize=(200, 120), xfill=False, yfill=False, **kwargs)
+            super(Card, self).__init__(xysize=(200, 280), xfill=False, yfill=False, **kwargs)
             self.suit = SUITS[suit]
             if number == 0:
                 number = 10
             self.number = number
             self.spendable = spendable
             self.tooltip = tooltip
-            self.text = Text(u'{0} {1}'.format(number, self.suit), color = '#6A3819', font='Hangyaboly.ttf')
+            self.text = Text(u'{0}{1}'.format(number, self.suit[0]), color = '#6A3819', font='Hangyaboly.ttf')
             self.t_text = Text(self.tooltip, size = 14, color = '#6A3819', font='Hangyaboly.ttf')
             self.bg = (self.spendable == True and Solid(SPENDABLE_COLOR) or Solid(PERMANENT_COLOR))
             self.frame = Solid('#6A3819')
@@ -34,11 +34,11 @@ init -3 python:
             self.xpos = 0
             self.ypos = 0
             self.xsize = 200
-            self.ysize = 120
+            self.ysize = 280
             self.x_offset = 0
             self.y_offset = 0
             self.stack = None
-            self.transform = Transform(child=self) #, xpos=self.xpos, ypos=self.ypos)
+            self.transform = Transform(child=self)
 
         def reinit_transform(self):
             """
@@ -59,14 +59,15 @@ init -3 python:
 
         def render(self, width, height, st, at):
             frame_render = renpy.render(self.frame, width, height, st, at)
-            bg_render = renpy.render(self.bg, 196, 116, st, at)
+            bg_render = renpy.render(self.bg, 196, 276, st, at)
             text_render = renpy.render(self.text, width, height, st, at)
             t_text_render = renpy.render(self.t_text, width, height, st, at)
             render = renpy.Render(width, height, st, at)
             render.blit(frame_render, (0, 0))
             render.blit(bg_render, (2, 2))
             render.blit(text_render, (10, 10))
-            render.blit(t_text_render, (10, 40))
+            render.blit(text_render, (160, 250))
+            render.blit(t_text_render, (5, 120))
             return render
 
         def visit(self):
