@@ -427,7 +427,7 @@ init -3 python:
             if accept_from is not None:
                 self.accept_from = accept_from
             # Rest of it
-            self.card_list = card_list
+            self.card_list = sorted(card_list, key=lambda x: x.number)
             for card in self.card_list:
                 card.reinit_transform()
                 card.stack = stack_id
