@@ -757,7 +757,7 @@ init -3 python:
                                         accepting_stack.append(self.dragged)
                                 else:
                                     #  Why not rearrange cards within stack
-                                    is_accepted = True
+                                    is_accepted = False
                         if not is_accepted:
                             #  If card was not accepted, it should be returned where it belongs
                             self.dragged.transform.xpos = self.initial_card_position[0]
