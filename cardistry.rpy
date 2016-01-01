@@ -36,19 +36,30 @@ init -3 python:
                 self.cost = number
 
         def get_displayable(self):
-            if self.maximized:
-                return self.large_displayable
-            else:
-                return self.small_displayable
+            return self.large_displayable
+            # if self.maximized:
+            #     return self.large_displayable
+            # else:
+            #     return self.small_displayable
 
         def __str__(self):
             return(u'{0} {1}'.format(self.suit, self.number))
 
         def maximize(self):
             self.maximized = True
+            self.large_displayable.xpos = self.small_displayable.xpos
+            self.large_displayable.ypos = self.small_displayable.ypos
+            self.large_displayable.transform.xpos = self.small_displayable.transform.xpos
+            self.large_displayable.transform.ypos = self.small_displayable.transform.ypos
+            self.large_displayable.transform.update()
 
         def minimize(self):
             self.maximized = False
+            self.small_displayable.xpos = self.large_displayable.xpos
+            self.small_displayable.ypos = self.large_displayable.ypos
+            self.small_displayable.transform.xpos = self.large_displayable.transform.xpos
+            self.small_displayable.transform.ypos = self.large_displayable.transform.ypos
+            self.small_displayable.transform.update()
 
     class CardSmallDisplayable(renpy.Displayable):
         def __init__(self, card, **kwargs):
@@ -91,6 +102,7 @@ init -3 python:
             self.transform.ypos = 0
             self.x_offset = 0
             self.y_offset = 0
+            self.transform.update()
 
 
     class CardLargeDisplayable(renpy.Displayable):
@@ -121,7 +133,7 @@ init -3 python:
             self.transform.ypos = 0
             self.x_offset = 0
             self.y_offset = 0
-            self.stack = None
+            self.transform.update()
             # self.transform = Transform(child=self) #, xpos=self.xpos, ypos=self.ypos)
 
         def render(self, width, height, st, at):
@@ -809,17 +821,19 @@ init -3 python:
                 for card in reversed(self.cards):
                     if inside((x,y), (card.get_displayable().transform.xpos, card.get_displayable().transform.ypos, card.get_displayable().xsize, card.get_displayable().ysize)) and self.get_stack_by_id(card.stack).give(card):
                         self.drag_start = (x, y)
-                        self.initial_card_position = (card.get_displayable().transform.xpos, card.get_displayable().transform.ypos)
+                        # card.maximize()
+                        self.drag_start = (card.get_displayable().transform.xpos, card.get_displayable().transform.ypos)
                         self.dragged = card
-                        # self.dragged.maximize()
                         self.dragged.get_displayable().x_offset = self.dragged.get_displayable().transform.xpos - x
                         self.dragged.get_displayable().y_offset = self.dragged.get_displayable().transform.ypos - y
                         #  Show dragged on the top of other cards
                         self.cards.append(self.cards.pop(self.cards.index(self.dragged)))
                         break  #  No need to move two cards at the same time
+                        # renpy.restart_interaction()
 
             if ev.type == pygame.MOUSEMOTION and self.dragged is not None:
                 #  Just redrawing card in hand
+                # self.dragged.maximize()
                 self.dragged.get_displayable().transform.xpos = x + self.dragged.get_displayable().x_offset
                 self.dragged.get_displayable().transform.ypos = y + self.dragged.get_displayable().y_offset
                 self.dragged.get_displayable().transform.update()
@@ -840,13 +854,16 @@ init -3 python:
                                         self.get_stack_by_id(self.dragged.stack).remove(self.dragged)
                                         accepting_stack.append(self.dragged)
                                 else:
-                                    #  Why not rearrange cards within stack
+                                    #  Set this to True to enable card rearrangement within stack
                                     is_accepted = False
+
                         if not is_accepted:
                             #  If card was not accepted, it should be returned where it belongs
-                            self.dragged.get_displayable().transform.xpos = self.initial_card_position[0]
-                            self.dragged.get_displayable().transform.ypos = self.initial_card_position[1]
+                            self.dragged.get_displayable().transform.xpos = self.drag_start[0]
+                            self.dragged.get_displayable().transform.ypos = self.drag_start[1]
                         #  Dragging has ended somehow anyway
+
+                        # self.dragged.minimize()
                         self.dragged.get_displayable().transform.update()
                         self.dragged = None
 
@@ -867,6 +884,7 @@ init -3 python:
                             old_stack.remove(self.dragged)
                             new_stack.append(self.dragged)
                             self.dragged.stack = new_stack.id
+                    # self.dragged.minimize()
                     #  Release dragged card anyway
                     self.dragged = None
                 #  Restart interaction to check for success, flip exit button state, etc.
@@ -1000,6 +1018,7 @@ init -3 python:
                 ret = u'F{0}'.format(self.get_stack_by_id('M_STACK').card_list[-1].suit)
             except IndexError:
                 # Consider the conflict lost with one of the suits in opponent hand
+                # if there were no playable cards to start with
                 ret = u'F{0}'.format(self.get_stack_by_id('O_HAND').card_list[0].suit)
             global player_deck
             #  Remove spent cards unless they are permanent
