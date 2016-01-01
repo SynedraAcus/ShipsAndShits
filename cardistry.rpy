@@ -36,10 +36,19 @@ init -3 python:
                 self.cost = number
 
         def get_displayable(self):
-            return self.small_displayable
+            if self.maximized:
+                return self.large_displayable
+            else:
+                return self.small_displayable
 
         def __str__(self):
             return(u'{0} {1}'.format(self.suit, self.number))
+
+        def maximize(self):
+            self.maximized = True
+
+        def minimize(self):
+            self.maximized = False
 
     class CardSmallDisplayable(renpy.Displayable):
         def __init__(self, card, **kwargs):
@@ -502,7 +511,7 @@ init -3 python:
             # Rest of it
             self.card_list = sorted(card_list, key=lambda x: x.number)
             for card in self.card_list:
-                # card.minimize()
+                card.minimize()
                 card.get_displayable().reinit_transform()
                 card.stack = stack_id
             if len(self.card_list) > 0:
