@@ -14,23 +14,54 @@ init -3 python:
     COST_QOTIENT = 1.5 #  Cost-to-nominal ratio for trading system
     # Card-related classes: card itself and an action
 
-    class Card(renpy.Displayable):
-        def __init__(self, suit, number, spendable = False, tooltip = DEFAULT_HISTORY, cost=None, **kwargs):
-            super(Card, self).__init__(xysize=(200, 280), xfill=False, yfill=False, **kwargs)
+    class Card(object):
+        """
+        Card for the game. This class contains value, suit and handles showing the correct displayable.
+        Small displayable is returned if card is not maximized, large is returned otherwise
+        """
+        def __init__(self, suit, number, spendable=False, tooltip=DEFAULT_HISTORY, cost=None):
             self.suit = SUITS[suit]
             if number == 0:
                 number = 10
             self.number = number
             self.spendable = spendable
             self.tooltip = tooltip
-            self.text = Text(u'{0}{1}'.format(number, self.suit[0]), color = '#6A3819', font='Hangyaboly.ttf')
-            self.t_text = Text(self.tooltip, size = 14, color = '#6A3819', font='Hangyaboly.ttf')
-            self.bg = (self.spendable == True and Solid(SPENDABLE_COLOR) or Solid(PERMANENT_COLOR))
-            self.frame = Solid('#6A3819')
-            if cost is None:
-                self.cost = self.number
-            else:
+            self.large_displayable = CardLargeDisplayable(self)
+            self.small_displayable = CardSmallDisplayable(self)
+            self.maximized = True
+            self.stack = None
+            if cost:
                 self.cost = cost
+            else:
+                self.cost = number
+
+        def get_displayable(self):
+            return self.large_displayable
+
+        def __str__(self):
+            return(u'{0} {1}'.format(self.suit, self.number))
+
+    class CardSmallDisplayable(renpy.Displayable):
+        pass
+        # def small_render(self, width, height, st, at):
+        #     """
+        #     Return 100*140 render for a card
+        #     """
+        #     frame_render = renpy.render(self.frame, self.xsize, self.ysize, st, at)
+        #     bg_render = renpy.render(self.bg, self.xsize-4, self.ysize-4, st, at)
+        #     text_render = renpy.render(self.text, width, height, st, at)
+        #     render = renpy.Render(width, height, st, at)
+        #     render.blit(frame_render, (0, 0))
+        #     render.blit(bg_render, (2, 2))
+        #     render.blit(text_render, (10, 10))
+
+    class CardLargeDisplayable(renpy.Displayable):
+        def __init__(self, card, **kwargs):
+            super(CardLargeDisplayable, self).__init__(xysize=(200, 280), xfill=False, yfill=False, **kwargs)
+            self.text = Text(u'{0}{1}'.format(card.number, card.suit[0]), color = '#6A3819', font='Hangyaboly.ttf')
+            self.t_text = Text(card.tooltip, size = 14, color = '#6A3819', font='Hangyaboly.ttf')
+            self.bg = (card.spendable == True and Solid(SPENDABLE_COLOR) or Solid(PERMANENT_COLOR))
+            self.frame = Solid('#6A3819')
             self.xpos = 0
             self.ypos = 0
             self.xsize = 200
@@ -45,19 +76,21 @@ init -3 python:
             Renitialise card Transform that contains its position and stack it belongs to.
             Should be called any time screen is initialized, currently called from Cardbox.__init__()
             """
+            #  Card size
+            self.transform.xsize = 200
+            self.transform.ysize = 280
+            #  Card position
             self.transform.xpos = 0
             self.transform.ypos = 0
-            self.transform.xsize = 200
-            self.transform.ysize = 120
             self.x_offset = 0
             self.y_offset = 0
             self.stack = None
             # self.transform = Transform(child=self) #, xpos=self.xpos, ypos=self.ypos)
 
-        def __str__(self):
-            return(u'{0} {1}'.format(self.suit, self.number))
-
         def render(self, width, height, st, at):
+            """
+            Return 200*280 render for a card
+            """
             frame_render = renpy.render(self.frame, width, height, st, at)
             bg_render = renpy.render(self.bg, 196, 276, st, at)
             text_render = renpy.render(self.text, width, height, st, at)
@@ -72,6 +105,18 @@ init -3 python:
 
         def visit(self):
             return [self.text, self.t_text, self.bg]
+
+        # def maximize(self):
+        #     self.maximized = True
+        #     self.xsize = 200
+        #     self.ysize = 280
+        #     self.transform.xsize = self.xsize
+        #     self.transform.ysize = self.ysize
+        #
+        # def minimize(self):
+        #     self.maximized = False
+        #     self.xsize = 100
+        #     self.ysize = 140
 
     class CardMove(Action):
         '''
@@ -429,7 +474,8 @@ init -3 python:
             # Rest of it
             self.card_list = sorted(card_list, key=lambda x: x.number)
             for card in self.card_list:
-                card.reinit_transform()
+                # card.minimize()
+                card.get_displayable().reinit_transform()
                 card.stack = stack_id
             if len(self.card_list) > 0:
                 self._position_cards()
@@ -448,7 +494,7 @@ init -3 python:
                 return int(self.x+self.xsize/2-100), self.y + 10
             else:
                 # Get coordinates, sorted by y
-                coords = max(((c.transform.xpos, c.transform.ypos) for c in self.card_list), key=lambda c: c[1])
+                coords = max(((c.get_displayable().transform.xpos, c.get_displayable().transform.ypos) for c in self.card_list), key=lambda c: c[1])
                 #  Add the next card 50 px under the lowest one
                 return coords[0], coords[1]+50
 
@@ -457,11 +503,11 @@ init -3 python:
             Position all the cards in stack. This is to be called only when
             initialising Cardbox for display
             """
-            self.card_list[0].transform.xpos = int(self.x+self.xsize/2-100)
-            self.card_list[0].transform.ypos = self.y + 10
+            self.card_list[0].get_displayable().transform.xpos = int(self.x+self.xsize/2-100)
+            self.card_list[0].get_displayable().transform.ypos = self.y + 10
             for card in self.card_list[1:]:
-                (card.transform.xpos, card.transform.ypos) = self.position_next_card()
-                card.transform.update()
+                (card.get_displayable().transform.xpos, card.get_displayable().transform.ypos) = self.position_next_card()
+                card.get_displayable().transform.update()
 
         # Card transfer methods
 
@@ -572,7 +618,7 @@ init -3 python:
             if self.card_list == []:
                 return int(self.x+self.xsize/2-100), self.y + 50
             # Get coordinates, sorted by y
-            coords = sorted(((c.transform.xpos, c.transform.ypos) for c in self.card_list), key=lambda c: c[1])
+            coords = sorted(((c.get_displayable().transform.xpos, c.get_displayable().transform.ypos) for c in self.card_list), key=lambda c: c[1])
             #  Add the next card 50 px under the lowest one
             return coords[-1][0], coords[-1][1]+50
 
@@ -717,28 +763,29 @@ init -3 python:
                 box_renders.append(tmp_render)
                 self.render_object.blit(tmp_render, (self.stacks[x].x, self.stacks[x].y))
             for card in self.cards:
-                self.render_object.place(card.transform)
+                self.render_object.place(card.get_displayable().transform)
             return self.render_object
 
         def event(self, ev, x, y, st):
             if ev.type == pygame.MOUSEBUTTONDOWN and ev.button == 1:
                 #  Checking if we have clicked any cards:
                 for card in reversed(self.cards):
-                    if inside((x,y), (card.transform.xpos, card.transform.ypos, card.xsize, card.ysize)) and self.get_stack_by_id(card.stack).give(card):
+                    if inside((x,y), (card.get_displayable().transform.xpos, card.get_displayable().transform.ypos, card.get_displayable().xsize, card.get_displayable().ysize)) and self.get_stack_by_id(card.stack).give(card):
                         self.drag_start = (x, y)
-                        self.initial_card_position = (card.transform.xpos, card.transform.ypos)
+                        self.initial_card_position = (card.get_displayable().transform.xpos, card.get_displayable().transform.ypos)
                         self.dragged = card
-                        self.dragged.x_offset = self.dragged.transform.xpos - x
-                        self.dragged.y_offset = self.dragged.transform.ypos - y
+                        # self.dragged.maximize()
+                        self.dragged.get_displayable().x_offset = self.dragged.get_displayable().transform.xpos - x
+                        self.dragged.get_displayable().y_offset = self.dragged.get_displayable().transform.ypos - y
                         #  Show dragged on the top of other cards
                         self.cards.append(self.cards.pop(self.cards.index(self.dragged)))
                         break  #  No need to move two cards at the same time
 
             if ev.type == pygame.MOUSEMOTION and self.dragged is not None:
                 #  Just redrawing card in hand
-                self.dragged.transform.xpos = x + self.dragged.x_offset
-                self.dragged.transform.ypos = y + self.dragged.y_offset
-                self.dragged.transform.update()
+                self.dragged.get_displayable().transform.xpos = x + self.dragged.get_displayable().x_offset
+                self.dragged.get_displayable().transform.ypos = y + self.dragged.get_displayable().y_offset
+                self.dragged.get_displayable().transform.update()
 
             if ev.type == pygame.MOUSEBUTTONUP and ev.button == 1:
                 if abs(x - self.drag_start[0]) > 7 or abs(y - self.drag_start[1]) > 7:
@@ -760,10 +807,10 @@ init -3 python:
                                     is_accepted = False
                         if not is_accepted:
                             #  If card was not accepted, it should be returned where it belongs
-                            self.dragged.transform.xpos = self.initial_card_position[0]
-                            self.dragged.transform.ypos = self.initial_card_position[1]
+                            self.dragged.get_displayable().transform.xpos = self.initial_card_position[0]
+                            self.dragged.get_displayable().transform.ypos = self.initial_card_position[1]
                         #  Dragging has ended somehow anyway
-                        self.dragged.transform.update()
+                        self.dragged.get_displayable().transform.update()
                         self.dragged = None
 
 
@@ -777,8 +824,8 @@ init -3 python:
                             #  Positioning card should happen before appending
                             #  Because it uses the accepting stack's card_list to define card position
                             new_coords = new_stack.position_next_card()
-                            (self.dragged.transform.xpos, self.dragged.transform.ypos) = new_coords
-                            self.dragged.transform.update()
+                            (self.dragged.get_displayable().transform.xpos, self.dragged.get_displayable().transform.ypos) = new_coords
+                            self.dragged.get_displayable().transform.update()
                             #  Remove dragged card from its initial stack and move it to acceptor
                             old_stack.remove(self.dragged)
                             new_stack.append(self.dragged)
@@ -790,7 +837,7 @@ init -3 python:
 
         def visit(self):
             l = []
-            l+=(x.transform for x in self.cards)
+            l+=(x.get_displayable().transform for x in self.cards)
             #l.append(self.bg)
             l.append(self.drag_text)
             l+=self.cardboxes
@@ -896,7 +943,7 @@ init -3 python:
                              if self.get_stack_by_id('M_STACK').accept(x, origin='O_HAND')]
                     card = renpy.random.choice(moves)
                     self.get_stack_by_id('O_HAND').remove(card)
-                    (card.transform.xpos, card.transform.ypos) = self.get_stack_by_id('M_STACK').position_next_card()
+                    (card.get_displayable().transform.xpos, card.get_displayable().transform.ypos) = self.get_stack_by_id('M_STACK').position_next_card()
                     self.get_stack_by_id('M_STACK').append(card)
                     # Move newly played card to top
                     self.cards.append(self.cards.pop(self.cards.index(card)))
