@@ -36,24 +36,53 @@ init -3 python:
                 self.cost = number
 
         def get_displayable(self):
-            return self.large_displayable
+            return self.small_displayable
 
         def __str__(self):
             return(u'{0} {1}'.format(self.suit, self.number))
 
     class CardSmallDisplayable(renpy.Displayable):
-        pass
-        # def small_render(self, width, height, st, at):
-        #     """
-        #     Return 100*140 render for a card
-        #     """
-        #     frame_render = renpy.render(self.frame, self.xsize, self.ysize, st, at)
-        #     bg_render = renpy.render(self.bg, self.xsize-4, self.ysize-4, st, at)
-        #     text_render = renpy.render(self.text, width, height, st, at)
-        #     render = renpy.Render(width, height, st, at)
-        #     render.blit(frame_render, (0, 0))
-        #     render.blit(bg_render, (2, 2))
-        #     render.blit(text_render, (10, 10))
+        def __init__(self, card, **kwargs):
+            super(CardSmallDisplayable, self).__init__(xysize=(100, 140), xfill=False, yfill=False, **kwargs)
+            self.bg = (card.spendable == True and Solid(SPENDABLE_COLOR) or Solid(PERMANENT_COLOR))
+            self.frame = Solid('#6A3819')
+            self.text = Text(u'{0}{1}'.format(card.number, card.suit[0]), color = '#6A3819')
+            self.xpos = 0
+            self.ypos = 0
+            self.xsize = 100
+            self.ysize = 140
+            self.x_offset = 0
+            self.y_offset = 0
+            self.transform = Transform(child=self)
+
+        def render(self, width, height, st, at):
+            """
+            Return 100*140 render for a card
+            """
+            frame_render = renpy.render(self.frame, self.xsize, self.ysize, st, at)
+            bg_render = renpy.render(self.bg, self.xsize-4, self.ysize-4, st, at)
+            text_render = renpy.render(self.text, width, height, st, at)
+            render = renpy.Render(width, height, st, at)
+            render.blit(frame_render, (0, 0))
+            render.blit(bg_render, (2, 2))
+            render.blit(text_render, (10, 10))
+            return render
+
+        def visit(self):
+            return[self.frame,
+                   self.bg,
+                   self.text]
+
+        def reinit_transform(self):
+            #  Card size
+            self.transform.xsize = 100
+            self.transform.ysize = 140
+            #  Card position
+            self.transform.xpos = 0
+            self.transform.ypos = 0
+            self.x_offset = 0
+            self.y_offset = 0
+
 
     class CardLargeDisplayable(renpy.Displayable):
         def __init__(self, card, **kwargs):
@@ -68,7 +97,6 @@ init -3 python:
             self.ysize = 280
             self.x_offset = 0
             self.y_offset = 0
-            self.stack = None
             self.transform = Transform(child=self)
 
         def reinit_transform(self):
