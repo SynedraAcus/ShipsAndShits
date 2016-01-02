@@ -826,9 +826,10 @@ init -3 python:
                         self.dragged.get_displayable().x_offset = self.dragged.get_displayable().transform.xpos - x
                         self.dragged.get_displayable().y_offset = self.dragged.get_displayable().transform.ypos - y
                         #  Show dragged on the top of other cards
-                        self.cards.append(self.cards.pop(self.cards.index(self.dragged)))
+                        #  But remember where it was just in case
+                        self.old_position = self.cards.index(self.dragged)
+                        self.cards.append(self.cards.pop(self.old_position))
                         break  #  No need to move two cards at the same time
-                        # renpy.restart_interaction()
 
             if ev.type == pygame.MOUSEMOTION and self.dragged is not None:
                 #  Just redrawing card in hand
@@ -861,6 +862,8 @@ init -3 python:
                             #  If card was not accepted, it should be returned where it belongs
                             self.dragged.get_displayable().transform.xpos = self.initial_card_position[0]
                             self.dragged.get_displayable().transform.ypos = self.initial_card_position[1]
+                            self.cards.pop()
+                            self.cards.insert(self.old_position, self.dragged)
                         #  Dragging has ended somehow anyway
 
                         self.dragged.minimize()
