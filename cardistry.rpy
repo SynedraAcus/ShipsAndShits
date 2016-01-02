@@ -36,11 +36,10 @@ init -3 python:
                 self.cost = number
 
         def get_displayable(self):
-            return self.large_displayable
-            # if self.maximized:
-            #     return self.large_displayable
-            # else:
-            #     return self.small_displayable
+            if self.maximized:
+                return self.large_displayable
+            else:
+                return self.small_displayable
 
         def __str__(self):
             return(u'{0} {1}'.format(self.suit, self.number))
@@ -833,10 +832,11 @@ init -3 python:
 
             if ev.type == pygame.MOUSEMOTION and self.dragged is not None:
                 #  Just redrawing card in hand
-                # self.dragged.maximize()
+                self.dragged.maximize()
                 self.dragged.get_displayable().transform.xpos = x + self.dragged.get_displayable().x_offset
                 self.dragged.get_displayable().transform.ypos = y + self.dragged.get_displayable().y_offset
                 self.dragged.get_displayable().transform.update()
+                renpy.restart_interaction()
 
             if ev.type == pygame.MOUSEBUTTONUP and ev.button == 1:
                 if abs(x - self.drag_start[0]) > 7 or abs(y - self.drag_start[1]) > 7:
@@ -863,9 +863,10 @@ init -3 python:
                             self.dragged.get_displayable().transform.ypos = self.initial_card_position[1]
                         #  Dragging has ended somehow anyway
 
-                        # self.dragged.minimize()
+                        self.dragged.minimize()
                         self.dragged.get_displayable().transform.update()
                         self.dragged = None
+                        # renpy.restart_interaction()
 
 
                 else:
@@ -877,6 +878,8 @@ init -3 python:
                         if old_stack.give(self.dragged) and new_stack.accept(self.dragged, origin=old_stack.id):
                             #  Positioning card should happen before appending
                             #  Because it uses the accepting stack's card_list to define card position
+                            #  The small displayable should be available for positioning as well
+                            self.dragged.minimize()
                             new_coords = new_stack.position_next_card()
                             (self.dragged.get_displayable().transform.xpos, self.dragged.get_displayable().transform.ypos) = new_coords
                             self.dragged.get_displayable().transform.update()
@@ -884,7 +887,7 @@ init -3 python:
                             old_stack.remove(self.dragged)
                             new_stack.append(self.dragged)
                             self.dragged.stack = new_stack.id
-                    # self.dragged.minimize()
+
                     #  Release dragged card anyway
                     self.dragged = None
                 #  Restart interaction to check for success, flip exit button state, etc.
