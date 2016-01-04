@@ -70,7 +70,7 @@ init -3 python:
         """
         def __init__(self, **kwargs):
             super(CardHiddenDisplayable, self).__init__(xysize=(100, 140), xfill=False, yfill=False, **kwargs)
-            self.bg = Solid(SPENDABLE_COLOR)
+            self.bg = LiveTile( 'images/ROOBASTSHKA.png')
             self.frame = Solid('#6A3819')
             self.xpos = 0
             self.ypos = 0
@@ -206,6 +206,9 @@ init -3 python:
         def visit(self):
             return [self.text, self.t_text, self.bg]
 
+        def __eq__(self, other):
+            return False
+
         # def maximize(self):
         #     self.maximized = True
         #     self.xsize = 200
@@ -305,10 +308,10 @@ init -3 python:
                        action=Function(p_adjustment.change, p_adjustment.value-0.1))
         ui.viewport(id = 'hand_view', xmaximum = 220, mousewheel=True, \
         draggable = True, yadjustment=p_adjustment, xalign=0.1)
-        ui.vbox(id = 'p_hand', spacing = 10, ysize = 220*len(player_deck))
+        ui.vbox(id = 'p_hand', spacing = 10, ysize = 300*len(player_deck))
         for card in (x for x in player_deck if x not in stack if x.suit in {y.suit for y in opponent_deck}):
             ui.button(action = CardMove(card), style=style.card_button)
-            ui.add(card, align = (0.5, 0.5))
+            ui.add(card.get_displayable(), align = (0.5, 0.5))
         ui.close()
         ui.imagebutton(idle='images/STRELKAH_VNEESE.png',
                        hover='images/STRELKAH_VNEESE.png',
@@ -318,7 +321,7 @@ init -3 python:
         # Played cards
         ui.vbox(id = 'stack', spacing = 10, xalign = 0.5, ypos =0.05, ymaximum = 0.85)
         for card in stack:
-            ui.add(card)
+            ui.add(card.get_displayable())
         ui.close()
         # Checking end conditions
         # Important note: variable names in SetVariable (actions on Defeat/Victory buttons)
@@ -371,7 +374,7 @@ init -3 python:
             yanchor=0, xalign=0.5, xsize=630)
         ui.grid(3, rows, id='collection_grid', transpose = False, spacing = 10)
         for card in player_deck:
-            ui.add(card)
+            ui.add(card.get_displayable())
         for j in range(rows*3 - len(player_deck)):
             ui.add(Null())
         ui.close()  # For grid
@@ -501,7 +504,7 @@ init -3 python:
         ui.vbox(id = 'p_hand', spacing = 10, ysize = 220*len(player_deck))
         for card in (x for x in player_deck if x.suit==u'Деньги'):
             ui.button(action = CardSell(card), style=style.card_button)
-            ui.add(card, align = (0.5, 0.5))
+            ui.add(card.get_displayable(), align = (0.5, 0.5))
         ui.close()
         ui.imagebutton(idle='images/STRELKAH_VNEESE.png',
                        hover='images/STRELKAH_VNEESE.png',
@@ -519,7 +522,7 @@ init -3 python:
         ui.vbox(id = 'p_hand', spacing = 10, ysize = 220*len(player_deck))
         for card in trade_stack:
             ui.button(action = CardUnsell(card), style=style.card_button)
-            ui.add(card, align = (0.5, 0.5))
+            ui.add(card.get_displayable(), align = (0.5, 0.5))
         ui.close()
         ui.imagebutton(idle='images/STRELKAH_VNEESE.png',
                        hover='images/STRELKAH_VNEESE.png',
@@ -587,9 +590,8 @@ init -3 python:
             Return position of the next card to be added
             Takes current card positions into account
             """
-            #max_y = max((c.y for c in self.card_list))
-            #return(int(self.x+self.xsize/2), max_y+50)
             # If there is no card list, add card to the top
+            # Children should provide more reasonable positioning for their size and shape
             if len(self.card_list) == 0:
                 return int(self.x+self.xsize/2-100), self.y + 10
             else:
