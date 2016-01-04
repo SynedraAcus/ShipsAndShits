@@ -28,7 +28,9 @@ init -3 python:
             self.tooltip = tooltip
             self.large_displayable = CardLargeDisplayable(self)
             self.small_displayable = CardSmallDisplayable(self)
-            self.maximized = True
+            self.hidden_displayable = CardHiddenDisplayable()
+            self.maximized = True  #  Set to True when card is expanded
+            self.visible = True  #  Set to True if player can see the card
             self.stack = None
             if cost:
                 self.cost = cost
@@ -36,7 +38,9 @@ init -3 python:
                 self.cost = number
 
         def get_displayable(self):
-            if self.maximized:
+            if not self.visible:
+                return self.hidden_displayable
+            elif self.maximized:
                 return self.large_displayable
             else:
                 return self.small_displayable
@@ -60,7 +64,52 @@ init -3 python:
             self.small_displayable.transform.ypos = self.large_displayable.transform.ypos
             self.small_displayable.transform.update()
 
+    class CardHiddenDisplayable(renpy.Displayable):
+        """
+        Displayable for card player can't see
+        """
+        def __init__(self, **kwargs):
+            super(CardHiddenDisplayable, self).__init__(xysize=(100, 140), xfill=False, yfill=False, **kwargs)
+            self.bg = Solid(SPENDABLE_COLOR)
+            self.frame = Solid('#6A3819')
+            self.xpos = 0
+            self.ypos = 0
+            self.xsize = 100
+            self.ysize = 140
+            self.x_offset = 0
+            self.y_offset = 0
+            self.transform = Transform(child=self)
+
+
+        def render(self, width, height, st, at):
+            frame_render = renpy.render(self.frame, self.xsize, self.ysize, st, at)
+            bg_render = renpy.render(self.bg, self.xsize-4, self.ysize-4, st, at)
+            render = renpy.Render(width, height, st, at)
+            render.blit(frame_render, (0,0))
+            render.blit(bg_render, (2, 2))
+            return render
+
+        def visit(self):
+            return[self.frame, self.bg]
+
+        def per_interact(self):
+            renpy.redraw(self, 0)
+
+        def reinit_transform(self):
+            #  Card size
+            self.transform.xsize = 100
+            self.transform.ysize = 140
+            #  Card position
+            self.transform.xpos = 0
+            self.transform.ypos = 0
+            self.x_offset = 0
+            self.y_offset = 0
+            self.transform.update()
+
     class CardSmallDisplayable(renpy.Displayable):
+        """
+        Regular card displayable
+        """
         def __init__(self, card, **kwargs):
             super(CardSmallDisplayable, self).__init__(xysize=(100, 140), xfill=False, yfill=False, **kwargs)
             self.bg = (card.spendable == True and Solid(SPENDABLE_COLOR) or Solid(PERMANENT_COLOR))
@@ -105,6 +154,9 @@ init -3 python:
 
 
     class CardLargeDisplayable(renpy.Displayable):
+        """
+        Expanded card displayable
+        """
         def __init__(self, card, **kwargs):
             super(CardLargeDisplayable, self).__init__(xysize=(200, 280), xfill=False, yfill=False, **kwargs)
             self.text = Text(u'{0}{1}'.format(card.number, card.suit[0]), color = '#6A3819', font='Hangyaboly.ttf')
@@ -1003,6 +1055,7 @@ init -3 python:
                     moves = [x for x in self.get_stack_by_id('O_HAND').card_list
                              if self.get_stack_by_id('M_STACK').accept(x, origin='O_HAND')]
                     card = renpy.random.choice(moves)
+                    card.visible = True
                     self.get_stack_by_id('O_HAND').remove(card)
                     (card.get_displayable().transform.xpos, card.get_displayable().transform.ypos) = self.get_stack_by_id('M_STACK').position_next_card()
                     self.get_stack_by_id('M_STACK').append(card)
@@ -1138,6 +1191,9 @@ init -1 python:
         global player_deck
         global conflict_table
         assert type(opponent_deck) is list and all(type(x) is Card for x in opponent_deck)
+        #  Hide opponent's cards
+        for card in opponent_deck:
+            card.visible = False
         # List of acceptable suits
         suits=set(x.suit for x in opponent_deck)
         p_hand_stack = PlayerConflictStack(card_list=[x for x in player_deck if x.suit in suits],
