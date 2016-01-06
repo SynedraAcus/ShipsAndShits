@@ -1205,7 +1205,7 @@ init -3 python:
         def __call__(self):
             global trade_table
             trade_table.finalize_failure()
-            renpy.hide_screen('trade_screen')
+            renpy.hide_ypos 350screen('trade_screen')
             renpy.hide_screen('trade_buttons_screen')
             renpy.restart_interaction()
 

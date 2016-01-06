@@ -72,6 +72,15 @@ New trading screen is called by the following function:
     The second argument is a list of suits accepted in this shop
 
 Screen is shown and hidden automatically. It currently doesn't place anything into 'ret' variable.
+
+NEW CONLICT SCREEN
+The conflict is called by the following function:
+
+    $ init_conflict_table(opponent_deck)
+    The only argument is an opponent deck
+
+The ret variable is as in old screen
+
 TRAVEL
 Unlike previous section, this is guidelines, not strict rules. As in, game won't crash if you violate it,
 but I'll personally rip your throat out if you mess label markup.
