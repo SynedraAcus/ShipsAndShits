@@ -669,7 +669,7 @@ init -3 python:
                 #  Checking if we have clicked any cards:
                 card_clicked = False
                 for card in reversed(self.cards):
-                    if inside((x,y), (card.get_displayable().transform.xpos, card.get_displayable().transform.ypos, card.get_displayable().xsize, card.get_displayable().ysize)) and self.get_stack_by_id(card.stack).give(card):
+                    if inside((x,y), (card.get_displayable().transform.xpos, card.get_displayable().transform.ypos, card.get_displayable().xsize, card.get_displayable().ysize)):
                         self.drag_start = (x, y)
                         # card.maximize()
                         self.initial_card_position = (card.get_displayable().transform.xpos, card.get_displayable().transform.ypos)
@@ -708,7 +708,7 @@ init -3 python:
                             if inside((x,y), (accepting_stack.x, accepting_stack.y, accepting_stack.xsize, accepting_stack.ysize)):
                                 if not self.dragged.stack == accepting_stack.id:
                                     #  If a card is moved to the other stack
-                                    if accepting_stack.accept(self.dragged, origin=self.dragged.stack):
+                                    if accepting_stack.accept(self.dragged, origin=self.dragged.stack) and self.dragged.stack.give(self.dragged):
                                         is_accepted = True
                                         self.get_stack_by_id(self.dragged.stack).remove(self.dragged)
                                         accepting_stack.append(self.dragged)
@@ -734,11 +734,11 @@ init -3 python:
                     #  Things to do upon click
                     #  Yeah, probably some card was clicked. For some reason this part is not entered when clicking
                     #  outside the card.
-                    if self.dragged is not None and self.dragged.stack in self.automove.keys():
+                    if self.dragged is not None:# and self.dragged.stack in self.automove.keys():
                         if not self.dragged.maximized:
                             #  On first click we only expand a card, but don't play it
                             self.dragged.maximize()
-                        else:
+                        elif self.dragged.stack in self.automove.keys():
                             # On second click card actually is played (and minimized)
                             #  First of all check whether transfer is possible
                             old_stack = self.get_stack_by_id(self.dragged.stack)
