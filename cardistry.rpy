@@ -575,8 +575,8 @@ init -3 python:
             if accept_from is not None:
                 self.accept_from = accept_from
             # Rest of it
-            self.card_list = sorted(card_list, key=lambda x: x.number)
-            for card in self.card_list:
+            tmp_list = sorted(card_list, key=lambda x: x.number)
+            for card in tmp_list:
                 card.minimize()
                 card.get_displayable().reinit_transform()
                 card.stack = stack_id
@@ -585,10 +585,10 @@ init -3 python:
 
         # Card positioning methods
 
-        def position_next_card(self):
+        def position_next_card(self, card):
             """
             Return position of the next card to be added
-            Takes current card positions into account
+            Takes current card positions and card in question into account
             """
             # If there is no card list, add card to the top
             # Children should provide more reasonable positioning for their size and shape
@@ -608,7 +608,7 @@ init -3 python:
             self.card_list[0].get_displayable().transform.xpos = int(self.x+self.xsize/2-100)
             self.card_list[0].get_displayable().transform.ypos = self.y + 10
             for card in self.card_list[1:]:
-                (card.get_displayable().transform.xpos, card.get_displayable().transform.ypos) = self.position_next_card()
+                (card.get_displayable().transform.xpos, card.get_displayable().transform.ypos) = self.position_next_card(card)
                 card.get_displayable().transform.update()
 
         # Card transfer methods
@@ -709,7 +709,7 @@ init -3 python:
             paid -= card.number
             super(PlayerOfferStack, self).remove(card)
 
-        def position_next_card(self):
+        def position_next_card(self, card):
             """
             Return position of the next card to be added
             Takes current card positions into account
@@ -771,7 +771,7 @@ init -3 python:
     class BasicStack(Cardbox):
         """
         Stack that accepts and gives all cards, but contains no more logic.
-        Useful every once in a while
+        Useful every once in a while, for debug mostly
         """
         def __init__(self, **kwargs):
             super(BasicStack, self).__init__(**kwargs)
@@ -795,6 +795,9 @@ init -3 python:
 
         def give(self, card):
             return True
+
+        def position_next_card(self, card):
+            super(PlayerConflictStack, self).position_next_card(card)
 
     class OpponentConflictStack(Cardbox):
         """
@@ -937,7 +940,7 @@ init -3 python:
                             #  Because it uses the accepting stack's card_list to define card position
                             #  The small displayable should be available for positioning as well
                             self.dragged.minimize()
-                            new_coords = new_stack.position_next_card()
+                            new_coords = new_stack.position_next_card(card)
                             (self.dragged.get_displayable().transform.xpos, self.dragged.get_displayable().transform.ypos) = new_coords
                             self.dragged.get_displayable().transform.update()
                             #  Remove dragged card from its initial stack and move it to acceptor
@@ -1059,7 +1062,7 @@ init -3 python:
                     card = renpy.random.choice(moves)
                     card.visible = True
                     self.get_stack_by_id('O_HAND').remove(card)
-                    (card.get_displayable().transform.xpos, card.get_displayable().transform.ypos) = self.get_stack_by_id('M_STACK').position_next_card()
+                    (card.get_displayable().transform.xpos, card.get_displayable().transform.ypos) = self.get_stack_by_id('M_STACK').position_next_card(card)
                     self.get_stack_by_id('M_STACK').append(card)
                     # Move newly played card to top
                     self.cards.append(self.cards.pop(self.cards.index(card)))
@@ -1198,14 +1201,16 @@ init -1 python:
             card.visible = False
         # List of acceptable suits
         suits=set(x.suit for x in opponent_deck)
+        # Player stack takes the entire bottom of the screen
         p_hand_stack = PlayerConflictStack(card_list=[x for x in player_deck if x.suit in suits],
                                            stack_id='P_HAND',
                                            accept_from=[],
-                                           x=100, y=100, xsize=250, ysize=500)
+                                           x=50, y=500, xsize=950, ysize=268)
         mid_stack = MidStack(card_list=[], stack_id='M_STACK', accept_from=['P_HAND', 'O_HAND'],
-                             x=450, y=100, xsize=250, ysize=500)
+                             x=50, y=175, xsize=950, ysize=300)
+        # Opponent stack takes bottom and doesn't need more than one line of cards, so it's narrow
         o_hand_stack = OpponentConflictStack(card_list=opponent_deck, stack_id='O_HAND',
-                                             x=780, y=100, xsize=250, ysize=500)
+                                             x=50, y=0, xsize=950, ysize=150)
         a = {'P_HAND': 'M_STACK'}
         conflict_table = ConflictTable(stacks=[p_hand_stack, mid_stack, o_hand_stack],
                                        automove=a)
