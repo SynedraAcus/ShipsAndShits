@@ -575,15 +575,18 @@ init -3 python:
             if accept_from is not None:
                 self.accept_from = accept_from
             # Rest of it
-            self.card_list = []
-            for card in sorted(card_list, key=lambda x: x.number):
-                card.minimize()
-                card.get_displayable().reinit_transform()
-                (card.get_displayable().transform.xpos, card.get_displayable().transform.ypos) = self.position_next_card(card)
-                card.stack = stack_id
-                self.card_list.append(card)
-            # if len(self.card_list) > 0:
-            #     self._position_cards()
+            self.card_list = sorted(card_list, key=lambda x: x.number)
+            # for card in self.card_list:
+            #     card.minimize()
+            #     # card.get_displayable().reinit_transform()
+            #     # (card.get_displayable().transform.xpos, card.get_displayable().transform.ypos) = self.position_next_card(card)
+            #     card.stack = stack_id
+            #     # self.card_list.append(card)
+            if self.card_list:
+                for card in self.card_list:
+                    card.minimize()
+                    card.stack = self.id
+                self.position_cards()
 
         # Card positioning methods
 
@@ -599,7 +602,27 @@ init -3 python:
                 # Get coordinates, sorted by y
                 coords = max(((c.get_displayable().transform.xpos, c.get_displayable().transform.ypos) for c in self.card_list), key=lambda c: c[1])
                 #  Add the next card 50 px under the lowest one
-                return coords[0], coords[1]+50
+                return coords[0]+renpy.random.randint(-7,7), coords[1]+50
+
+        def position_cards(self):
+            """
+            Initially position cards for cardbox.
+            As with previous method, doesn't particularly care about design and shit
+            """
+            #  Card list is not a property of objects! It's a parameter
+            #  Yes, it does get property as a param, but doesn't require it directly
+            x = self.x + self.xsize/2 - 100
+            y = self.y + 10
+            self.card_list[0].get_displayable().transform.xpos = x
+            self.card_list[0].get_displayable().transform.ypos = y
+            self.card_list[0].get_displayable().transform.update()
+            for card in self.card_list[1:]:
+                y += 40
+                x += renpy.random.randint(-7, 7)
+                card.get_displayable().transform.xpos = x
+                card.get_displayable().transform.ypos = y
+                card.get_displayable().transform.update()
+
 
         # Card transfer methods
 
@@ -786,6 +809,9 @@ init -3 python:
         def give(self, card):
             return True
 
+        # def position_cards(self, card_list):
+        #     pass
+
         def position_next_card(self, card):
             if len(self.card_list) == 0:
                 return (self.x+100, self.y+20)
@@ -806,12 +832,9 @@ init -3 python:
         def give(self, card):
             return False
 
-        def position_next_card(self, card):
-            if len(self.card_list) == 0:
-                return (self.x+100, self.y+20)
-            else:
-                return max([c.get_displayable().transform.xpos for c in self.card_list])+50,\
-                       self.card_list[-1].get_displayable().transform.ypos + renpy.random.choice(range(-10,10,1))
+        # def position_cards(self, card_list):
+        #     pass
+
 
     class MidStack(Cardbox):
         """
@@ -941,7 +964,7 @@ init -3 python:
                             #  Because it uses the accepting stack's card_list to define card position
                             #  The small displayable should be available for positioning as well
                             self.dragged.minimize()
-                            new_coords = new_stack.position_next_card(card)
+                            new_coords = new_stack.position_next_card(self.dragged)
                             (self.dragged.get_displayable().transform.xpos, self.dragged.get_displayable().transform.ypos) = new_coords
                             self.dragged.get_displayable().transform.update()
                             #  Remove dragged card from its initial stack and move it to acceptor
@@ -957,7 +980,6 @@ init -3 python:
         def visit(self):
             l = []
             l+=(x.get_displayable().transform for x in self.cards)
-            #l.append(self.bg)
             l.append(self.drag_text)
             l+=self.cardboxes
             return l
