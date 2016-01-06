@@ -812,12 +812,6 @@ init -3 python:
         # def position_cards(self, card_list):
         #     pass
 
-        def position_next_card(self, card):
-            if len(self.card_list) == 0:
-                return (self.x+100, self.y+20)
-            else:
-                return max([c.get_displayable().transform.xpos for c in self.card_list])+50,\
-                       self.card_list[-1].get_displayable().transform.ypos + renpy.random.choice(range(-5,5,1))
 
     class OpponentConflictStack(Cardbox):
         """
@@ -868,6 +862,16 @@ init -3 python:
 
         def give(self, card):
             return True
+
+        def position_next_card(self, card):
+            if len(self.card_list) == 0:
+               return int(self.x+self.xsize/2-100), self.y
+            else:
+                # Get coordinates, sorted by y
+                coords = max(((c.get_displayable().transform.xpos, c.get_displayable().transform.ypos) for c in self.card_list), key=lambda c: c[1])
+                #  Add the next card 40 px under the lowest one
+                return coords[0]+renpy.random.randint(-7,7), coords[1]+40
+
 
     class Table(renpy.Displayable):
 
