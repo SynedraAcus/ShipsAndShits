@@ -832,8 +832,22 @@ init -3 python:
         def give(self, card):
             return False
 
-        # def position_cards(self, card_list):
-        #     pass
+        def position_cards(self):
+            """
+            Position cards for an opponent conflict stack. Much like Cardbox.position_cards(), but places
+            cards horizontally rather than vertically
+            """
+            x = self.x + self.xsize/2 - (40*(len(self.card_list)-1)+100)/2
+            y = self.y + 10
+            self.card_list[0].get_displayable().transform.xpos = x
+            self.card_list[0].get_displayable().transform.ypos = y
+            self.card_list[0].get_displayable().transform.update()
+            for card in self.card_list[1:]:
+                y += renpy.random.randint(-7, 7)
+                x += 40
+                card.get_displayable().transform.xpos = x
+                card.get_displayable().transform.ypos = y
+                card.get_displayable().transform.update()
 
 
     class MidStack(Cardbox):
