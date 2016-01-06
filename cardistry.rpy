@@ -590,10 +590,9 @@ init -3 python:
         def position_next_card(self, card):
             """
             Return position of the next card to be added
-            Takes current card positions and card in question into account
+            Places the next card 50 px under the last one, no matter what. Children should provide more reasonable
+            positioning algorithms.
             """
-            # If there is no card list, add card to the top
-            # Children should provide more reasonable positioning for their size and shape
             if len(self.card_list) == 0:
                 return int(self.x+self.xsize/2-100), self.y + 10
             else:
@@ -788,7 +787,11 @@ init -3 python:
             return True
 
         def position_next_card(self, card):
-            return super(PlayerConflictStack, self).position_next_card(card)
+            if len(self.card_list) == 0:
+                return (self.x+100, self.y+20)
+            else:
+                return max([c.get_displayable().transform.xpos for c in self.card_list])+50,\
+                       self.card_list[-1].get_displayable().transform.ypos + renpy.random.choice(range(-5,5,1))
 
     class OpponentConflictStack(Cardbox):
         """
@@ -802,6 +805,13 @@ init -3 python:
 
         def give(self, card):
             return False
+
+        def position_next_card(self, card):
+            if len(self.card_list) == 0:
+                return (self.x+100, self.y+20)
+            else:
+                return max([c.get_displayable().transform.xpos for c in self.card_list])+50,\
+                       self.card_list[-1].get_displayable().transform.ypos + renpy.random.choice(range(-10,10,1))
 
     class MidStack(Cardbox):
         """
