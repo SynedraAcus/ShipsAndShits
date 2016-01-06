@@ -1,14 +1,31 @@
-CONFLICT CALLS
+CARD DEFINITIONS
 
-Conflict must be initialised, then shown, then you may get results. The following is a complete run-through:
+    If you need to create a card, you can do it like this:
 
-    $ init_conflict(u'0З1С1Д')
-    # This line initialises everything for a conflict. The only argument is deck-defining line.
-    # The syntax is digit-suit letter-digit-suit letter, et cetera et cetera. Usable letters are ЗСДИ
-    # As this is a python line, don't forget that dollar sign in the beginning!
+    c = Card(u'Д', 2, spendable=False, tooltip='Tooltip', cost = 8)
+    player_deck.append(c)
 
-    show screen conf
-    # This line actually starts conflict. Careful: it's 'show screen', not 'call screen' as in previous version
+    First two arguments are suit letter and a value. Keyword arguments are:
+    spendable (boolean): whether the card is lost after being played
+    tooltip (str): card description
+    cost (int): cost of this card in gold.
+
+NEW TRADING SCREEN
+New trading screen is called by the following function:
+
+    $ init_trade_table(stock, accepted_suits=[u'Деньги', u'Знания'])
+    The first argument is a list of cards sold in this shop
+    The second argument is a list of suits accepted in this shop
+
+Screen is shown and hidden automatically. It currently doesn't place anything into 'ret' variable.
+
+NEW CONLICT SCREEN
+The conflict is called by the following function:
+
+    $ init_conflict_table(opponent_deck)
+    The only argument is an opponent deck. It may be either a list of Card object, or a deckline.
+    The syntax of the deckline is digit-suit letter-digit-suit letter, et cetera et cetera. Usable letters are ЗСДИ.
+    For example, u'4С4С2Д' is two of money, four of force and once more four of force.
 
     "Launching conflict"
     # There must be at least one line of text between showing screen and reading results
@@ -32,57 +49,9 @@ Conflict must be initialised, then shown, then you may get results. The followin
         "Returned success
         jump success
 
-CARD DEFINITIONS
-
-    More powerful way to design cards is creating them directly, one by one, like this:
-
-    c = Card(u'Д', 2, spendable=False, tooltip='Tooltip', cost = 8)
-    player_deck.append(c)
-
-    First two arguments are suit letter and a value. Keyword arguments are:
-    spendable (boolean): whether the card is lost after being played
-    tooltip (str): card description
-    cost (int): cost of this card in gold.
-
-
-TRADING SCREEN
-You currently can add only "Sell card for money"-type actions. The screen is much like previous one.
-    $ test_card = Card(u'Д', 10, spendable=True, tooltip='Эта карта была куплена при тестировании магазина')
-    # Defining card for sale. First two papameters are suit and value. Spendable is boolean,
-    # tooltip is card description; these two can (but should not) be omitted
-    #
-    $ init_trade(10, test_card)
-    #Initialising card's price and card itself
-    #
-    "Calling shop"
-    #Again, at least one line should be present between calling screen and checking for output
-    #
-    if ret == 'Sold':
-        "Покупка совершена"
-        jump sold
-    elif ret == 'NotSold':
-        "Покупка отменена игроком"
-        jump cancelled
-
-NEW TRADING SCREEN
-New trading screen is called by the following function:
-
-    $ init_trade_table(stock, accepted_suits=[u'Деньги', u'Знания'])
-    The first argument is a list of cards sold in this shop
-    The second argument is a list of suits accepted in this shop
-
-Screen is shown and hidden automatically. It currently doesn't place anything into 'ret' variable.
-
-NEW CONLICT SCREEN
-The conflict is called by the following function:
-
-    $ init_conflict_table(opponent_deck)
-    The only argument is an opponent deck. It may be either a
-
-The ret variable is as in old screen
 
 TRAVEL
-Unlike previous section, this is guidelines, not strict rules. As in, game won't crash if you violate it,
+Unlike previous section, these are guidelines, not strict rules. As in, game won't crash if you violate it,
 but I'll personally rip your throat out if you mess label markup.
 When the player gets into port from map, renpy jumps to the label named like that port (yankee, node*, poop, etc)
 The part right after it should do some port initialisation: check variables and so on.
