@@ -67,7 +67,7 @@ You currently can add only "Sell card for money"-type actions. The screen is muc
 NEW TRADING SCREEN
 New trading screen is called by the following function:
 
-    $ init_trade_screen(stock, accepted_suits=[u'Деньги', u'Знания'])
+    $ init_trade_table(stock, accepted_suits=[u'Деньги', u'Знания'])
     The first argument is a list of cards sold in this shop
     The second argument is a list of suits accepted in this shop
 
@@ -77,7 +77,7 @@ NEW CONLICT SCREEN
 The conflict is called by the following function:
 
     $ init_conflict_table(opponent_deck)
-    The only argument is an opponent deck
+    The only argument is an opponent deck. It may be either a
 
 The ret variable is as in old screen
 

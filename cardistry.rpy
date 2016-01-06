@@ -1205,7 +1205,7 @@ init -3 python:
         def __call__(self):
             global trade_table
             trade_table.finalize_failure()
-            renpy.hide_ypos 350screen('trade_screen')
+            renpy.hide_screen('trade_screen')
             renpy.hide_screen('trade_buttons_screen')
             renpy.restart_interaction()
 
@@ -1265,7 +1265,10 @@ init -1 python:
         """
         global player_deck
         global conflict_table
-        assert type(opponent_deck) is list and all(type(x) is Card for x in opponent_deck)
+        #  Opponent deck may be either a list of cards or a deckline
+        assert (type(opponent_deck) is list and all(type(x) is Card for x in opponent_deck)) or type(opponent_deck) is str
+        if type(opponent_deck) is unicode:
+            opponent_deck = deck(opponent_deck)
         #  Hide opponent's cards
         for card in opponent_deck:
             card.visible = False
