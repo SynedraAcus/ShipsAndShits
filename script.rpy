@@ -258,22 +258,16 @@ label start:
             nvl clear
             "Вы попали в меню дебага. Тут можно посмотреть разные недоделанные фичи, но если Вы игрок, а не член команды, имейте в виду: они могут работать, не работать, ломать игру, оскорблять чувства верующих и плохо выглядеть. Если подумать, они сильно похожи на меня."
             menu:
-                "Вступить в беспричинный конфликт":
-                    #nvl clear
-                    jump gamble
-                "Перечитать предыдущие уже не три строчки":
+                "Вернуться в начало":
                     nvl clear
                     jump start
                 "Куда-нибудь поплыть":
                     nvl clear
                     jump map_label
-                "Включить торговый экран":
-                    nvl clear
-                    jump trade_test
-                "Включить новый экран торговли":
+                "Протестировать торговлю":
                     nvl clear
                     jump new_trade
-                "Включить новый экран конфликта":
+                "Протестировать конфликт":
                     nvl clear
                     jump new_conflict
 
@@ -329,49 +323,6 @@ label new_trade:
     "Сейчас Вы будете возвращены в меню дебага."
     jump debug_menu
 
-label trade_test:
-    $ test_card = Card(u'Д', 10, spendable=True, tooltip='Эта карта была куплена при тестировании магазина')
-    $ init_trade(10, test_card)
-    "Здесь вы можете купить десятку денег за десятку денег. Я подозреваю, что в реальности бизнес работает как-то иначе, но для дебага сойдёт"
-    show screen trade
-    "Включаем магазин"
-    if ret == 'Sold':
-        "Сделка завершена. Убедитесь в этом на экране колоды."
-        jump start
-    if ret == 'NotSold':
-        "Сделка отменена."
-        jump start
-
-label gamble:
-    $ init_conflict(u'0З1С')
-    show screen conf
-    "Вы вступили в конфликт. Ни его цель, ни награда за победу вам не ясны."
-    #$ _return = renpy.show_screen('conf')
-    if ret[0] == 'F':
-        jump failure
-    elif ret == u'SЗнания':
-        jump success_knowledge
-    elif ret == u'SСила':
-        jump success_force
-
-label success_knowledge:
-    "Вы победили, применив свой безмерный интеллект"
-    jump success
-
-label success_force:
-    "Вы победили, применив свою безмерную силу"
-    jump success
-
-label failure:
-    nvl clear
-    $ player_deck.append(Card(u'З', 11, spendable = True, tooltip = u'Эта карта была выдана после поражения'))
-    "Раз уж вы потерпели поражение, ваша колода была усилена"
-    "Теперь поражение невозможно в принципе"
-    jump gamble
-
-label success:
-    "Вы победили в нашей игре"
-    return
 
 label map_label:
     show screen map_screen
