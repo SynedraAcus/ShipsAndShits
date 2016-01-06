@@ -545,9 +545,6 @@ init -3 python:
                     x+=40
                     # y+=renpy.random.randint(-5,5)
 
-
-
-
     class OpponentConflictStack(Cardbox):
         """
         Opponent hand for conflict
@@ -1020,10 +1017,7 @@ init -1 python:
                                            x=10, y=100, xsize=300, ysize=500)
         t_hand_stack = TraderHandStack(card_list=stock, stack_id='T_HAND', accept_from=['T_OFFER'],
                                        x=800, y=100, xsize=300, ysize=500)
-        #n_stack = NullStack(stack_id='NULL', accept_from=['HAND'], x=750, xsize=300, y=100, ysize=500)
         a = {'P_HAND': 'P_OFFER', 'T_HAND': 'T_OFFER', 'T_OFFER': 'P_HAND', 'P_OFFER': 'P_HAND'}
-        #acc_stack._position_cards()
-        #p_stack._position_cards()
         trade_table = TradeTable(stacks=[p_hand_stack, t_hand_stack, p_offer_stack, t_offer_stack], automove=a)
         renpy.show_screen('trade_screen')
         renpy.show_screen('trade_buttons_screen')
