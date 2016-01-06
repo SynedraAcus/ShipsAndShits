@@ -667,6 +667,7 @@ init -3 python:
         def event(self, ev, x, y, st):
             if ev.type == pygame.MOUSEBUTTONDOWN and ev.button == 1:
                 #  Checking if we have clicked any cards:
+                card_clicked = False
                 for card in reversed(self.cards):
                     if inside((x,y), (card.get_displayable().transform.xpos, card.get_displayable().transform.ypos, card.get_displayable().xsize, card.get_displayable().ysize)) and self.get_stack_by_id(card.stack).give(card):
                         self.drag_start = (x, y)
@@ -679,7 +680,14 @@ init -3 python:
                         #  But remember where it was just in case
                         self.old_position = self.cards.index(self.dragged)
                         self.cards.append(self.cards.pop(self.old_position))
+                        card_clicked = True
                         break  #  No need to move two cards at the same time
+                if not card_clicked:
+                    #  If no card was clicked on, look for any maximized cards and minimize them
+                    for card in self.cards:
+                        if card.maximized:
+                            card.minimize()
+                            renpy.restart_interaction()
 
             if ev.type == pygame.MOUSEMOTION and self.dragged is not None:
                 #  Just redrawing card in hand
@@ -724,25 +732,32 @@ init -3 python:
 
                 else:
                     #  Things to do upon click
+                    #  Yeah, probably some card was clicked. For some reason this part is not entered when clicking
+                    #  outside the card.
                     if self.dragged is not None and self.dragged.stack in self.automove.keys():
-                        #  First of all check whether transfer is possible
-                        old_stack = self.get_stack_by_id(self.dragged.stack)
-                        new_stack = self.get_stack_by_id(self.automove[old_stack.id])
-                        if old_stack.give(self.dragged) and new_stack.accept(self.dragged, origin=old_stack.id):
-                            #  Positioning card should happen before appending
-                            #  Because it uses the accepting stack's card_list to define card position
-                            #  The small displayable should be available for positioning as well
-                            self.dragged.minimize()
-                            new_coords = new_stack.position_next_card(self.dragged)
-                            (self.dragged.get_displayable().transform.xpos, self.dragged.get_displayable().transform.ypos) = new_coords
-                            self.dragged.get_displayable().transform.update()
-                            #  Remove dragged card from its initial stack and move it to acceptor
-                            old_stack.remove(self.dragged)
-                            new_stack.append(self.dragged)
-                            self.dragged.stack = new_stack.id
+                        if not self.dragged.maximized:
+                            #  On first click we only expand a card, but don't play it
+                            self.dragged.maximize()
+                        else:
+                            # On second click card actually is played (and minimized)
+                            #  First of all check whether transfer is possible
+                            old_stack = self.get_stack_by_id(self.dragged.stack)
+                            new_stack = self.get_stack_by_id(self.automove[old_stack.id])
+                            if old_stack.give(self.dragged) and new_stack.accept(self.dragged, origin=old_stack.id):
+                                #  Positioning card should happen before appending
+                                #  Because it uses the accepting stack's card_list to define card position
+                                #  The small displayable should be available for positioning as well
+                                self.dragged.minimize()
+                                new_coords = new_stack.position_next_card(self.dragged)
+                                (self.dragged.get_displayable().transform.xpos, self.dragged.get_displayable().transform.ypos) = new_coords
+                                self.dragged.get_displayable().transform.update()
+                                #  Remove dragged card from its initial stack and move it to acceptor
+                                old_stack.remove(self.dragged)
+                                new_stack.append(self.dragged)
+                                self.dragged.stack = new_stack.id
+                        #  Release dragged card anyway
+                        self.dragged = None
 
-                    #  Release dragged card anyway
-                    self.dragged = None
                 #  Restart interaction to check for success, flip exit button state, etc.
                 renpy.restart_interaction()
 
