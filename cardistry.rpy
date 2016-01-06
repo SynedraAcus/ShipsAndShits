@@ -602,7 +602,7 @@ init -3 python:
                 # Get coordinates, sorted by y
                 coords = max(((c.get_displayable().transform.xpos, c.get_displayable().transform.ypos) for c in self.card_list), key=lambda c: c[1])
                 #  Add the next card 50 px under the lowest one
-                return coords[0]+renpy.random.randint(-7,7), coords[1]+50
+                return coords[0], coords[1]+50
 
         def position_cards(self):
             """
@@ -618,7 +618,7 @@ init -3 python:
             self.card_list[0].get_displayable().transform.update()
             for card in self.card_list[1:]:
                 y += 40
-                x += renpy.random.randint(-7, 7)
+                #x += renpy.random.randint(-7, 7)
                 card.get_displayable().transform.xpos = x
                 card.get_displayable().transform.ypos = y
                 card.get_displayable().transform.update()
@@ -827,6 +827,9 @@ init -3 python:
                     x += spacer_len
                     starting_points[suit] = (x, y)
                     x += lengths[suit]
+            #  TO DO: add multiline positioning
+            else:
+                raise NotImplementedError('Cannot use more than one line of cards')
             for suit in lengths.keys():
                 (x, y) = starting_points[suit]
                 for card in (c for c in self.card_list if c.suit == suit):
@@ -834,7 +837,7 @@ init -3 python:
                     card.get_displayable().transform.ypos = y
                     card.get_displayable().transform.update()
                     x+=40
-                    y+=renpy.random.randint(-5,5)
+                    # y+=renpy.random.randint(-5,5)
 
 
 
@@ -863,7 +866,7 @@ init -3 python:
             self.card_list[0].get_displayable().transform.ypos = y
             self.card_list[0].get_displayable().transform.update()
             for card in self.card_list[1:]:
-                y += renpy.random.randint(-7, 7)
+                #y += renpy.random.randint(-7, 7)
                 x += 40
                 card.get_displayable().transform.xpos = x
                 card.get_displayable().transform.ypos = y
@@ -896,7 +899,7 @@ init -3 python:
                 # Get coordinates, sorted by y
                 coords = max(((c.get_displayable().transform.xpos, c.get_displayable().transform.ypos) for c in self.card_list), key=lambda c: c[1])
                 #  Add the next card 40 px under the lowest one
-                return coords[0]+renpy.random.randint(-7,7), coords[1]+40
+                return coords[0], coords[1]+40
 
 
     class Table(renpy.Displayable):
