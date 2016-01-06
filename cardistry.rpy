@@ -582,6 +582,9 @@ init -3 python:
         """
         def __init__(self, **kwargs):
             super(MidStack, self).__init__(**kwargs)
+            #  Position of the last player card
+            self.last_x = int(self.x+self.xsize/2-100)
+            self.last_y = self.y
 
         def accept(self, card, origin=None):
             if origin not in self.accept_from:
@@ -599,10 +602,26 @@ init -3 python:
             if len(self.card_list) == 0:
                return int(self.x+self.xsize/2-100), self.y
             else:
-                # Get coordinates, sorted by y
-                coords = max(((c.get_displayable().transform.xpos, c.get_displayable().transform.ypos) for c in self.card_list), key=lambda c: c[1])
-                #  Add the next card 40 px under the lowest one
-                return coords[0], coords[1]+40
+                if len(self.card_list)%2 == 1:
+                    #  If the computer card's position is to be calculated
+                    #  Drop the computer card under player's
+                    return(self.last_x, self.last_y+40)
+                else:
+                    #Old approach: 40 px under lowest card
+                    # Get coordinates, sorted by y
+                    coords = max(((c.get_displayable().transform.xpos, c.get_displayable().transform.ypos) for c in self.card_list), key=lambda c: c[1])
+                    #  Add the next card 40 px under the lowest one
+                    return coords[0], coords[1]+40
+
+        def append(self, card):
+            """
+            Remember where the player placed his last card, so that it will be covered
+            """
+            if len(self.card_list)%2 == 0:
+                #  If the player is adding card, not the opponent
+                self.last_x = card.get_displayable().transform.xpos
+                self.last_y = card.get_displayable().transform.ypos
+            self.card_list.append(card)
 
 
     class Table(renpy.Displayable):
