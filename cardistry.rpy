@@ -575,13 +575,15 @@ init -3 python:
             if accept_from is not None:
                 self.accept_from = accept_from
             # Rest of it
-            tmp_list = sorted(card_list, key=lambda x: x.number)
-            for card in tmp_list:
+            self.card_list = []
+            for card in sorted(card_list, key=lambda x: x.number):
                 card.minimize()
                 card.get_displayable().reinit_transform()
+                (card.get_displayable().transform.xpos, card.get_displayable().transform.ypos) = self.position_next_card(card)
                 card.stack = stack_id
-            if len(self.card_list) > 0:
-                self._position_cards()
+                self.card_list.append(card)
+            # if len(self.card_list) > 0:
+            #     self._position_cards()
 
         # Card positioning methods
 
@@ -599,17 +601,6 @@ init -3 python:
                 coords = max(((c.get_displayable().transform.xpos, c.get_displayable().transform.ypos) for c in self.card_list), key=lambda c: c[1])
                 #  Add the next card 50 px under the lowest one
                 return coords[0], coords[1]+50
-
-        def _position_cards(self):
-            """
-            Position all the cards in stack. This is to be called only when
-            initialising Cardbox for display
-            """
-            self.card_list[0].get_displayable().transform.xpos = int(self.x+self.xsize/2-100)
-            self.card_list[0].get_displayable().transform.ypos = self.y + 10
-            for card in self.card_list[1:]:
-                (card.get_displayable().transform.xpos, card.get_displayable().transform.ypos) = self.position_next_card(card)
-                card.get_displayable().transform.update()
 
         # Card transfer methods
 
@@ -797,7 +788,7 @@ init -3 python:
             return True
 
         def position_next_card(self, card):
-            super(PlayerConflictStack, self).position_next_card(card)
+            return super(PlayerConflictStack, self).position_next_card(card)
 
     class OpponentConflictStack(Cardbox):
         """
