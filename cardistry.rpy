@@ -1,7 +1,7 @@
 # Everything related to the card conflict mechanics
 # ASDF
 init -3 python:
-import math
+    import math
     SUITS={u'С':u'Сила',
         u'Д':u'Деньги',
         u'З':u'Знания',

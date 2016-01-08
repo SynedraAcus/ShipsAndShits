@@ -322,7 +322,7 @@ screen file_picker():
 
                 # Each file slot is a button.
                 button:
-                    action FileAction(i)
+                    action [FixDisplayables(), FileAction(i)]
                     xfill True
 
                     has hbox
