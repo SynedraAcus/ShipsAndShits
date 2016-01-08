@@ -1,8 +1,7 @@
 # Everything related to the card conflict mechanics
 # ASDF
 init -3 python:
-    import random
-    import math
+import math
     SUITS={u'С':u'Сила',
         u'Д':u'Деньги',
         u'З':u'Знания',
@@ -26,9 +25,6 @@ init -3 python:
             self.number = number
             self.spendable = spendable
             self.tooltip = tooltip
-            self.large_displayable = CardLargeDisplayable(self)
-            self.small_displayable = CardSmallDisplayable(self)
-            self.hidden_displayable = CardHiddenDisplayable()
             self.maximized = True  #  Set to True when card is expanded
             self.visible = True  #  Set to True if player can see the card
             self.stack = None
@@ -36,6 +32,24 @@ init -3 python:
                 self.cost = cost
             else:
                 self.cost = number
+            self.init_displayables()
+
+        #  Displayables-related method
+        def init_displayables(self):
+            """
+            Initialize card displayables
+            """
+            self.large_displayable = CardLargeDisplayable(self)
+            self.small_displayable = CardSmallDisplayable(self)
+            self.hidden_displayable = CardHiddenDisplayable()
+
+        def remove_displayables(self):
+            """
+            Remove card displayables, as those can't be saved
+            """
+            self.large_displayable = None
+            self.small_displayable = None
+            self.hidden_displayable = None
 
         def get_displayable(self):
             if not self.visible:
@@ -45,8 +59,12 @@ init -3 python:
             else:
                 return self.small_displayable
 
+        #  Useful 4 debug
+
         def __str__(self):
             return(u'{0} {1}'.format(self.suit, self.number))
+
+        #  Two methods that switch displayables
 
         def maximize(self):
             self.maximized = True
@@ -943,6 +961,7 @@ init -3 python:
             global trade_table
             trade_table.finalize_failure()
             renpy.hide_screen('trade_screen')
+            trade_table = None
             renpy.hide_screen('trade_buttons_screen')
             renpy.restart_interaction()
 

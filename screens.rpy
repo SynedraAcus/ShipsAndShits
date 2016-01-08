@@ -258,6 +258,28 @@ init -2:
 # a single screen, file_picker. We then use the file_picker screen
 # from simple load and save screens.
 
+init python:
+    class FixDisplayables(Action):
+        """
+        Remove displayables for cards before saving
+        """
+        def __init__(self):
+            pass
+
+        def __call__(self):
+            global player_deck
+            global conflict_table
+            global trade_table
+            conflict_table = None
+            trade_table = None
+            if renpy.current_screen().screen_name[0] == 'save':
+                #  Delete displayables before saving
+                for card in player_deck:
+                    card.remove_displayables()
+
+        def get_sensitive(self):
+            return True
+
 screen file_picker():
 
     frame:
