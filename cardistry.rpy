@@ -726,7 +726,7 @@ init -3 python:
                             if inside((x,y), (accepting_stack.x, accepting_stack.y, accepting_stack.xsize, accepting_stack.ysize)):
                                 if not self.dragged.stack == accepting_stack.id:
                                     #  If a card is moved to the other stack
-                                    if accepting_stack.accept(self.dragged, origin=self.dragged.stack) and self.dragged.stack.give(self.dragged):
+                                    if accepting_stack.accept(self.dragged, origin=self.dragged.stack) and self.get_stack_by_id(self.dragged.stack).give(self.dragged):
                                         is_accepted = True
                                         self.get_stack_by_id(self.dragged.stack).remove(self.dragged)
                                         accepting_stack.append(self.dragged)
@@ -1021,6 +1021,9 @@ init -1 python:
         """
         global player_deck
         global conflict_table
+        global gl_no_rollback
+        if gl_no_rollback:
+            renpy.block_rollback()
         #  Opponent deck may be either a list of cards or a deckline
         assert (type(opponent_deck) is list and all(type(x) is Card for x in opponent_deck)) or type(opponent_deck) is str
         if type(opponent_deck) is unicode:
@@ -1053,10 +1056,12 @@ init -1 python:
         :return:
         """
         global player_deck
-        #global acc_stack
         global trade_table
         global paid
         global withheld
+        global gl_no_rollback
+        if gl_no_rollback:
+            renpy.block_rollback()
         paid = 0
         withheld = 0
         assert type(stock) is list and len(stock)>0 and all(lambda x: type(x) is Card for x in stock)

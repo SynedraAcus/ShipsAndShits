@@ -75,7 +75,7 @@ init -5 python:
             if label is None:
                 raise ValueError('MapEvent cannot be created without a label')
             self.label = label
-            self.weight =rpg weight
+            self.weight = weight
             if node_list:
                 self.node_list = node_list
                 self.universal = False
