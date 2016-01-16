@@ -57,7 +57,7 @@ transform shiptransform(old_coords, coords):
 
 init -5 python:
 
-def leave_node():
+    def leave_node():
         """
         A simple function that calls current node's _quit label
         :return:
@@ -75,7 +75,7 @@ def leave_node():
             if label is None:
                 raise ValueError('MapEvent cannot be created without a label')
             self.label = label
-            self.weight = weight
+            self.weight =rpg weight
             if node_list:
                 self.node_list = node_list
                 self.universal = False
