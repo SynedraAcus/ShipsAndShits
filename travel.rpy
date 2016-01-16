@@ -1,5 +1,8 @@
 # Everything related to travels
 #
+
+default coords = monet.coordinates
+default old_coords = monet.coordinates
 screen map_screen():
     tag map
     modal True
@@ -40,27 +43,21 @@ screen map_screen():
         hotspot node5.hotspot action Travel(node5)
         hotspot node6.hotspot action Travel(node6)
     add 'images/1024ship.png':
+        at shiptransform(old_coords, coords)
         anchor (0.5, 1.0)
-        pos current_port.coordinates
+        #pos current_port.coordinates
         id 'ship'
         #at ship_d
 
-# transform ship_d(new_pos):
-#     linear 1.0 pos new_pos
-#
-# transform slow:
-#     pause 5.0
-#
-# transform move_ship(x1, y1, x2, y2, time):
-#     on update:
-#         xpos x1
-#         ypos y1
-#         linear time xpos x2 ypos y2
+transform shiptransform(old_coords, coords):
+    # on replace:
+    #     linear 0.5 pos coords
+    pos old_coords
+    linear 0.5 pos coords
 
 init -5 python:
 
-    import random
-    def leave_node():
+def leave_node():
         """
         A simple function that calls current node's _quit label
         :return:
@@ -130,9 +127,14 @@ init -5 python:
 
         def __call__(self):
             global current_port
+            global coords
+            global old_coords
             current_port = self.map_point
+            old_coords = coords
+            coords = current_port.coordinates
             ship = renpy.get_widget('map_screen', 'ship')
-            ship.pos = current_port.coordinates
+            renpy.redraw(ship, 0)
+            # renpy.force_full_redraw()
             renpy.hide_screen('map')
             renpy.jump(self.map_point.get_label())
 
