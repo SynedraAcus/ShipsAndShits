@@ -3,6 +3,11 @@
 
 default coords = monet.coordinates
 default old_coords = monet.coordinates
+
+screen invisible_timer(label):
+    zorder 3
+    timer 0.5 action [SetVariable('old_coords', coords), Hide('invisible_timer'), Hide('map_screen'), Jump(label)]
+
 screen map_screen():
     tag map
     modal True
@@ -54,6 +59,7 @@ transform shiptransform(old_coords, coords):
     #     linear 0.5 pos coords
     pos old_coords
     linear 0.5 pos coords
+
 
 init -5 python:
 
@@ -132,11 +138,13 @@ init -5 python:
             current_port = self.map_point
             old_coords = coords
             coords = current_port.coordinates
-            ship = renpy.get_widget('map_screen', 'ship')
-            renpy.redraw(ship, 0)
+            #ship = renpy.get_widget('map_screen', 'ship')
+            #renpy.redraw(ship, 0)
             # renpy.force_full_redraw()
-            renpy.hide_screen('map')
-            renpy.jump(self.map_point.get_label())
+            # renpy.hide_screen('map')
+            renpy.show_screen(_screen_name='invisible_timer', label=self.map_point.get_label())
+            renpy.restart_interaction()
+            #renpy.jump(self.map_point.get_label())
 
         def get_sensitive(self):
             global current_port
