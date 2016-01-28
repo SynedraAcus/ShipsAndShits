@@ -4,7 +4,7 @@
 # eg. image eileen happy = "eileen_happy.png"
 
 # Declare characters used by this game.
-define narrator = Character(None, kind = nvl, what_color="#000000", size = 10)
+define narrator = Character(None, kind = nvl, what_color="#000000", size = 12)
 
 init -2 python:
     menu = nvl_menu
@@ -52,11 +52,11 @@ label start:
     show bg solid_bg
 
     # Image initialisation
-    image bg monet_port_image = Image('images/1024_monet_port.jpg', align=(0.5,0.5))
-    image bg monet_palace_image = Image('images/1024_monet_palace.jpg', align=(0.5, 0.5))
-    image bg monet_district_image = Image('images/1024_monet_district.jpg', align=(0.5, 0.5))
-    image bg vortex_sub_image = Image('images/1024_vortex_sub.jpg', align=(0.5, 0.5))
-    image bg vortex_hunt_image = Image('images/1024_vortex_hunt.jpg', align=(0.5, 0.5))
+    image bg monet_port_image = Image('images/1129_monet_port.jpg', align=(0.5,0.5))
+    image bg monet_palace_image = Image('images/1129_monet_palace.jpg', align=(0.5, 0.5))
+    image bg monet_district_image = Image('images/1129_monet_district.jpg', align=(0.5, 0.5))
+    image bg vortex_sub_image = Image('images/1129_vortex_sub.jpg', align=(0.5, 0.5))
+    image bg vortex_hunt_image = Image('images/1129_vortex_hunt.jpg', align=(0.5, 0.5))
     menu:
         "Пропустить вступление":
             $ player_deck.append(Card(u'Д', 4, spendable = True, tooltip = u'Мелочь, оставшаяся после найма экипажа и пирушки по этому поводу'))
@@ -159,8 +159,9 @@ label start:
                 "Вздохнув, отец быстро набрасывает на листке бумаги рекомендательное письмо и советует пойти с этим в службы Адмиралтейства — узнать, есть ли у них работа для начинающего мореплавателя. Вы берёте письмо, благодарите отца еще раз, целуете маму, просите передать брату привет и наконец покидаете отчий дом. Видит бог, вы долго ждали этого момента. Пора отправляться в путь."
                 $ player_deck.append(Card(u'И', 4, spendable = True, tooltip = u'Рекомендательное письмо, подписанное Иштваном Гандрабуром — уважаемым в городе человеком'))
                 "{color=#0000ffff}Колода пополнена!{/color}"
-                nvl clear
+                # nvl clear
                 label start_last_part:
+                show bg monet_port_image
                 "Осталось только решить, куда именно."
                 menu:
                     "В службы Адмиралтейства":
