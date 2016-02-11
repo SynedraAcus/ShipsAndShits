@@ -15,7 +15,7 @@ screen map_screen():
     if gl_no_rollback:
         $ renpy.block_rollback()
     imagemap:
-        auto 'images/1024map_%s.png'
+        auto 'images/1129map_%s.png'
         #  Main cities
         hotspot monet.hotspot action Travel(monet)
         hotspot tartari.hotspot action Travel(tartari)
