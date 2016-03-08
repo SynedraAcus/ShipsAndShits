@@ -411,6 +411,36 @@ label start:
                 "Протестировать конфликт":
                     nvl clear
                     jump new_conflict
+                "Протестировать weighted_random":
+                    nvl clear
+                    jump weighted
+
+
+###################################
+#Debug submenus
+###################################
+
+label weighted:
+    nvl clear
+    "В этом разделе мы тестируем процедуру weighted_random. Работает она следующим образом:"
+    "r = weighted_random((item1, weight1), (item2, weight2), ... (itemN, weightN))"
+    "Веса работают точно так же, как в случае с ивентами. На данный момент мы будем тестировать следующую конструкцию:"
+    "r = weighted_random((('label1', 1), ('label2', 2), ('label3', 3)))\nrenpy.jump(r)"
+    menu:
+        "Поехали!":
+            $r = weighted_random((('label1', 1), ('label2', 2), ('label3', 3)))
+            $renpy.jump(r)
+        "Вернуться в предыдущее меню":
+            jump debug_menu
+    label label1:
+        "label1"
+        jump weighted
+    label label2:
+        "label2"
+        jump weighted
+    label label3:
+        "label3"
+        jump weighted
 
 label new_conflict:
     nvl clear

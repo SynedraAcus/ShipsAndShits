@@ -63,6 +63,22 @@ transform shiptransform(old_coords, coords):
 
 init -5 python:
 
+    def weighted_random(elements):
+        """
+        Weighted random element selector. Takes a list of (item, weight) tuples and returns a single item.
+        The probability of the item being returned is proportional to its weight.
+        """
+        assert type(elements) is list
+        r = renpy.random.randint(0, sum(x[1] for x in elements))
+        s = 0
+        ret = None
+        for x in elements:
+            s += x[1]
+            if r<s:
+                return x[0]
+        return x[0]  #   In case the very highest value was rolled
+
+
     def leave_node():
         """
         A simple function that calls current node's _quit label
