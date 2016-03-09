@@ -936,7 +936,7 @@ init -3 python:
             This table requires no activity
             :return:
             """
-            pass
+            renpy.redraw(self, 0)
 
         def finalize_success(self):
             pass
