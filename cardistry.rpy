@@ -511,7 +511,7 @@ init -3 python:
             super(DeckStack, self).__init__(**kwargs)
 
         def accept(self, card, origin=None):
-            return True
+            return False
 
         def give(self, card):
             return True
