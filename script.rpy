@@ -417,11 +417,16 @@ label start:
                     jump weighted
                 "Протестировать новый экран колоды":
                     nvl clear
-                    $ init_deck_table()
+                    jump deck_view
 
 ###################################
 #Debug submenus
 ###################################
+
+label deck_view:
+    $ init_deck_table()
+    "Тут будет статистика карт"
+    jump debug_menu
 
 label weighted:
     nvl clear

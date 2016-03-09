@@ -317,7 +317,7 @@ init -3 python:
         def position_next_card(self, card):
             """
             Return position of the next card to be added
-            Places the next card 50 px under the last one, no matter what. Children should provide more reasonable
+            Places the next card 50 px under the lowest one, no matter what. Children should provide more reasonable
             positioning algorithms.
             """
             if len(self.card_list) == 0:
@@ -333,8 +333,6 @@ init -3 python:
             Initially position cards for cardbox.
             As with previous method, doesn't particularly care about design and shit
             """
-            #  Card list is not a property of objects! It's a parameter
-            #  Yes, it does get property as a param, but doesn't require it directly
             x = self.x + self.xsize/2 - 100
             y = self.y + 10
             self.card_list[0].get_displayable().transform.xpos = x
@@ -342,7 +340,6 @@ init -3 python:
             self.card_list[0].get_displayable().transform.update()
             for card in self.card_list[1:]:
                 y += 40
-                #x += renpy.random.randint(-7, 7)
                 card.get_displayable().transform.xpos = x
                 card.get_displayable().transform.ypos = y
                 card.get_displayable().transform.update()
@@ -505,16 +502,16 @@ init -3 python:
                 return False
 
 
-    class BasicStack(Cardbox):
+    class DeckStack(Cardbox):
         """
         Stack that gives all cards and accepts none, but contains no more logic.
         Used in Deck screen
         """
         def __init__(self, **kwargs):
-            super(BasicStack, self).__init__(**kwargs)
+            super(DeckStack, self).__init__(**kwargs)
 
         def accept(self, card, origin=None):
-            return False
+            return True
 
         def give(self, card):
             return True
@@ -702,9 +699,9 @@ init -3 python:
                     for card in self.cards:
                         if card.maximized:
                             card.minimize()
-                            renpy.restart_interaction()
+                renpy.restart_interaction()
 
-            if ev.type == pygame.MOUSEMOTION and self.dragged is not None:
+            elif ev.type == pygame.MOUSEMOTION and self.dragged is not None:
                 #  Just redrawing card in hand
                 self.dragged.maximize()
                 self.dragged.get_displayable().transform.xpos = x + self.dragged.get_displayable().x_offset
@@ -712,7 +709,7 @@ init -3 python:
                 self.dragged.get_displayable().transform.update()
                 renpy.restart_interaction()
 
-            if ev.type == pygame.MOUSEBUTTONUP and ev.button == 1:
+            elif ev.type == pygame.MOUSEBUTTONUP and ev.button == 1:
                 if abs(x - self.drag_start[0]) > 7 or abs(y - self.drag_start[1]) > 7:
                     #  If it was a long enough drag
                     if self.dragged is not None:
@@ -770,8 +767,12 @@ init -3 python:
                                 old_stack.remove(self.dragged)
                                 new_stack.append(self.dragged)
                                 self.dragged.stack = new_stack.id
+                        else:
+                            #  If the card was expanded, but it cannot be played
+                            self.dragged.minimize()
                         #  Release dragged card anyway
                         self.dragged = None
+                        renpy.restart_interaction()
 
                 #  Restart interaction to check for success, flip exit button state, etc.
                 renpy.restart_interaction()
@@ -923,8 +924,8 @@ init -3 python:
 
     class DeckTable(Table):
         """
-        The Table for a deck view. Contains 4 non-active Cardboxes (one for each suit).
-        Also has a small display space for value sums on the right
+        The Table for a deck view. Is expected to contain 4 non-active Cardboxes (one for each suit).
+        Also has a small display space for value sums and such
         """
         def __init__(self, **kwargs):
             super(DeckTable, self).__init__(**kwargs)
@@ -932,7 +933,7 @@ init -3 python:
 
         def per_interact(self):
             """
-            This table demands no activity
+            This table requires no activity
             :return:
             """
             pass
@@ -1104,23 +1105,23 @@ init -1 python:
         global player_deck
         global deck_table
         #  Defining 4 separate stacks, one for each suit
-        money_stack = BasicStack(card_list=[x for x in player_deck if x.suit==u'Деньги'],
-                                 stack_id='MONEY', accept_from=None,
-                                 x=100, xsize=200,
-                                 y=100, ysize=500)
-        force_stack = BasicStack(card_list=[x for x in player_deck if x.suit == u'Сила'],
-                                 stack_id='FORCE', accept_from=None,
-                                 x=350, xsize=200,
-                                 y=100, ysize=500)
-        intrigue_stack = BasicStack(card_list=[x for x in player_deck if x.suit == u'Интриги'],
-                                    stack_id='INTRIGUE', accept_from=None,
-                                    x=600, xsize=200,
-                                    y=100, ysize=500)
-        knowledge_stack=BasicStack(card_list=[x for x in player_deck if x.suit == u'Знания'],
-                                   stack_id='KNOWLEDGE', accept_from=None,
-                                   x=850, xsize=200,
+        money_stack = DeckStack(card_list=[x for x in player_deck if x.suit == u'Деньги'],
+                                stack_id='MONEY', #accept_from=None,
+                                x=100, xsize=200,
+                                y=100, ysize=500)
+        force_stack = DeckStack(card_list=[x for x in player_deck if x.suit == u'Сила'],
+                                stack_id='FORCE', accept_from=None,
+                                x=350, xsize=200,
+                                y=100, ysize=500)
+        intrigue_stack = DeckStack(card_list=[x for x in player_deck if x.suit == u'Интриги'],
+                                   stack_id='INTRIGUE', accept_from=None,
+                                   x=600, xsize=200,
                                    y=100, ysize=500)
-        deck_table = DeckTable(stacks=[money_stack, force_stack, intrigue_stack, knowledge_stack])
+        knowledge_stack=DeckStack(card_list=[x for x in player_deck if x.suit == u'Знания'],
+                                  stack_id='KNOWLEDGE', accept_from=None,
+                                  x=850, xsize=200,
+                                  y=100, ysize=500)
+        deck_table = DeckTable(stacks=[money_stack, force_stack, intrigue_stack, knowledge_stack], automove={})
         renpy.show_screen('deck_screen')
 
 
