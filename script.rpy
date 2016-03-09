@@ -425,7 +425,7 @@ label start:
 
 label deck_view:
     $ init_deck_table()
-    "Тут будет статистика карт"
+    "Колода"
     jump debug_menu
 
 label weighted:

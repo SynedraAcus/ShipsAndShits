@@ -1,5 +1,5 @@
 # Everything related to the card conflict mechanics
-# ASDF
+
 init -3 python:
     import math
     SUITS={u'С':u'Сила',
@@ -11,8 +11,9 @@ init -3 python:
     SPENDABLE_COLOR = '#AAA'
     PERMANENT_COLOR = '#DEC666'
     COST_QOTIENT = 1.5 #  Cost-to-nominal ratio for trading system
-    # Card-related classes: card itself and an action
 
+# Card-related classes: card itself and an action
+"Тут будет статистика карт"
     class Card(object):
         """
         Card for the game. This class contains value, suit and handles showing the correct displayable.
@@ -34,7 +35,7 @@ init -3 python:
                 self.cost = number
             self.init_displayables()
 
-        #  Displayables-related method
+        #  Displayables-related methods
         def init_displayables(self):
             """
             Initialize card displayables
@@ -203,7 +204,6 @@ init -3 python:
             self.x_offset = 0
             self.y_offset = 0
             self.transform.update()
-            # self.transform = Transform(child=self) #, xpos=self.xpos, ypos=self.ypos)
 
         def render(self, width, height, st, at):
             """
@@ -300,12 +300,6 @@ init -3 python:
                 self.accept_from = accept_from
             # Rest of it
             self.card_list = sorted(card_list, key=lambda x: x.number)
-            # for card in self.card_list:
-            #     card.minimize()
-            #     # card.get_displayable().reinit_transform()
-            #     # (card.get_displayable().transform.xpos, card.get_displayable().transform.ypos) = self.position_next_card(card)
-            #     card.stack = stack_id
-            #     # self.card_list.append(card)
             if self.card_list:
                 for card in self.card_list:
                     card.minimize()
@@ -448,8 +442,6 @@ init -3 python:
             Return position of the next card to be added
             Takes current card positions into account
             """
-            #max_y = max((c.y for c in self.card_list))
-            #return(int(self.x+self.xsize/2), max_y+50)
             # If there is no card list, add card to the top
             if self.card_list == []:
                 return int(self.x+self.xsize/2-100), self.y + 50
@@ -1020,16 +1012,6 @@ init -3 python:
             global withheld
             return paid >= withheld
 
-    # class HideConflictSuccess(Action):
-    #     def __init__(self):
-    #         pass
-    #
-    #     def get_sensitive(self):
-    #         return True
-    #
-    #     def __call__(self):
-    #         renpy.hide_screen('coflict_table_screen')
-    #         renpy.hide_screen('conflict_success_screen')
 
 #  Table button screens. Separate because buttons inside CDD are a godawful mess
 
