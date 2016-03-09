@@ -929,7 +929,31 @@ init -3 python:
         """
         def __init__(self, **kwargs):
             super(DeckTable, self).__init__(**kwargs)
-            pass
+            # Initializing stack description lines
+            self.money_line = Text(u'Деньги: {0} ({1})'.format(sum((x.number for x in self.get_stack_by_id('MONEY').card_list)),
+                                                                  len(self.get_stack_by_id('MONEY').card_list)),
+                                   color='#6A3819', size=30)
+            self.force_line = Text(u'Сила: {0} ({1})'.format(sum((x.number for x in self.get_stack_by_id('FORCE').card_list)),
+                                                                  len(self.get_stack_by_id('FORCE').card_list)),
+                                   color='#6A3819', size=30)
+            self.intrigue_line = Text(u'Интриги: {0} ({1})'.format(sum((x.number for x in self.get_stack_by_id('INTRIGUE').card_list)),
+                                                                  len(self.get_stack_by_id('INTRIGUE').card_list)),
+                                   color='#6A3819', size=30)
+            self.knowledge_line = Text(u'Знания: {0} ({1})'.format(sum((x.number for x in self.get_stack_by_id('KNOWLEDGE').card_list)),
+                                                                  len(self.get_stack_by_id('KNOWLEDGE').card_list)),
+                                   color='#6A3819', size=30)
+
+        def render(self, width, height, st, at):
+            render = super(DeckTable, self).render(width, height, st, at)
+            money_line_render = renpy.render(self.money_line, width, height, st, at)
+            force_line_render = renpy.render(self.force_line, width, height, st, at)
+            intrigue_line_render = renpy.render(self.intrigue_line, width, height, st, at)
+            knowledge_line_render = renpy.render(self.knowledge_line, width, height, st, at)
+            render.blit(money_line_render, (100, 620))
+            render.blit(force_line_render, (350, 620))
+            render.blit(intrigue_line_render, (600, 620))
+            render.blit(knowledge_line_render, (850, 620))
+            return render
 
         def per_interact(self):
             """
@@ -937,6 +961,15 @@ init -3 python:
             :return:
             """
             renpy.redraw(self, 0)
+
+        def visit(self):
+            """
+            Return all the children of this Table
+            :return:
+            """
+            ret = super(DeckTable, self).visit()
+            return ret
+            ret.extend((self.money_line, self.force_line. self.intrigue_line, self.knowledge_line))
 
         def finalize_success(self):
             pass
