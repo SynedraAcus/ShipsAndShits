@@ -507,17 +507,14 @@ init -3 python:
 
     class BasicStack(Cardbox):
         """
-        Stack that accepts and gives all cards, but contains no more logic.
-        Useful every once in a while, for debug mostly
+        Stack that gives all cards and accepts none, but contains no more logic.
+        Used in Deck screen
         """
         def __init__(self, **kwargs):
             super(BasicStack, self).__init__(**kwargs)
 
         def accept(self, card, origin=None):
-            if origin in self.accept_from:
-                return True
-            else:
-                return False
+            return False
 
         def give(self, card):
             return True
@@ -924,6 +921,25 @@ init -3 python:
                     player_deck.remove(card)
             renpy.show_screen('conflict_success_screen')
 
+    class DeckTable(Table):
+        """
+        The Table for a deck view. Contains 4 non-active Cardboxes (one for each suit).
+        Also has a small display space for value sums on the right
+        """
+        def __init__(self, **kwargs):
+            super(DeckTable, self).__init__(**kwargs)
+            pass
+
+        def per_interact(self):
+            """
+            This table demands no activity
+            :return:
+            """
+            pass
+
+        def finalize_success(self):
+            pass
+
 
     #  Action classes for button screens
 
@@ -1080,6 +1096,34 @@ init -1 python:
         renpy.show_screen('trade_screen')
         renpy.show_screen('trade_buttons_screen')
 
+    def init_deck_table():
+        """
+        Initialize a deck view screen and show it
+        :return:
+        """
+        global player_deck
+        global deck_table
+        #  Defining 4 separate stacks, one for each suit
+        money_stack = BasicStack(card_list=[x for x in player_deck if x.suit==u'Деньги'],
+                                 stack_id='MONEY', accept_from=None,
+                                 x=100, xsize=200,
+                                 y=100, ysize=500)
+        force_stack = BasicStack(card_list=[x for x in player_deck if x.suit == u'Сила'],
+                                 stack_id='FORCE', accept_from=None,
+                                 x=350, xsize=200,
+                                 y=100, ysize=500)
+        intrigue_stack = BasicStack(card_list=[x for x in player_deck if x.suit == u'Интриги'],
+                                    stack_id='INTRIGUE', accept_from=None,
+                                    x=600, xsize=200,
+                                    y=100, ysize=500)
+        knowledge_stack=BasicStack(card_list=[x for x in player_deck if x.suit == u'Знания'],
+                                   stack_id='KNOWLEDGE', accept_from=None,
+                                   x=850, xsize=200,
+                                   y=100, ysize=500)
+        deck_table = DeckTable(stacks=[money_stack, force_stack, intrigue_stack, knowledge_stack])
+        renpy.show_screen('deck_screen')
+
+
 
 init:
     screen trade_screen():
@@ -1091,3 +1135,8 @@ init:
         modal True
         zorder 9
         add conflict_table
+
+    screen deck_screen():
+        modal True
+        zorder 9
+        add deck_table

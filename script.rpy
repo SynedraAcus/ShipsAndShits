@@ -17,6 +17,7 @@ init -2 python:
     # Initialising new conflict variables
     trade_table = None #  If no init_* functions were called before new screens, this will break
     conflict_table = None
+    deck_table = None
     # Globals for new trade system
     paid = 0
     withheld = 0
@@ -414,7 +415,9 @@ label start:
                 "Протестировать weighted_random":
                     nvl clear
                     jump weighted
-
+                "Протестировать новый экран колоды":
+                    nvl clear
+                    $ init_deck_table()
 
 ###################################
 #Debug submenus
