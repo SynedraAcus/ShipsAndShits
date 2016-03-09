@@ -12,8 +12,7 @@ init -3 python:
     PERMANENT_COLOR = '#DEC666'
     COST_QOTIENT = 1.5 #  Cost-to-nominal ratio for trading system
 
-# Card-related classes: card itself and an action
-"Тут будет статистика карт"
+    # Card-related classes: card itself and an action
     class Card(object):
         """
         Card for the game. This class contains value, suit and handles showing the correct displayable.
@@ -1042,6 +1041,14 @@ screen conflict_failure_screen():
         xalign 0.5
         yalign 0.5
 
+screen deck_hide_screen:
+    zorder 10
+    textbutton u"Колода":
+        action [Hide('deck_screen'), Hide('deck_hide_screen')]
+        xalign 0.5
+        xanchor 0.5
+        yalign 0.95
+
 ## Table init procedures
 
 init -1 python:
@@ -1138,6 +1145,7 @@ init -1 python:
                                   y=100, ysize=500)
         deck_table = DeckTable(stacks=[money_stack, force_stack, intrigue_stack, knowledge_stack], automove={})
         renpy.show_screen('deck_screen')
+        renpy.show_screen('deck_hide_screen')
 
 
 
