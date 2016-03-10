@@ -640,6 +640,7 @@ init -3 python:
             self.cards = []
             for x in self.stacks:
                 self.cards.extend(x.card_list)
+            self.old_position = len(self.cards) - 1
             self.drag_text = Text('None dragged')
             self.dragged = None
             self.drag_start = (0, 0)
@@ -681,8 +682,11 @@ init -3 python:
                         self.dragged.get_displayable().y_offset = self.dragged.get_displayable().transform.ypos - y
                         #  Show dragged on the top of other cards
                         #  But remember where it was just in case
-                        self.old_position = self.cards.index(self.dragged)
-                        self.cards.append(self.cards.pop(self.old_position))
+                        if self.cards.index(self.dragged) < len(self.cards)-1:
+                            #  If the card is already in the latest position, this piece is unnecessary.
+                            #  Even worse, it risks overwriting the valuable self.old_position, which harms DeckScreen
+                            self.old_position = self.cards.index(self.dragged)
+                            self.cards.append(self.cards.pop(self.old_position))
                         card_clicked = True
                         break  #  No need to move two cards at the same time
                 if not card_clicked:
