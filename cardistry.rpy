@@ -689,6 +689,8 @@ init -3 python:
                     #  If no card was clicked on, look for any maximized cards and minimize them
                     for card in self.cards:
                         if card.maximized:
+                            self.cards.insert(self.old_position, card)
+                            self.cards.pop()
                             card.minimize()
                 renpy.restart_interaction()
 
@@ -725,6 +727,7 @@ init -3 python:
                             self.dragged.get_displayable().transform.ypos = self.initial_card_position[1]
                             self.cards.pop()
                             self.cards.insert(self.old_position, self.dragged)
+
                         #  Dragging has ended somehow anyway
 
                         self.dragged.minimize()
@@ -760,6 +763,8 @@ init -3 python:
                                 self.dragged.stack = new_stack.id
                         else:
                             #  If the card was expanded, but it cannot be played
+                            self.cards.insert(self.old_position, self.dragged)
+                            self.cards.pop()
                             self.dragged.minimize()
                         #  Release dragged card anyway
                         self.dragged = None
