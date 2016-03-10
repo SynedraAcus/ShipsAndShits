@@ -170,7 +170,7 @@ screen nvl(dialogue, items=None):
 
     #add SideImage() xalign 0.0 yalign 1.0
     use quick_menu
-    textbutton u"Колода" action Show('collection'):
+    textbutton u"Колода" action Function(init_deck_table):
         xalign 0.5
         xanchor 0.5
         yalign 0.95

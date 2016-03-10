@@ -1,5 +1,5 @@
 # Everything related to the card conflict mechanics
-# ASDF
+
 init -3 python:
     import math
     SUITS={u'С':u'Сила',
@@ -11,8 +11,8 @@ init -3 python:
     SPENDABLE_COLOR = '#AAA'
     PERMANENT_COLOR = '#DEC666'
     COST_QOTIENT = 1.5 #  Cost-to-nominal ratio for trading system
-    # Card-related classes: card itself and an action
 
+    # Card-related classes: card itself and an action
     class Card(object):
         """
         Card for the game. This class contains value, suit and handles showing the correct displayable.
@@ -34,7 +34,7 @@ init -3 python:
                 self.cost = number
             self.init_displayables()
 
-        #  Displayables-related method
+        #  Displayables-related methods
         def init_displayables(self):
             """
             Initialize card displayables
@@ -203,7 +203,6 @@ init -3 python:
             self.x_offset = 0
             self.y_offset = 0
             self.transform.update()
-            # self.transform = Transform(child=self) #, xpos=self.xpos, ypos=self.ypos)
 
         def render(self, width, height, st, at):
             """
@@ -300,12 +299,6 @@ init -3 python:
                 self.accept_from = accept_from
             # Rest of it
             self.card_list = sorted(card_list, key=lambda x: x.number)
-            # for card in self.card_list:
-            #     card.minimize()
-            #     # card.get_displayable().reinit_transform()
-            #     # (card.get_displayable().transform.xpos, card.get_displayable().transform.ypos) = self.position_next_card(card)
-            #     card.stack = stack_id
-            #     # self.card_list.append(card)
             if self.card_list:
                 for card in self.card_list:
                     card.minimize()
@@ -317,7 +310,7 @@ init -3 python:
         def position_next_card(self, card):
             """
             Return position of the next card to be added
-            Places the next card 50 px under the last one, no matter what. Children should provide more reasonable
+            Places the next card 50 px under the lowest one, no matter what. Children should provide more reasonable
             positioning algorithms.
             """
             if len(self.card_list) == 0:
@@ -333,8 +326,6 @@ init -3 python:
             Initially position cards for cardbox.
             As with previous method, doesn't particularly care about design and shit
             """
-            #  Card list is not a property of objects! It's a parameter
-            #  Yes, it does get property as a param, but doesn't require it directly
             x = self.x + self.xsize/2 - 100
             y = self.y + 10
             self.card_list[0].get_displayable().transform.xpos = x
@@ -342,7 +333,6 @@ init -3 python:
             self.card_list[0].get_displayable().transform.update()
             for card in self.card_list[1:]:
                 y += 40
-                #x += renpy.random.randint(-7, 7)
                 card.get_displayable().transform.xpos = x
                 card.get_displayable().transform.ypos = y
                 card.get_displayable().transform.update()
@@ -451,8 +441,6 @@ init -3 python:
             Return position of the next card to be added
             Takes current card positions into account
             """
-            #max_y = max((c.y for c in self.card_list))
-            #return(int(self.x+self.xsize/2), max_y+50)
             # If there is no card list, add card to the top
             if self.card_list == []:
                 return int(self.x+self.xsize/2-100), self.y + 50
@@ -505,19 +493,16 @@ init -3 python:
                 return False
 
 
-    class BasicStack(Cardbox):
+    class DeckStack(Cardbox):
         """
-        Stack that accepts and gives all cards, but contains no more logic.
-        Useful every once in a while, for debug mostly
+        Stack that gives all cards and accepts none, but contains no more logic.
+        Used in Deck screen
         """
         def __init__(self, **kwargs):
-            super(BasicStack, self).__init__(**kwargs)
+            super(DeckStack, self).__init__(**kwargs)
 
         def accept(self, card, origin=None):
-            if origin in self.accept_from:
-                return True
-            else:
-                return False
+            return False
 
         def give(self, card):
             return True
@@ -705,9 +690,9 @@ init -3 python:
                     for card in self.cards:
                         if card.maximized:
                             card.minimize()
-                            renpy.restart_interaction()
+                renpy.restart_interaction()
 
-            if ev.type == pygame.MOUSEMOTION and self.dragged is not None:
+            elif ev.type == pygame.MOUSEMOTION and self.dragged is not None:
                 #  Just redrawing card in hand
                 self.dragged.maximize()
                 self.dragged.get_displayable().transform.xpos = x + self.dragged.get_displayable().x_offset
@@ -715,7 +700,7 @@ init -3 python:
                 self.dragged.get_displayable().transform.update()
                 renpy.restart_interaction()
 
-            if ev.type == pygame.MOUSEBUTTONUP and ev.button == 1:
+            elif ev.type == pygame.MOUSEBUTTONUP and ev.button == 1:
                 if abs(x - self.drag_start[0]) > 7 or abs(y - self.drag_start[1]) > 7:
                     #  If it was a long enough drag
                     if self.dragged is not None:
@@ -773,8 +758,12 @@ init -3 python:
                                 old_stack.remove(self.dragged)
                                 new_stack.append(self.dragged)
                                 self.dragged.stack = new_stack.id
+                        else:
+                            #  If the card was expanded, but it cannot be played
+                            self.dragged.minimize()
                         #  Release dragged card anyway
                         self.dragged = None
+                        renpy.restart_interaction()
 
                 #  Restart interaction to check for success, flip exit button state, etc.
                 renpy.restart_interaction()
@@ -924,6 +913,58 @@ init -3 python:
                     player_deck.remove(card)
             renpy.show_screen('conflict_success_screen')
 
+    class DeckTable(Table):
+        """
+        The Table for a deck view. Is expected to contain 4 non-active Cardboxes (one for each suit).
+        Also has a small display space for value sums and such
+        """
+        def __init__(self, **kwargs):
+            super(DeckTable, self).__init__(**kwargs)
+            # Initializing stack description lines
+            self.money_line = Text(u'Деньги: {0} ({1})'.format(sum((x.number for x in self.get_stack_by_id('MONEY').card_list)),
+                                                                  len(self.get_stack_by_id('MONEY').card_list)),
+                                   color='#6A3819', size=30)
+            self.force_line = Text(u'Сила: {0} ({1})'.format(sum((x.number for x in self.get_stack_by_id('FORCE').card_list)),
+                                                                  len(self.get_stack_by_id('FORCE').card_list)),
+                                   color='#6A3819', size=30)
+            self.intrigue_line = Text(u'Интриги: {0} ({1})'.format(sum((x.number for x in self.get_stack_by_id('INTRIGUE').card_list)),
+                                                                  len(self.get_stack_by_id('INTRIGUE').card_list)),
+                                   color='#6A3819', size=30)
+            self.knowledge_line = Text(u'Знания: {0} ({1})'.format(sum((x.number for x in self.get_stack_by_id('KNOWLEDGE').card_list)),
+                                                                  len(self.get_stack_by_id('KNOWLEDGE').card_list)),
+                                   color='#6A3819', size=30)
+
+        def render(self, width, height, st, at):
+            render = super(DeckTable, self).render(width, height, st, at)
+            money_line_render = renpy.render(self.money_line, width, height, st, at)
+            force_line_render = renpy.render(self.force_line, width, height, st, at)
+            intrigue_line_render = renpy.render(self.intrigue_line, width, height, st, at)
+            knowledge_line_render = renpy.render(self.knowledge_line, width, height, st, at)
+            render.blit(money_line_render, (100, 620))
+            render.blit(force_line_render, (350, 620))
+            render.blit(intrigue_line_render, (600, 620))
+            render.blit(knowledge_line_render, (850, 620))
+            return render
+
+        def per_interact(self):
+            """
+            This table requires no activity
+            :return:
+            """
+            renpy.redraw(self, 0)
+
+        def visit(self):
+            """
+            Return all the children of this Table
+            :return:
+            """
+            ret = super(DeckTable, self).visit()
+            return ret
+            ret.extend((self.money_line, self.force_line. self.intrigue_line, self.knowledge_line))
+
+        def finalize_success(self):
+            pass
+
 
     #  Action classes for button screens
 
@@ -970,16 +1011,6 @@ init -3 python:
             global withheld
             return paid >= withheld
 
-    # class HideConflictSuccess(Action):
-    #     def __init__(self):
-    #         pass
-    #
-    #     def get_sensitive(self):
-    #         return True
-    #
-    #     def __call__(self):
-    #         renpy.hide_screen('coflict_table_screen')
-    #         renpy.hide_screen('conflict_success_screen')
 
 #  Table button screens. Separate because buttons inside CDD are a godawful mess
 
@@ -1009,6 +1040,14 @@ screen conflict_failure_screen():
         action [Hide('conflict_table_screen'), Hide('conflict_failure_screen')]
         xalign 0.5
         yalign 0.5
+
+screen deck_hide_screen:
+    zorder 10
+    textbutton u"Колода":
+        action [Hide('deck_screen'), Hide('deck_hide_screen')]
+        xalign 0.5
+        xanchor 0.5
+        yalign 0.95
 
 ## Table init procedures
 
@@ -1080,6 +1119,35 @@ init -1 python:
         renpy.show_screen('trade_screen')
         renpy.show_screen('trade_buttons_screen')
 
+    def init_deck_table():
+        """
+        Initialize a deck view screen and show it
+        :return:
+        """
+        global player_deck
+        global deck_table
+        #  Defining 4 separate stacks, one for each suit
+        money_stack = DeckStack(card_list=[x for x in player_deck if x.suit == u'Деньги'],
+                                stack_id='MONEY', #accept_from=None,
+                                x=100, xsize=200,
+                                y=100, ysize=500)
+        force_stack = DeckStack(card_list=[x for x in player_deck if x.suit == u'Сила'],
+                                stack_id='FORCE', accept_from=None,
+                                x=350, xsize=200,
+                                y=100, ysize=500)
+        intrigue_stack = DeckStack(card_list=[x for x in player_deck if x.suit == u'Интриги'],
+                                   stack_id='INTRIGUE', accept_from=None,
+                                   x=600, xsize=200,
+                                   y=100, ysize=500)
+        knowledge_stack=DeckStack(card_list=[x for x in player_deck if x.suit == u'Знания'],
+                                  stack_id='KNOWLEDGE', accept_from=None,
+                                  x=850, xsize=200,
+                                  y=100, ysize=500)
+        deck_table = DeckTable(stacks=[money_stack, force_stack, intrigue_stack, knowledge_stack], automove={})
+        renpy.show_screen('deck_screen')
+        renpy.show_screen('deck_hide_screen')
+
+
 
 init:
     screen trade_screen():
@@ -1091,3 +1159,8 @@ init:
         modal True
         zorder 9
         add conflict_table
+
+    screen deck_screen():
+        modal True
+        zorder 9
+        add deck_table

@@ -17,6 +17,7 @@ init -2 python:
     # Initialising new conflict variables
     trade_table = None #  If no init_* functions were called before new screens, this will break
     conflict_table = None
+    deck_table = None
     # Globals for new trade system
     paid = 0
     withheld = 0
@@ -514,6 +515,43 @@ label start:
                 "Протестировать конфликт":
                     nvl clear
                     jump new_conflict
+                "Протестировать weighted_random":
+                    nvl clear
+                    jump weighted
+                "Протестировать новый экран колоды":
+                    nvl clear
+                    jump deck_view
+
+###################################
+#Debug submenus
+###################################
+
+label deck_view:
+    $ init_deck_table()
+    "Колода"
+    jump debug_menu
+
+label weighted:
+    nvl clear
+    "В этом разделе мы тестируем процедуру weighted_random. Работает она следующим образом:"
+    "r = weighted_random((item1, weight1), (item2, weight2), ... (itemN, weightN))"
+    "Веса работают точно так же, как в случае с ивентами. На данный момент мы будем тестировать следующую конструкцию:"
+    "r = weighted_random((('label1', 1), ('label2', 2), ('label3', 3)))\nrenpy.jump(r)"
+    menu:
+        "Поехали!":
+            $r = weighted_random((('label1', 1), ('label2', 2), ('label3', 3)))
+            $renpy.jump(r)
+        "Вернуться в предыдущее меню":
+            jump debug_menu
+    label label1:
+        "label1"
+        jump weighted
+    label label2:
+        "label2"
+        jump weighted
+    label label3:
+        "label3"
+        jump weighted
 
 label new_conflict:
     nvl clear
