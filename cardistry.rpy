@@ -608,7 +608,7 @@ init -3 python:
                return int(self.x+self.xsize/2-100), self.y
             if self.ysize + self.y - self.last_y <= 140:
                 #  if one more card will not fit in the desk
-                self.last_x += 100
+                self.last_x += 110
                 self.last_y = self.y-40 # It will be added back right in the next line
             return(self.last_x, self.last_y+40)
 
