@@ -517,7 +517,7 @@ init -3 python:
                 l = len([x for x in kwargs['card_list'] if x.suit == suit])
                 if l>0:
                     lengths[suit] = (l-1)*40 + 100 #  Length in pixels
-            self.next_pos = {}
+            self.last_pos = {}
             x = kwargs['x']
             y = kwargs['y'] + 10
             if sum(lengths.values()) < kwargs['xsize']:
@@ -525,7 +525,7 @@ init -3 python:
                 spacer_len = (kwargs['xsize'] - sum(lengths.values()))/(len(lengths)+1)
                 for suit in sorted(lengths.keys()):
                     x += spacer_len
-                    self.next_pos[suit] = [x, y]
+                    self.last_pos[suit] = [x, y]
                     x += lengths[suit]
             else:
                 #  TO DO: add multiline positioning
@@ -539,14 +539,16 @@ init -3 python:
             return True
 
         def position_next_card(self, card):
-            self.next_pos[card.suit][0] += 40
-            return self.next_pos[card.suit]
+            self.last_pos[card.suit][0] += 40
+            return self.last_pos[card.suit]
 
     class OpponentConflictStack(Cardbox):
         """
         Opponent hand for conflict
         """
         def __init__(self, **kwargs):
+            self.last_pos=[kwargs['x'] + kwargs['xsize']/2 - (40*(len(kwargs['card_list'])-1)+100)/2,
+                           kwargs['y']+10]
             super(OpponentConflictStack, self).__init__(**kwargs)
 
         def accept(self, card, origin=None):
@@ -555,23 +557,9 @@ init -3 python:
         def give(self, card):
             return False
 
-        def position_cards(self):
-            """
-            Position cards for an opponent conflict stack. Much like Cardbox.position_cards(), but places
-            cards horizontally rather than vertically
-            """
-            x = self.x + self.xsize/2 - (40*(len(self.card_list)-1)+100)/2
-            y = self.y + 10
-            self.card_list[0].get_displayable().transform.xpos = x
-            self.card_list[0].get_displayable().transform.ypos = y
-            self.card_list[0].get_displayable().transform.update()
-            for card in self.card_list[1:]:
-                #y += renpy.random.randint(-7, 7)
-                x += 40
-                card.get_displayable().transform.xpos = x
-                card.get_displayable().transform.ypos = y
-                card.get_displayable().transform.update()
-
+        def position_next_card(self, card):
+            self.last_pos[0] += 40
+            return self.last_pos
 
     class MidStack(Cardbox):
         """
