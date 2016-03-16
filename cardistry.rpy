@@ -490,7 +490,7 @@ init -3 python:
     class DeckStack(Cardbox):
         """
         Stack that gives all cards and accepts none, but contains no more logic.
-        Used in Deck screen
+        Used in Deck screen. Giving is necessary to allow dragging cards
         """
         def __init__(self, **kwargs):
             super(DeckStack, self).__init__(**kwargs)
@@ -505,8 +505,31 @@ init -3 python:
             super(DeckStack, self).position_next_card(card)
 
     class PlayerConflictStack(Cardbox):
-        #  Player hand for conflict screen
+        """
+        Player hand for conflict screen. Does not accept cards and positioning may break if this rule is violated!
+        """
         def __init__(self, **kwargs):
+            #  Setting starting points for card placement. This should be done before super.__init__
+            #  (and, thus, self.position_next_card) is called
+            suits = set(x.suit for x in kwargs['card_list'])
+            lengths = {}
+            for suit in suits:
+                l = len([x for x in kwargs['card_list'] if x.suit == suit])
+                if l>0:
+                    lengths[suit] = (l-1)*40 + 100 #  Length in pixels
+            self.next_pos = {}
+            x = kwargs['x']
+            y = kwargs['y'] + 10
+            if sum(lengths.values()) < kwargs['xsize']:
+                #  All lines fit in a single row
+                spacer_len = (kwargs['xsize'] - sum(lengths.values()))/(len(lengths)+1)
+                for suit in sorted(lengths.keys()):
+                    x += spacer_len
+                    self.next_pos[suit] = [x, y]
+                    x += lengths[suit]
+            else:
+                #  TO DO: add multiline positioning
+                raise NotImplementedError('Cannot use more than one line of cards')
             super(PlayerConflictStack, self).__init__(**kwargs)
 
         def accept(self, card, origin=None):
@@ -515,35 +538,9 @@ init -3 python:
         def give(self, card):
             return True
 
-        def position_cards(self):
-            #  Defining starting points for all suits available in set
-            suits = set(x.suit for x in self.card_list)
-            lengths = {}
-            for suit in suits:
-                l = len([x for x in self.card_list if x.suit == suit])
-                if l>0:
-                    lengths[suit] = (l-1)*40 + 100 #  Length in pixels
-            starting_points = {}
-            x = self.x
-            y = self.y + 10
-            if sum(lengths.values()) < self.xsize:
-                #  All lines fit in a single row
-                spacer_len = (self.xsize - sum(lengths.values()))/(len(lengths)+1)
-                for suit in sorted(lengths.keys()):
-                    x += spacer_len
-                    starting_points[suit] = (x, y)
-                    x += lengths[suit]
-            #  TO DO: add multiline positioning
-            else:
-                raise NotImplementedError('Cannot use more than one line of cards')
-            for suit in lengths.keys():
-                (x, y) = starting_points[suit]
-                for card in (c for c in self.card_list if c.suit == suit):
-                    card.get_displayable().transform.xpos = x
-                    card.get_displayable().transform.ypos = y
-                    card.get_displayable().transform.update()
-                    x+=40
-                    # y+=renpy.random.randint(-5,5)
+        def position_next_card(self, card):
+            self.next_pos[card.suit][0] += 40
+            return self.next_pos[card.suit]
 
     class OpponentConflictStack(Cardbox):
         """
