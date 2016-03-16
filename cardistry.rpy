@@ -443,19 +443,6 @@ init -3 python:
             paid -= card.number
             super(PlayerOfferStack, self).remove(card)
 
-        def position_next_card(self, card):
-            """
-            Return position of the next card to be added
-            Takes current card positions into account
-            """
-            # If there is no card list, add card to the top
-            if self.card_list == []:
-                return int(self.x+self.xsize/2-100), self.y + 50
-            # Get coordinates, sorted by y
-            coords = sorted(((c.get_displayable().transform.xpos, c.get_displayable().transform.ypos) for c in self.card_list), key=lambda c: c[1])
-            #  Add the next card 50 px under the lowest one
-            return coords[-1][0], coords[-1][1]+50
-
     class TraderOfferStack(Cardbox):
         """
         Stack for trader-sold cards during trade
@@ -477,18 +464,18 @@ init -3 python:
             withheld += card.cost
             super(TraderOfferStack, self).append(card)
 
-    class TraderHandStack(Cardbox):
+    class TraderShoppingStack(Cardbox):
         """
         Stack for trader hand.
         Overloaded .remove decreases withheld if card moved back from T_OFFER
         """
         def __init__(self, **kwargs):
-            super(TraderHandStack, self).__init__(**kwargs)
+            super(TraderShoppingStack, self).__init__(**kwargs)
 
         def append(self, card):
             global withheld
             withheld -= card.cost
-            super(TraderHandStack, self).append(card)
+            super(TraderShoppingStack, self).append(card)
 
         def give(self, card):
             return True
@@ -1130,8 +1117,8 @@ init -1 python:
         p_hand_stack = PlayerShoppingStack(card_list=[x for x in player_deck if x.suit in accepted_suits],
                                            stack_id='P_HAND', accept_from=['T_OFFER', 'P_OFFER'],
                                            x=10, y=100, xsize=300, ysize=500)
-        t_hand_stack = TraderHandStack(card_list=stock, stack_id='T_HAND', accept_from=['T_OFFER'],
-                                       x=800, y=100, xsize=300, ysize=500)
+        t_hand_stack = TraderShoppingStack(card_list=stock, stack_id='T_HAND', accept_from=['T_OFFER'],
+                                           x=800, y=100, xsize=300, ysize=500)
         a = {'P_HAND': 'P_OFFER', 'T_HAND': 'T_OFFER', 'T_OFFER': 'P_HAND', 'P_OFFER': 'P_HAND'}
         trade_table = TradeTable(stacks=[p_hand_stack, t_hand_stack, p_offer_stack, t_offer_stack], automove=a)
         renpy.show_screen('trade_screen')
