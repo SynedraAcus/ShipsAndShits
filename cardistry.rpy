@@ -288,13 +288,15 @@ init -3 python:
 
 
     class Cardbox(object):
-        def __init__(self, card_list=[], stack_id='NO ID', accept_from = None, x=0, y=0, xsize=300, ysize=300):
+        def __init__(self, card_list=[], stack_id='NO ID', accept_from = None, allow_positioning = False,
+                     x=0, y=0, xsize=300, ysize=300):
             # Position on screen
             self.x = x
             self.y = y
             self.id = stack_id
             self.xsize = xsize
             self.ysize = ysize
+            self.allow_positioning = allow_positioning
             if accept_from is not None:
                 self.accept_from = accept_from
             # Rest of it
@@ -720,6 +722,13 @@ init -3 python:
                                     if accepting_stack.accept(self.dragged, origin=self.dragged.stack) and self.get_stack_by_id(self.dragged.stack).give(self.dragged):
                                         is_accepted = True
                                         self.get_stack_by_id(self.dragged.stack).remove(self.dragged)
+                                        #  If a stack does not allow positioning in any place, ask it for card coord
+                                        if not accepting_stack.allow_positioning:
+                                            #  This could've been a single line, but properties chains would be so long
+                                            #  one could think it was Java
+                                            coords = accepting_stack.position_next_card(self.dragged)
+                                            self.dragged.get_displayable().transform.xpos = coords[0]
+                                            self.dragged.get_displayable().transform.ypos = coords[1]
                                         accepting_stack.append(self.dragged)
                                 else:
                                     #  Set this to True to enable card rearrangement within stack
