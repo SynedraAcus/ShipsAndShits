@@ -566,10 +566,9 @@ init -3 python:
         Central stack for the conflict
         """
         def __init__(self, **kwargs):
+            self.last_pos = [int(kwargs['x']+kwargs['xsize']/2-100),
+                             kwargs['y']]
             super(MidStack, self).__init__(**kwargs)
-            #  Position of the last card added
-            self.last_x = int(self.x+self.xsize/2-100)
-            self.last_y = self.y
 
         def accept(self, card, origin=None):
             if origin not in self.accept_from:
@@ -584,21 +583,15 @@ init -3 python:
             return True
 
         def position_next_card(self, card):
-            if len(self.card_list) == 0:
-               return int(self.x+self.xsize/2-100), self.y
-            if self.ysize + self.y - self.last_y <= 140:
+            if self.ysize + self.y - self.last_pos[1] <= 140:
                 #  if one more card will not fit in the desk
-                self.last_x += 110
-                self.last_y = self.y-40 # It will be added back right in the next line
-            return(self.last_x, self.last_y+40)
+                self.last_pos[0] += 110
+                self.last_pos[1] = self.y
+            else:
+                if len(self.card_list)>0:
+                    self.last_pos[1] += 40
+            return self.last_pos
 
-        def append(self, card):
-            """
-            Remember where the player placed his last card, so that it will be covered
-            """
-            self.last_x = card.get_displayable().transform.xpos
-            self.last_y = card.get_displayable().transform.ypos
-            self.card_list.append(card)
 
 
     class Table(renpy.Displayable):
