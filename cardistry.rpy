@@ -299,13 +299,18 @@ init -3 python:
             self.allow_positioning = allow_positioning
             if accept_from is not None:
                 self.accept_from = accept_from
-            # Rest of it
-            self.card_list = sorted(card_list, key=lambda x: x.number)
-            if self.card_list:
-                for card in self.card_list:
+            # Adding cards
+            self.card_list = []
+            if len(card_list)>0:
+                for card in sorted(card_list, key=lambda x: x.number):
                     card.minimize()
-                    card.stack = self.id
-                self.position_cards()
+                    (card.get_displayable().transform.xpos, card.get_displayable().transform.ypos) = self.position_next_card(card)
+                    self.append(card)
+            # if self.card_list:
+            #     for card in self.card_list:
+            #         card.minimize()
+            #         card.stack = self.id
+            #     self.position_cards()
 
         # Card positioning methods
 
@@ -323,21 +328,21 @@ init -3 python:
                 #  Add the next card 50 px under the lowest one
                 return coords[0], coords[1]+50
 
-        def position_cards(self):
-            """
-            Initially position cards for cardbox.
-            As with previous method, doesn't particularly care about design and shit
-            """
-            x = self.x + self.xsize/2 - 100
-            y = self.y + 10
-            self.card_list[0].get_displayable().transform.xpos = x
-            self.card_list[0].get_displayable().transform.ypos = y
-            self.card_list[0].get_displayable().transform.update()
-            for card in self.card_list[1:]:
-                y += 40
-                card.get_displayable().transform.xpos = x
-                card.get_displayable().transform.ypos = y
-                card.get_displayable().transform.update()
+        # def position_cards(self):
+        #     """
+        #     Initially position cards for cardbox.
+        #     As with previous method, doesn't particularly care about design and shit
+        #     """
+        #     # x = self.x + self.xsize/2 - 100
+        #     # y = self.y + 10
+        #     # self.card_list[0].get_displayable().transform.xpos = x
+        #     # self.card_list[0].get_displayable().transform.ypos = y
+        #     # self.card_list[0].get_displayable().transform.update()
+        #     # for card in self.card_list[1:]:
+        #     #     y += 40
+        #     #     card.get_displayable().transform.xpos = x
+        #     #     card.get_displayable().transform.ypos = y
+        #     #     card.get_displayable().transform.update()
 
 
         # Card transfer methods
@@ -508,6 +513,9 @@ init -3 python:
 
         def give(self, card):
             return True
+
+        def position_next_card(self, card):
+            super(DeckStack, self).position_next_card(card)
 
     class PlayerConflictStack(Cardbox):
         #  Player hand for conflict screen
@@ -1139,19 +1147,19 @@ init -1 python:
         #  Defining 4 separate stacks, one for each suit
         money_stack = DeckStack(card_list=[x for x in player_deck if x.suit == u'Деньги'],
                                 stack_id='MONEY', #accept_from=None,
-                                x=100, xsize=200,
+                                x=100, xsize=220,
                                 y=100, ysize=500)
         force_stack = DeckStack(card_list=[x for x in player_deck if x.suit == u'Сила'],
                                 stack_id='FORCE', accept_from=None,
-                                x=350, xsize=200,
+                                x=350, xsize=220,
                                 y=100, ysize=500)
         intrigue_stack = DeckStack(card_list=[x for x in player_deck if x.suit == u'Интриги'],
                                    stack_id='INTRIGUE', accept_from=None,
-                                   x=600, xsize=200,
+                                   x=600, xsize=220,
                                    y=100, ysize=500)
         knowledge_stack=DeckStack(card_list=[x for x in player_deck if x.suit == u'Знания'],
                                   stack_id='KNOWLEDGE', accept_from=None,
-                                  x=850, xsize=200,
+                                  x=850, xsize=220,
                                   y=100, ysize=500)
         deck_table = DeckTable(stacks=[money_stack, force_stack, intrigue_stack, knowledge_stack], automove={})
         renpy.show_screen('deck_screen')
