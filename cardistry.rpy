@@ -328,23 +328,6 @@ init -3 python:
                 #  Add the next card 50 px under the lowest one
                 return coords[0], coords[1]+50
 
-        # def position_cards(self):
-        #     """
-        #     Initially position cards for cardbox.
-        #     As with previous method, doesn't particularly care about design and shit
-        #     """
-        #     # x = self.x + self.xsize/2 - 100
-        #     # y = self.y + 10
-        #     # self.card_list[0].get_displayable().transform.xpos = x
-        #     # self.card_list[0].get_displayable().transform.ypos = y
-        #     # self.card_list[0].get_displayable().transform.update()
-        #     # for card in self.card_list[1:]:
-        #     #     y += 40
-        #     #     card.get_displayable().transform.xpos = x
-        #     #     card.get_displayable().transform.ypos = y
-        #     #     card.get_displayable().transform.update()
-
-
         # Card transfer methods
 
         def give(self, card):
@@ -1059,12 +1042,12 @@ init -1 python:
         p_hand_stack = PlayerConflictStack(card_list=[x for x in player_deck if x.suit in suits],
                                            stack_id='P_HAND',
                                            accept_from=[],
-                                           x=50, y=500, xsize=920, ysize=268)
+                                           x=50, y=500, xsize=1030, ysize=268)
         mid_stack = MidStack(card_list=[], stack_id='M_STACK', accept_from=['P_HAND', 'O_HAND'],
-                             x=50, y=175, xsize=920, ysize=300)
+                             x=50, y=175, xsize=1030, ysize=300)
         # Opponent stack takes bottom and doesn't need more than one line of cards, so it's narrow
         o_hand_stack = OpponentConflictStack(card_list=opponent_deck, stack_id='O_HAND',
-                                             x=50, y=0, xsize=920, ysize=150)
+                                             x=50, y=0, xsize=1030, ysize=150)
         a = {'P_HAND': 'M_STACK'}
         conflict_table = ConflictTable(stacks=[p_hand_stack, mid_stack, o_hand_stack],
                                        automove=a)
