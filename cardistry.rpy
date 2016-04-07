@@ -128,11 +128,16 @@ init -3 python:
         """
         Regular card displayable
         """
+
+        suit_bg = {u'Деньги': 'images/MoneySmallCard.jpg',
+           u'Знания': 'images/KnowledgeSmallCard.jpg',
+           u'Интриги': 'images/IntrigueSmallCard.jpg',
+           u'Сила': 'images/ForceSmallCard.jpg'}
+
         def __init__(self, card, **kwargs):
             super(CardSmallDisplayable, self).__init__(xysize=(100, 140), xfill=False, yfill=False, **kwargs)
-            self.bg = (card.spendable == True and Solid(SPENDABLE_COLOR) or Solid(PERMANENT_COLOR))
-            self.frame = Solid('#6A3819')
-            self.text = Text(u'{0}{1}'.format(card.number, card.suit[0]), color = '#6A3819')
+            self.bg = Image(self.suit_bg[card.suit])
+            self.text = Text(u'{0}'.format(card.number), color = '#6A3819')
             self.xpos = 0
             self.ypos = 0
             self.xsize = 100
@@ -145,18 +150,16 @@ init -3 python:
             """
             Return 100*140 render for a card
             """
-            frame_render = renpy.render(self.frame, self.xsize, self.ysize, st, at)
             bg_render = renpy.render(self.bg, self.xsize-4, self.ysize-4, st, at)
             text_render = renpy.render(self.text, width, height, st, at)
             render = renpy.Render(width, height, st, at)
-            render.blit(frame_render, (0, 0))
             render.blit(bg_render, (2, 2))
-            render.blit(text_render, (10, 10))
+            render.blit(text_render, (15-int(text_render.width/2), 3))
+            render.blit(text_render, (88-int(text_render.width/2), 117))
             return render
 
         def visit(self):
-            return[self.frame,
-                   self.bg,
+            return[self.bg,
                    self.text]
 
         def reinit_transform(self):
@@ -188,7 +191,6 @@ init -3 python:
                                xanchor=0.5)
             self.bg = Image(self.suit_bg[card.suit])
             self.transparent_block = Solid('#FFFFFF95')
-            self.frame = Solid('#6A3819')
             self.xpos = 0
             self.ypos = 0
             self.xsize = 200
@@ -216,22 +218,21 @@ init -3 python:
             """
             Return 200*280 render for a card
             """
-            # frame_render = renpy.render(self.frame, width, height, st, at)
             bg_render = renpy.render(self.bg, 192, 270, st, at)
             trans_render = renpy.render(self.transparent_block, 192, 120, st, at)
             text_render = renpy.render(self.text, width, height, st, at)
             t_text_render = renpy.render(self.t_text, width, height, st, at)
             render = renpy.Render(width, height, st, at)
-            # render.blit(frame_render, (0, 0))
             render.blit(bg_render, (0, 0))
             render.blit(trans_render, (4, 80))
+            #  Manual anchoring, since CDDs apparently don't respect xanchor property
             render.blit(text_render, (25-int(text_render.width/2), 10))
             render.blit(text_render, (175-int(text_render.width/2), 250))
             render.blit(t_text_render, (100-int(t_text_render.width/2), 140-int(t_text_render.height/2)))
             return render
 
         def visit(self):
-            return [self.text, self.t_text, self.bg]
+            return [self.text, self.t_text, self.bg, self.transparent_block]
 
         def __eq__(self, other):
             return False
