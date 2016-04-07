@@ -175,11 +175,16 @@ init -3 python:
         """
         Expanded card displayable
         """
+        suit_bg = {u'Деньги': 'images/MoneyBigCard.jpg',
+                   u'Знания': 'images/KnowledgeBigCard.jpg',
+                   u'Интриги': 'images/IntrigueBigCard.jpg',
+                   u'Сила': 'images/ForceBigCard.jpg'}
+
         def __init__(self, card, **kwargs):
             super(CardLargeDisplayable, self).__init__(xysize=(200, 280), xfill=False, yfill=False, **kwargs)
             self.text = Text(u'{0}{1}'.format(card.number, card.suit[0]), color = '#6A3819', font='Hangyaboly.ttf')
             self.t_text = Text(card.tooltip, size = 14, color = '#6A3819', font='Hangyaboly.ttf')
-            self.bg = (card.spendable == True and Solid(SPENDABLE_COLOR) or Solid(PERMANENT_COLOR))
+            self.bg = Image(self.suit_bg[card.suit])
             self.frame = Solid('#6A3819')
             self.xpos = 0
             self.ypos = 0

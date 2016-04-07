@@ -565,11 +565,9 @@ label weighted:
 label new_conflict:
     nvl clear
     "Вы попали в тестовый конфликт. У оппонента пять единиц Знаний и тройка Силы, так что Вы без труда выиграете."
-    "Чтобы это гарантировать, вам тоже будет выдано пять единиц Знаний"
-    # $ for a in range(5):
-    $ player_deck.extend((Card(u'З', 1, tooltip=u'Двойка знаний'), Card(u'З', 1, tooltip=u'Двойка знаний'),Card(u'З', 1, tooltip=u'Двойка знаний')))
-    $ player_deck.extend((Card(u'З', 1, tooltip=u'Двойка знаний'), Card(u'З', 1, tooltip=u'Двойка знаний')))
-    $ init_conflict_table([Card(u'З', 1), Card(u'С', 3), Card(u'З', 1), Card(u'З', 1), Card(u'З', 1), Card(u'З', 1), Card(u'З', 1), Card(u'З', 1)])
+    "Чтобы это гарантировать, вам тоже будет выдана пригоршня всяких карт."
+    $ player_deck.extend((Card(u'Д', 1, tooltip=u'Двойка знаний'), Card(u'И', 1, tooltip=u'Единица денег')))
+    $ init_conflict_table([Card(u'Д', 1), Card(u'С', 3), Card(u'И', 1), Card(u'З', 1), Card(u'З', 1), Card(u'З', 1), Card(u'З', 1), Card(u'З', 1)])
     "Запускаем конфликт"
     if ret == u'SЗнания':
         "Вы победили с помощью своих знаний."
