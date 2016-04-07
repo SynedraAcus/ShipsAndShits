@@ -183,8 +183,9 @@ init -3 python:
         def __init__(self, card, **kwargs):
             super(CardLargeDisplayable, self).__init__(xysize=(200, 280), xfill=False, yfill=False, **kwargs)
             self.text = Text(u'{0}{1}'.format(card.number, card.suit[0]), color = '#6A3819', font='Hangyaboly.ttf')
-            self.t_text = Text(card.tooltip, size = 14, color = '#6A3819', font='Hangyaboly.ttf')
+            self.t_text = Text(card.tooltip, size = 18, color = '#6A3819', font='Hangyaboly.ttf')
             self.bg = Image(self.suit_bg[card.suit])
+            self.transparent_block = Solid('#FFFFFF95')
             self.frame = Solid('#6A3819')
             self.xpos = 0
             self.ypos = 0
@@ -213,13 +214,15 @@ init -3 python:
             """
             Return 200*280 render for a card
             """
-            frame_render = renpy.render(self.frame, width, height, st, at)
-            bg_render = renpy.render(self.bg, 196, 276, st, at)
+            # frame_render = renpy.render(self.frame, width, height, st, at)
+            bg_render = renpy.render(self.bg, 192, 270, st, at)
+            trans_render = renpy.render(self.transparent_block, 192, 120, st, at)
             text_render = renpy.render(self.text, width, height, st, at)
             t_text_render = renpy.render(self.t_text, width, height, st, at)
             render = renpy.Render(width, height, st, at)
-            render.blit(frame_render, (0, 0))
-            render.blit(bg_render, (2, 2))
+            # render.blit(frame_render, (0, 0))
+            render.blit(bg_render, (0, 0))
+            render.blit(trans_render, (4, 80))
             render.blit(text_render, (10, 10))
             render.blit(text_render, (160, 250))
             render.blit(t_text_render, (5, 120))
