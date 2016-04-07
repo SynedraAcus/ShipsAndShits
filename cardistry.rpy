@@ -182,8 +182,10 @@ init -3 python:
 
         def __init__(self, card, **kwargs):
             super(CardLargeDisplayable, self).__init__(xysize=(200, 280), xfill=False, yfill=False, **kwargs)
-            self.text = Text(u'{0}{1}'.format(card.number, card.suit[0]), color = '#6A3819', font='Hangyaboly.ttf')
-            self.t_text = Text(card.tooltip, size = 18, color = '#6A3819', font='Hangyaboly.ttf')
+            self.text = Text(u'{0}'.format(card.number), size=32, color = '#6A3819', font='Hangyaboly.ttf',
+                             xanchor=0.5)
+            self.t_text = Text(card.tooltip, size = 18, color = '#6A3819', font='Hangyaboly.ttf',
+                               xanchor=0.5)
             self.bg = Image(self.suit_bg[card.suit])
             self.transparent_block = Solid('#FFFFFF95')
             self.frame = Solid('#6A3819')
@@ -223,9 +225,9 @@ init -3 python:
             # render.blit(frame_render, (0, 0))
             render.blit(bg_render, (0, 0))
             render.blit(trans_render, (4, 80))
-            render.blit(text_render, (10, 10))
-            render.blit(text_render, (160, 250))
-            render.blit(t_text_render, (5, 120))
+            render.blit(text_render, (25-int(text_render.width/2), 10))
+            render.blit(text_render, (175-int(text_render.width/2), 250))
+            render.blit(t_text_render, (100-int(t_text_render.width/2), 140-int(t_text_render.height/2)))
             return render
 
         def visit(self):
