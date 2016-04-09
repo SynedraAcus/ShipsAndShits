@@ -1078,8 +1078,6 @@ init -1 python:
         global gl_no_rollback
         if gl_no_rollback:
             renpy.block_rollback()
-        paid = 0
-        withheld = 0
         assert type(stock) is list and len(stock)>0 and all(lambda x: type(x) is Card for x in stock)
         assert type (accepted_suits) is list and all(x in accepted_suits in [u'Сила', u'Деньги', u'Знания', u'Интриги'])
         t_offer_stack = TraderOfferStack(card_list=[], stack_id='T_OFFER', accept_from=['T_HAND'],
@@ -1091,6 +1089,8 @@ init -1 python:
                                            x=10, y=100, xsize=300, ysize=500)
         t_hand_stack = TraderShoppingStack(card_list=stock, stack_id='T_HAND', accept_from=['T_OFFER'],
                                            x=800, y=100, xsize=300, ysize=500)
+        paid = 0
+        withheld = 0
         a = {'P_HAND': 'P_OFFER', 'T_HAND': 'T_OFFER', 'T_OFFER': 'P_HAND', 'P_OFFER': 'P_HAND'}
         trade_table = TradeTable(stacks=[p_hand_stack, t_hand_stack, p_offer_stack, t_offer_stack], automove=a)
         renpy.show_screen('trade_screen')
