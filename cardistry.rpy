@@ -332,12 +332,12 @@ init -3 python:
             positioning algorithms.
             """
             if len(self.card_list) == 0:
-                return int(self.x+self.xsize/2-100), self.y + 10
+                return int(self.x+self.xsize/2-50), self.y + 10
             else:
                 # Get coordinates, sorted by y
-                coords = max(((c.get_displayable().transform.xpos, c.get_displayable().transform.ypos) for c in self.card_list), key=lambda c: c[1])
+                coord = max(((c.get_displayable().transform.xpos, c.get_displayable().transform.ypos) for c in self.card_list), key=lambda c: c[1])
                 #  Add the next card 50 px under the lowest one
-                return coords[0], coords[1]+50
+                return coord[0], coord[1]+50
 
         # Card transfer methods
 
@@ -496,7 +496,13 @@ init -3 python:
             return True
 
         def position_next_card(self, card):
-            super(DeckStack, self).position_next_card(card)
+            if len(self.card_list) == 0:
+                return int(self.x+self.xsize/2-50), self.y + 10
+            else:
+                # Get coordinates, sorted by y
+                coord = max(((c.get_displayable().transform.xpos, c.get_displayable().transform.ypos) for c in self.card_list), key=lambda c: c[1])
+                #  Add the next card 50 px under the lowest one
+                return coord[0], coord[1]+50
 
     class PlayerConflictStack(Cardbox):
         """
