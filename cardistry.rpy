@@ -137,7 +137,7 @@ init -3 python:
         def __init__(self, card, **kwargs):
             super(CardSmallDisplayable, self).__init__(xysize=(100, 140), xfill=False, yfill=False, **kwargs)
             self.bg = Image(self.suit_bg[card.suit])
-            self.text = Text(u'{0}'.format(card.number), color = '#6A3819')
+            self.text = Text(u'{0}'.format(card.number), color = '#6A3819', font='Hangyaboly.ttf')
             self.xpos = 0
             self.ypos = 0
             self.xsize = 100
@@ -187,8 +187,8 @@ init -3 python:
             super(CardLargeDisplayable, self).__init__(xysize=(200, 280), xfill=False, yfill=False, **kwargs)
             self.text = Text(u'{0}'.format(card.number), size=32, color = '#6A3819', font='Hangyaboly.ttf',
                              xanchor=0.5)
-            self.t_text = Text(card.tooltip, size = 18, color = '#6A3819', font='Hangyaboly.ttf',
-                               xanchor=0.5)
+            self.t_text = Text(card.tooltip, size=18, color='#6A3819', font='Hangyaboly.ttf',
+                               xanchor=0.5, outlines=[(2, '#FFFFFFFF', 0, 0)])
             self.bg = Image(self.suit_bg[card.suit])
             self.transparent_block = Solid('#FFFFFF95')
             self.xpos = 0
