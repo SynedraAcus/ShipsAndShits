@@ -875,6 +875,7 @@ init -3 python:
 
         def finalize_failure(self):
             global ret
+            self.finalizing = True
             try:
                 ret = u'F{0}'.format(self.get_stack_by_id('M_STACK').card_list[-1].suit)
             except IndexError:
@@ -886,14 +887,18 @@ init -3 python:
             for card in self.get_stack_by_id('M_STACK').card_list:
                 if card in player_deck and card.spendable:
                     player_deck.remove(card)
+            #  Set transition to Dissolve, so that ship doesn't display immediately
+            renpy.transition(Dissolve(0.3))
             renpy.show_screen('conflict_failure_screen')
 
         def finalize_success(self):
             global ret
+            self.finalizing = True
             ret = u'S{0}'.format(self.get_stack_by_id('M_STACK').card_list[-1].suit)
             for card in self.get_stack_by_id('M_STACK').card_list:
                 if card in player_deck and card.spendable:
                     player_deck.remove(card)
+            renpy.transition(Dissolve(0.3))
             renpy.show_screen('conflict_success_screen')
 
     class DeckTable(Table):
@@ -1011,18 +1016,34 @@ screen trade_buttons_screen():
 screen conflict_success_screen():
     modal True
     zorder 100
-    textbutton u"Вы победили":
+    imagebutton:
+        idle 'images/win_button.png'
         action [Hide('conflict_table_screen'), Hide('conflict_success_screen')]
         xalign 0.5
         yalign 0.5
+    text u'НИШТЯК':
+        size 150
+        xalign 0.5
+        yalign 0.7
+        font 'Hangyaboly.ttf'
+        outlines [(5, '#000000', 0, 0)]
 
 screen conflict_failure_screen():
     modal True
-    zorder 10
-    textbutton u"Вы проиграли":
+    zorder 100
+    imagebutton:
+        idle 'images/fail_button.png'
+        hover 'images/fail_button.png'
         action [Hide('conflict_table_screen'), Hide('conflict_failure_screen')]
         xalign 0.5
         yalign 0.5
+    text u'ОБЛОМ':
+        size 150
+        xalign 0.5
+        yalign 0.7
+        font 'Hangyaboly.ttf'
+        color '#000000'
+        outlines [(5, '#FFFFFF', 0, 0)]
 
 screen deck_hide_screen:
     zorder 10
@@ -1062,7 +1083,7 @@ init -1 python:
                                            x=50, y=500, xsize=1030, ysize=268)
         mid_stack = MidStack(card_list=[], stack_id='M_STACK', accept_from=['P_HAND', 'O_HAND'],
                              x=50, y=175, xsize=1030, ysize=300)
-        # Opponent stack takes bottom and doesn't need more than one line of cards, so it's narrow
+        # Opponent stack takes top and doesn't need more than one line of cards, so it's narrow
         o_hand_stack = OpponentConflictStack(card_list=opponent_deck, stack_id='O_HAND',
                                              x=50, y=0, xsize=1030, ysize=150)
         a = {'P_HAND': 'M_STACK'}
