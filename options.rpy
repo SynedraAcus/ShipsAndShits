@@ -96,7 +96,8 @@ init -1 python hide:
     ## are the size of the left/right and top/bottom borders,
     ## respectively.
 
-    style.nvl_window.background = Frame("images/Tmp_frame.png", 6, 6)
+    # style.nvl_window.background = Frame("images/Tmp_frame.png", 6, 6)
+    style.nvl_window.background = None
     ## Margin is space surrounding the window, where the background
     ## is not drawn.
 
