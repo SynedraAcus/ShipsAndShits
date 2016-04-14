@@ -900,7 +900,8 @@ init -3 python:
             ret = u'S{0}'.format(self.get_stack_by_id('M_STACK').card_list[-1].suit)
             #  Remove spent cards unless they are permanent
             for card in self.get_stack_by_id('M_STACK').card_list:
-                if card in player_deck and card.spendable and not self.return_spent:
+                if card in player_deck and card.spendable:
+                    #  Self.return_spent is not honored in case of victory
                     player_deck.remove(card)
             renpy.transition(Dissolve(0.3))
             renpy.show_screen('conflict_success_screen')
