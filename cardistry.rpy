@@ -8,8 +8,9 @@ init -3 python:
         u'И':u'Интриги'}
 
     DEFAULT_HISTORY = u'Вам не известна история этой карты'
-    SPENDABLE_COLOR = '#AAA'
-    PERMANENT_COLOR = '#DEC666'
+    #  SPENDABLE_COLOR and PERMANENT_COLOR are used by a format method, so they are without '#'
+    SPENDABLE_COLOR = 'AAAAAA'
+    PERMANENT_COLOR = 'DEC666'
     COST_QOTIENT = 1.5 #  Cost-to-nominal ratio for trading system
 
     # Card-related classes: card itself and an action
@@ -129,14 +130,14 @@ init -3 python:
         Regular card displayable
         """
 
-        suit_bg = {u'Деньги': 'images/MoneySmallCard.jpg',
-           u'Знания': 'images/KnowledgeSmallCard.jpg',
-           u'Интриги': 'images/IntrigueSmallCard.jpg',
-           u'Сила': 'images/ForceSmallCard.jpg'}
+        suit_bg = {u'Деньги': 'images/MoneySmall{0}Card.jpg',
+           u'Знания': 'images/KnowledgeSmall{0}Card.jpg',
+           u'Интриги': 'images/IntrigueSmall{0}Card.jpg',
+           u'Сила': 'images/ForceSmall{0}Card.jpg'}
 
         def __init__(self, card, **kwargs):
             super(CardSmallDisplayable, self).__init__(xysize=(100, 140), xfill=False, yfill=False, **kwargs)
-            self.bg = Image(self.suit_bg[card.suit])
+            self.bg = Image(self.suit_bg[card.suit].format((card.spendable and 'Spendable' or 'Permanent')))
             self.text = Text(u'{0}'.format(card.number), color = '#6A3819', font='Hangyaboly.ttf')
             self.xpos = 0
             self.ypos = 0
@@ -178,19 +179,20 @@ init -3 python:
         """
         Expanded card displayable
         """
-        suit_bg = {u'Деньги': 'images/MoneyBigCard.jpg',
-                   u'Знания': 'images/KnowledgeBigCard.jpg',
-                   u'Интриги': 'images/IntrigueBigCard.jpg',
-                   u'Сила': 'images/ForceBigCard.jpg'}
+        suit_bg = {u'Деньги': 'images/MoneyBig{0}Card.jpg',
+                   u'Знания': 'images/KnowledgeBig{0}Card.jpg',
+                   u'Интриги': 'images/IntrigueBig{0}Card.jpg',
+                   u'Сила': 'images/ForceBig{0}Card.jpg'}
 
         def __init__(self, card, **kwargs):
             super(CardLargeDisplayable, self).__init__(xysize=(200, 280), xfill=False, yfill=False, **kwargs)
             self.text = Text(u'{0}'.format(card.number), size=32, color = '#6A3819', font='Hangyaboly.ttf',
                              xanchor=0.5)
             self.t_text = Text(card.tooltip, size=18, color='#6A3819', font='Hangyaboly.ttf',
-                               xanchor=0.5, outlines=[(2, '#FFFFFFFF', 0, 0)])
-            self.bg = Image(self.suit_bg[card.suit])
-            self.transparent_block = Solid('#FFFFFF95')
+                               xanchor=0.5,
+                               outlines=[(2, '#{0}'.format(card.spendable and SPENDABLE_COLOR or PERMANENT_COLOR), 0, 0)])
+            self.bg = Image(self.suit_bg[card.suit].format((card.spendable and 'Spendable' or 'Permanent')))
+            self.transparent_block = Solid('#{0}95'.format(card.spendable and SPENDABLE_COLOR or PERMANENT_COLOR))
             self.xpos = 0
             self.ypos = 0
             self.xsize = 200
