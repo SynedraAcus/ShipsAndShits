@@ -840,8 +840,9 @@ init -3 python:
                     player_deck.append(card)
 
     class ConflictTable(Table):
-        def __init__(self, **kwargs):
+        def __init__(self, return_spent=False, **kwargs):
             super(ConflictTable, self).__init__(**kwargs)
+            self.return_spent = return_spent
             self.finalizing = False # Set to True when calling finalize_*
 
         def per_interact(self):
@@ -887,7 +888,7 @@ init -3 python:
             global player_deck
             #  Remove spent cards unless they are permanent
             for card in self.get_stack_by_id('M_STACK').card_list:
-                if card in player_deck and card.spendable:
+                if card in player_deck and card.spendable and not self.return_spent:
                     player_deck.remove(card)
             #  Set transition to Dissolve, so that ship doesn't display immediately
             renpy.transition(Dissolve(0.3))
@@ -897,8 +898,9 @@ init -3 python:
             global ret
             self.finalizing = True
             ret = u'S{0}'.format(self.get_stack_by_id('M_STACK').card_list[-1].suit)
+            #  Remove spent cards unless they are permanent
             for card in self.get_stack_by_id('M_STACK').card_list:
-                if card in player_deck and card.spendable:
+                if card in player_deck and card.spendable and not self.return_spent:
                     player_deck.remove(card)
             renpy.transition(Dissolve(0.3))
             renpy.show_screen('conflict_success_screen')
@@ -1058,7 +1060,7 @@ screen deck_hide_screen:
 ## Table init procedures
 
 init -1 python:
-    def init_conflict_table(opponent_deck):
+    def init_conflict_table(opponent_deck, return_spent=False):
         """
         Initialize conflict table and show the corresponding screen
         :param opponent_deck: A list of cards
@@ -1090,7 +1092,8 @@ init -1 python:
                                              x=50, y=0, xsize=1030, ysize=150)
         a = {'P_HAND': 'M_STACK'}
         conflict_table = ConflictTable(stacks=[p_hand_stack, mid_stack, o_hand_stack],
-                                       automove=a)
+                                       automove=a,
+                                       return_spent=return_spent)
         renpy.show_screen('conflict_table_screen')
 
     def init_trade_table(stock, accepted_suits=[u'Сила', u'Деньги', u'Знания', u'Интриги']):
