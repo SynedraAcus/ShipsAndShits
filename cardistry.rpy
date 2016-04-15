@@ -610,7 +610,6 @@ init -3 python:
             for x in self.stacks:
                 self.cards.extend(x.card_list)
             self.old_position = len(self.cards) - 1
-            self.drag_text = Text('None dragged')
             self.dragged = None
             self.drag_start = (0, 0)
             #  Debug Cardbox highlighters
@@ -620,13 +619,6 @@ init -3 python:
 
         def render(self, width, height, st, at):
             self.render_object = renpy.Render(width, height, st, at)
-            #  DEBUG DRAG TEXT
-            if self.dragged is not None:
-                self.drag_text = Text('{0}'.format(self.dragged.stack))
-            else:
-                self.drag_text = Text('None dragged')
-            drag_render = renpy.render(self.drag_text, width, height, st, at)
-            self.render_object.blit(drag_render, (500, 600))
             #  DEBUG STACK BOXES
             box_renders = []
             for x in range(len(self.stacks)):
@@ -756,7 +748,6 @@ init -3 python:
         def visit(self):
             l = []
             l+=(x.get_displayable().transform for x in self.cards)
-            l.append(self.drag_text)
             l+=self.cardboxes
             return l
 
