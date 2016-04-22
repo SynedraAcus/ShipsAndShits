@@ -570,8 +570,8 @@ init -3 python:
         Central stack for the conflict
         """
         def __init__(self, **kwargs):
-            self.last_pos = [int(kwargs['x']+kwargs['xsize']/2-100),
-                             kwargs['y']]
+            self.last_pos = [kwargs['x']+200,
+                             int(kwargs['y']+kwargs['ysize']/2-70)]
             super(MidStack, self).__init__(**kwargs)
 
         def accept(self, card, origin=None):
@@ -587,13 +587,8 @@ init -3 python:
             return True
 
         def position_next_card(self, card):
-            if self.ysize + self.y - self.last_pos[1] <= 140:
-                #  if one more card will not fit in the desk
-                self.last_pos[0] += 110
-                self.last_pos[1] = self.y
-            else:
-                if len(self.card_list)>0:
-                    self.last_pos[1] += 40
+            if len(self.card_list)>0:
+                self.last_pos[0] += 40
             return self.last_pos
 
 
