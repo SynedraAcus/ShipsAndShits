@@ -312,8 +312,7 @@ init -3 python:
             self.allow_positioning = allow_positioning
             if accept_from is not None:
                 self.accept_from = accept_from
-            if bg_file is not None:
-                self.bg_file = bg_file
+            self.bg_file = bg_file
             # Adding cards
             self.card_list = []
             if len(card_list)>0:
@@ -612,7 +611,8 @@ init -3 python:
             #  Stack background images
             self.stack_bgs = []
             for x in self.stacks:
-                self.stack_bgs.append(Image(x.bg_file))
+                if x.bg_file is not None:
+                    self.stack_bgs.append(Image(x.bg_file))
             #  Debug Cardbox highlighters
             self.cardboxes = []
             for x in self.stacks:
