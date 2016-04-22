@@ -302,7 +302,7 @@ init -3 python:
 
     class Cardbox(object):
         def __init__(self, card_list=[], stack_id='NO ID', accept_from = None, allow_positioning = False,
-                     x=0, y=0, xsize=300, ysize=300):
+                     x=0, y=0, xsize=300, ysize=300, bg_file = None):
             # Position on screen
             self.x = x
             self.y = y
@@ -312,6 +312,8 @@ init -3 python:
             self.allow_positioning = allow_positioning
             if accept_from is not None:
                 self.accept_from = accept_from
+            if bg_file is not None:
+                self.bg_file = bg_file
             # Adding cards
             self.card_list = []
             if len(card_list)>0:
@@ -334,7 +336,7 @@ init -3 python:
             positioning algorithms.
             """
             if len(self.card_list) == 0:
-                return int(self.x+self.xsize/2-50), self.y + 10
+                return int(self.x+self.xsize/2-50), self.   y + 10
             else:
                 # Get coordinates, sorted by y
                 coord = max(((c.get_displayable().transform.xpos, c.get_displayable().transform.ypos) for c in self.card_list), key=lambda c: c[1])
@@ -612,6 +614,10 @@ init -3 python:
             self.old_position = len(self.cards) - 1
             self.dragged = None
             self.drag_start = (0, 0)
+            #  Stack background images
+            self.stack_bgs = []
+            for x in self.stacks:
+                self.stack_bgs.append(Image(x.bg_file))
             #  Debug Cardbox highlighters
             self.cardboxes = []
             for x in self.stacks:
@@ -625,6 +631,11 @@ init -3 python:
                 tmp_render = self.cardboxes[x].render(self.stacks[x].xsize, self.stacks[x].ysize, st, at)
                 box_renders.append(tmp_render)
                 self.render_object.blit(tmp_render, (self.stacks[x].x, self.stacks[x].y))
+            #  Stack images
+            for i in range(len(self.stacks)):
+                if self.stacks[i].bg_file is not None:
+                    tmp_render = renpy.render(self.stack_bgs[i], self.stacks[i].xsize, self.stacks[i].ysize, st, at)
+                    self.render_object.blit(tmp_render, (self.stacks[i].x, self.stacks[i].y))
             for card in self.cards:
                 self.render_object.place(card.get_displayable().transform)
             return self.render_object
@@ -1076,12 +1087,15 @@ init -1 python:
         p_hand_stack = PlayerConflictStack(card_list=[x for x in player_deck if x.suit in suits],
                                            stack_id='P_HAND',
                                            accept_from=[],
-                                           x=50, y=500, xsize=1030, ysize=268)
+                                           x=50, y=500, xsize=1030, ysize=268,
+                                           bg_file='images/lower_stk.png')
         mid_stack = MidStack(card_list=[], stack_id='M_STACK', accept_from=['P_HAND', 'O_HAND'],
-                             x=50, y=175, xsize=1030, ysize=300)
+                             x=50, y=175, xsize=1030, ysize=300,
+                             bg_file='images/middle_stk.png')
         # Opponent stack takes top and doesn't need more than one line of cards, so it's narrow
         o_hand_stack = OpponentConflictStack(card_list=opponent_deck, stack_id='O_HAND',
-                                             x=50, y=0, xsize=1030, ysize=150)
+                                             x=50, y=0, xsize=1030, ysize=150,
+                                             bg_file='images/upper_stk.png')
         a = {'P_HAND': 'M_STACK'}
         conflict_table = ConflictTable(stacks=[p_hand_stack, mid_stack, o_hand_stack],
                                        automove=a,
