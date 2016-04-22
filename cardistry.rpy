@@ -1,7 +1,7 @@
 # Everything related to the card conflict mechanics
 
 init -3 python:
-    import math
+import pygame
     SUITS={u'С':u'Сила',
         u'Д':u'Деньги',
         u'З':u'Знания',
@@ -13,7 +13,38 @@ init -3 python:
     PERMANENT_COLOR = 'DEC666'
     COST_QOTIENT = 1.5 #  Cost-to-nominal ratio for trading system
 
-    # Card-related classes: card itself and an action
+    #  Various utility functions
+
+    def deck(deckline):
+        """
+        Given a deck-describing line, return a list of cards.\
+        Line syntax is like 0С2Д2Д, etc. etc. Number, then suit, repeat for all cards\
+        '0' means '10' because fuck you, that's why\
+        """
+        if not (type(deckline) == unicode):
+            raise TypeError('Only unicode line accepted by deck constructor')
+        d = []
+        l=list(deckline)
+        while len(l)>0:
+            num = int(l.pop(0))
+            suit = l.pop(0)
+            d.append(Card(suit, num))
+        return d
+
+    def inside(click, box):
+        """
+        Check whether a point is within a box
+        :param click: 2-element tuple (x,y)
+        :param box: 4-element tuple: (x,y,xsize,ysize)
+        :return:
+        """
+        if not(click[0]<box[0] or click[0]>box[0]+box[2]):
+            if not (click[1]<box[1] or click[1]>box[1]+box[3]):
+                return True
+        return False
+
+    #  Card data class and displayable classes
+
     class Card(object):
         """
         Card for the game. This class contains value, suit and handles showing the correct displayable.
@@ -246,66 +277,9 @@ init -3 python:
         def __eq__(self, other):
             return False
 
-    def deck(deckline):
-        #'''
-        #Given a deck-describing line, return a list of cards.\
-        #Line syntax is like 0С2Д2Д, etc. etc. Number, then suit, repeat for all cards\
-        #'0' means '10' because fuck you, that's why\
-        #'''
-        if not (type(deckline) == unicode):
-            raise TypeError('Only unicode line accepted by deck constructor')
-        d = []
-        l=list(deckline)
-        while len(l)>0:
-            num = int(l.pop(0))
-            suit = l.pop(0)
-            d.append(Card(suit, num))
-        return d
 
-    def card_collection(**kwargs):
-        '''
-        Screen that shows card collection
-        '''
-        global player_deck
-        ui.window(id='collection_window', background=Frame('images/Tmp_frame.png', 5, 5), area = (0.05, 0.05, 0.9, 0.85))
-        ui.fixed(id='collection_fixed', area = (0.05, 0.05, 0.9, 0.85))
-        ui.text(u"Колода", color='#000000', xalign=0.5, ypos=0)
-        rows = int(math.ceil(len(player_deck)/3.0))
-        ui.viewport (id='collection_viewport', mousewheel = True, ypos=0.1,\
-            yanchor=0, xalign=0.5, xsize=630)
-        ui.grid(3, rows, id='collection_grid', transpose = False, spacing = 10)
-        for card in player_deck:
-            ui.add(card.get_displayable())
-        for j in range(rows*3 - len(player_deck)):
-            ui.add(Null())
-        ui.close()  # For grid
-        ui.close()  # For fixed
-        # The following is outside the window!
-        ui.textbutton(u"Продолжить", action = Hide('collection'), xalign = 0.5, yalign = 0.95)
-
-    renpy.define_screen('collection', card_collection, modal = 'True', zorder='10')
-
-    ##########################################################
-    #New card screen displayable and other event-capable shit#
-    ##########################################################
-    import pygame
-
-    #  Various utility functions
-
-    def inside(click, box):
-        """
-        Check whether a point is within a box
-        :param click: 2-element tuple (x,y)
-        :param box: 4-element tuple: (x,y,xsize,ysize)
-        :return:
-        """
-        if not(click[0]<box[0] or click[0]>box[0]+box[2]):
-            if not (click[1]<box[1] or click[1]>box[1]+box[3]):
-                return True
-        return False
 
     #  Cardbox and its children
-
 
     class Cardbox(object):
         def __init__(self, card_list=[], stack_id='NO ID', accept_from = None, allow_positioning = False,
@@ -347,7 +321,7 @@ init -3 python:
                 # Get coordinates, sorted by y
                 coord = max(((c.get_displayable().transform.xpos, c.get_displayable().transform.ypos) for c in self.card_list), key=lambda c: c[1])
                 #  Add the next card 50 px under the lowest one
-                return coord[0], coord[1]+50
+                return coord[0], coord[1]+40
 
         # Card transfer methods
 
@@ -505,15 +479,6 @@ init -3 python:
         def give(self, card):
             return True
 
-        # def position_next_card(self, card):
-        #     if len(self.card_list) == 0:
-        #         return int(self.x+self.xsize/2-50), self.y + 10
-        #     else:
-        #         # Get coordinates, sorted by y
-        #         coord = max(((c.get_displayable().transform.xpos, c.get_displayable().transform.ypos) for c in self.card_list), key=lambda c: c[1])
-        #         #  Add the next card 50 px under the lowest one
-        #         return coord[0], coord[1]+50
-
     class PlayerConflictStack(Cardbox):
         """
         Player hand for conflict screen. Does not accept cards and positioning may break if this rule is violated!
@@ -597,7 +562,7 @@ init -3 python:
                 self.last_pos[0] += 40
             return self.last_pos
 
-
+#  Table base and various specialized tables
 
     class Table(renpy.Displayable):
 
