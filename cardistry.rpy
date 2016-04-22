@@ -231,7 +231,7 @@ init -3 python:
             text_render = renpy.render(self.text, width, height, st, at)
             t_text_render = renpy.render(self.t_text, width, height, st, at)
             render = renpy.Render(width, height, st, at)
-            render.blit(shadow_render, (7, 7))
+            render.blit(shadow_render, (7, 4))
             render.blit(bg_render, (0, 0))
             render.blit(trans_render, (4, 80))
             #  Manual anchoring, since CDDs apparently don't respect xanchor property
@@ -505,14 +505,14 @@ init -3 python:
         def give(self, card):
             return True
 
-        def position_next_card(self, card):
-            if len(self.card_list) == 0:
-                return int(self.x+self.xsize/2-50), self.y + 10
-            else:
-                # Get coordinates, sorted by y
-                coord = max(((c.get_displayable().transform.xpos, c.get_displayable().transform.ypos) for c in self.card_list), key=lambda c: c[1])
-                #  Add the next card 50 px under the lowest one
-                return coord[0], coord[1]+50
+        # def position_next_card(self, card):
+        #     if len(self.card_list) == 0:
+        #         return int(self.x+self.xsize/2-50), self.y + 10
+        #     else:
+        #         # Get coordinates, sorted by y
+        #         coord = max(((c.get_displayable().transform.xpos, c.get_displayable().transform.ypos) for c in self.card_list), key=lambda c: c[1])
+        #         #  Add the next card 50 px under the lowest one
+        #         return coord[0], coord[1]+50
 
     class PlayerConflictStack(Cardbox):
         """
@@ -1008,63 +1008,8 @@ init -3 python:
             global withheld
             return paid >= withheld
 
+    # Table init procedures
 
-#  Table button screens. Separate because buttons inside CDD are a godawful mess
-
-screen trade_buttons_screen():
-    zorder 10
-    textbutton u"Торговать":
-        action DoSell()
-        xpos 350
-        ypos 350
-    textbutton u"Не торговать":
-        action DoNotSell()
-        xpos 550
-        ypos 350
-
-screen conflict_success_screen():
-    modal True
-    zorder 100
-    imagebutton:
-        idle 'images/win_button.png'
-        action [Hide('conflict_table_screen'), Hide('conflict_success_screen')]
-        xalign 0.5
-        yalign 0.5
-    text u'НИШТЯК':
-        size 150
-        xalign 0.5
-        yalign 0.7
-        font 'Hangyaboly.ttf'
-        outlines [(5, '#000000', 0, 0)]
-
-screen conflict_failure_screen():
-    modal True
-    zorder 100
-    imagebutton:
-        idle 'images/fail_button.png'
-        hover 'images/fail_button.png'
-        action [Hide('conflict_table_screen'), Hide('conflict_failure_screen')]
-        xalign 0.5
-        yalign 0.5
-    text u'ОБЛОМ':
-        size 150
-        xalign 0.5
-        yalign 0.7
-        font 'Hangyaboly.ttf'
-        color '#000000'
-        outlines [(5, '#FFFFFF', 0, 0)]
-
-screen deck_hide_screen:
-    zorder 10
-    textbutton u"Колода":
-        action [Hide('deck_screen'), Hide('deck_hide_screen')]
-        xalign 0.5
-        xanchor 0.5
-        yalign 0.95
-
-## Table init procedures
-
-init -1 python:
     def init_conflict_table(opponent_deck, return_spent=False):
         """
         Initialize conflict table and show the corresponding screen
@@ -1163,21 +1108,3 @@ init -1 python:
         deck_table = DeckTable(stacks=[money_stack, force_stack, intrigue_stack, knowledge_stack], automove={})
         renpy.show_screen('deck_screen')
         renpy.show_screen('deck_hide_screen')
-
-
-
-init:
-    screen trade_screen():
-        modal True
-        zorder 9
-        add trade_table
-
-    screen conflict_table_screen():
-        modal True
-        zorder 9
-        add conflict_table
-
-    screen deck_screen():
-        modal True
-        zorder 9
-        add deck_table
