@@ -186,6 +186,7 @@ init -3 python:
 
         def __init__(self, card, **kwargs):
             super(CardLargeDisplayable, self).__init__(xysize=(200, 280), xfill=False, yfill=False, **kwargs)
+            self.shadow = Solid('#00000020')
             self.text = Text(u'{0}'.format(card.number), size=32, color = '#6A3819', font='Hangyaboly.ttf',
                              xanchor=0.5)
             self.t_text = Text(card.tooltip, size=18, color='#6A3819', font='Hangyaboly.ttf',
@@ -203,7 +204,7 @@ init -3 python:
 
         def reinit_transform(self):
             """
-            Renitialise card Transform that contains its position and stack it belongs to.
+            Renitialise card Transform that contains its position and size.
             Should be called any time screen is initialized, currently called from Cardbox.__init__()
             """
             #  Card size
@@ -220,11 +221,13 @@ init -3 python:
             """
             Return 200*280 render for a card
             """
+            shadow_render = renpy.render(self.shadow, 200, 280, st, at)
             bg_render = renpy.render(self.bg, 192, 270, st, at)
             trans_render = renpy.render(self.transparent_block, 192, 120, st, at)
             text_render = renpy.render(self.text, width, height, st, at)
             t_text_render = renpy.render(self.t_text, width, height, st, at)
             render = renpy.Render(width, height, st, at)
+            render.blit(shadow_render, (7, 7))
             render.blit(bg_render, (0, 0))
             render.blit(trans_render, (4, 80))
             #  Manual anchoring, since CDDs apparently don't respect xanchor property
