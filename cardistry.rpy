@@ -1087,7 +1087,7 @@ init -1 python:
         p_hand_stack = PlayerConflictStack(card_list=[x for x in player_deck if x.suit in suits],
                                            stack_id='P_HAND',
                                            accept_from=[],
-                                           x=50, y=500, xsize=1030, ysize=268,
+                                           x=70, y=465, xsize=970, ysize=205,
                                            bg_file='images/lower_stk.png')
         mid_stack = MidStack(card_list=[], stack_id='M_STACK', accept_from=['P_HAND', 'O_HAND'],
                              x=50, y=175, xsize=1030, ysize=300,
