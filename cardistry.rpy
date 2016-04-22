@@ -1,7 +1,7 @@
 # Everything related to the card conflict mechanics
 
 init -3 python:
-import pygame
+    import pygame
     SUITS={u'С':u'Сила',
         u'Д':u'Деньги',
         u'З':u'Знания',
@@ -17,9 +17,9 @@ import pygame
 
     def deck(deckline):
         """
-        Given a deck-describing line, return a list of cards.\
-        Line syntax is like 0С2Д2Д, etc. etc. Number, then suit, repeat for all cards\
-        '0' means '10' because fuck you, that's why\
+        Given a deck-describing line, return a list of cards.
+        Line syntax is like 0С2Д2Д, etc. etc. Number, then suit, repeat for all cards
+        '0' means '10' because fuck you, that's why
         """
         if not (type(deckline) == unicode):
             raise TypeError('Only unicode line accepted by deck constructor')
