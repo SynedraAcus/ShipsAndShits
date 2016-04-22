@@ -73,6 +73,7 @@ label start:
     image bg monet_district_image = Image('images/1129_monet_district.jpg', align=(0.5, 0.5))
     image bg vortex_sub_image = Image('images/1129_vortex_sub.jpg', align=(0.5, 0.5))
     image bg vortex_hunt_image = Image('images/1129_vortex_hunt.jpg', align=(0.5, 0.5))
+    image bg vortex_cave_image = Image('images/1129_vortex_cave.jpg', align=(0.5, 0.5))
     menu:
         "Зайти в меню разнообразного дебага":
             jump debug_menu
