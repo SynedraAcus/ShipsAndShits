@@ -71,6 +71,8 @@ init -3 python:
             self.maximized = True
             self.large_displayable.xpos = self.small_displayable.xpos
             self.large_displayable.ypos = self.small_displayable.ypos
+            self.large_displayable.x_offset = self.small_displayable.x_offset*2
+            self.large_displayable.y_offset = self.small_displayable.y_offset*2
             self.large_displayable.transform.xpos = self.small_displayable.transform.xpos
             self.large_displayable.transform.ypos = self.small_displayable.transform.ypos
             self.large_displayable.transform.update()
@@ -79,6 +81,8 @@ init -3 python:
             self.maximized = False
             self.small_displayable.xpos = self.large_displayable.xpos
             self.small_displayable.ypos = self.large_displayable.ypos
+            self.small_displayable.x_offset = int(self.large_displayable.x_offset/2)
+            self.small_displayable.y_offset = int(self.large_displayable.y_offset/2)
             self.small_displayable.transform.xpos = self.large_displayable.transform.xpos
             self.small_displayable.transform.ypos = self.large_displayable.transform.ypos
             self.small_displayable.transform.update()
