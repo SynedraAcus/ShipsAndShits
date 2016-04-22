@@ -1090,7 +1090,7 @@ init -1 python:
                                            x=70, y=465, xsize=970, ysize=205,
                                            bg_file='images/lower_stk.png')
         mid_stack = MidStack(card_list=[], stack_id='M_STACK', accept_from=['P_HAND', 'O_HAND'],
-                             x=50, y=175, xsize=1030, ysize=300,
+                             x=70, y=235, xsize=970, ysize=229,
                              bg_file='images/middle_stk.png')
         # Opponent stack takes top and doesn't need more than one line of cards, so it's narrow
         o_hand_stack = OpponentConflictStack(card_list=opponent_deck, stack_id='O_HAND',
