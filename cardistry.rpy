@@ -1089,7 +1089,7 @@ init -1 python:
                              bg_file='images/middle_stk.png')
         # Opponent stack takes top and doesn't need more than one line of cards, so it's narrow
         o_hand_stack = OpponentConflictStack(card_list=opponent_deck, stack_id='O_HAND',
-                                             x=70, y=32, xsize=970, ysize=205,
+                                             x=70, y=35, xsize=970, ysize=205,
                                              bg_file='images/upper_stk.png')
         a = {'P_HAND': 'M_STACK'}
         conflict_table = ConflictTable(stacks=[p_hand_stack, mid_stack, o_hand_stack],
