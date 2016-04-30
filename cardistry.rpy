@@ -884,7 +884,8 @@ init -3 python:
         """
         def __init__(self, **kwargs):
             super(DeckTable, self).__init__(**kwargs)
-            self.positions = [st.x for st in self.stacks]
+            self.x_positions = [st.x for st in self.stacks]
+            self.y_positions = [st.y for st in self.stacks]
             #  Lists of descriptive lines
             self.suits = [u'Деньги', u'Сила', u'Интриги', u'Знания']
             self.headers = [Text(x, color='#6A3819', size=30, font='Hangyaboly.ttf') for x in self.suits]
@@ -902,11 +903,11 @@ init -3 python:
             #  Feels a bit boilerplate-ish?
             for i in range(len(self.headers)):
                 tmp_render = renpy.render(self.headers[i], width, height, st, at)
-                render.blit(tmp_render, (self.positions[i]+100-int(tmp_render.width/2), 115))
+                render.blit(tmp_render, (self.x_positions[i]+100-int(tmp_render.width/2), self.y_positions[i]+15))
                 tmp_render = renpy.render(self.sums[i], width, height, st, at)
-                render.blit(tmp_render, (self.positions[i]+60-int(tmp_render.width/2), 602))
+                render.blit(tmp_render, (self.x_positions[i]+60-int(tmp_render.width/2), self.y_positions[i]+502))
                 tmp_render = renpy.render(self.counts[i], width, height, st, at)
-                render.blit(tmp_render, (self.positions[i]+160-int(tmp_render.width/2), 602))
+                render.blit(tmp_render, (self.x_positions[i]+160-int(tmp_render.width/2), self.y_positions[i]+502))
             return render
 
         def per_interact(self):
