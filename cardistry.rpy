@@ -876,6 +876,7 @@ init -3 python:
             renpy.transition(Dissolve(0.3))
             renpy.show_screen('conflict_success_screen')
 
+
     class DeckTable(Table):
         """
         The Table for a deck view. Is expected to contain 4 non-active Cardboxes (one for each suit).
@@ -883,30 +884,29 @@ init -3 python:
         """
         def __init__(self, **kwargs):
             super(DeckTable, self).__init__(**kwargs)
-            # Initializing stack description lines
-            self.money_line = Text(u'Деньги: {0} ({1})'.format(sum((x.number for x in self.get_stack_by_id('MONEY').card_list)),
-                                                                  len(self.get_stack_by_id('MONEY').card_list)),
-                                   color='#6A3819', size=30, font='Hangyaboly.ttf')
-            self.force_line = Text(u'Сила: {0} ({1})'.format(sum((x.number for x in self.get_stack_by_id('FORCE').card_list)),
-                                                                  len(self.get_stack_by_id('FORCE').card_list)),
-                                   color='#6A3819', size=30, font='Hangyaboly.ttf')
-            self.intrigue_line = Text(u'Интриги: {0} ({1})'.format(sum((x.number for x in self.get_stack_by_id('INTRIGUE').card_list)),
-                                                                  len(self.get_stack_by_id('INTRIGUE').card_list)),
-                                   color='#6A3819', size=30, font='Hangyaboly.ttf')
-            self.knowledge_line = Text(u'Знания: {0} ({1})'.format(sum((x.number for x in self.get_stack_by_id('KNOWLEDGE').card_list)),
-                                                                  len(self.get_stack_by_id('KNOWLEDGE').card_list)),
-                                   color='#6A3819', size=30, font='Hangyaboly.ttf')
+            self.positions = [st.x for st in self.stacks]
+            #  Lists of descriptive lines
+            self.suits = [u'Деньги', u'Сила', u'Интриги', u'Знания']
+            self.headers = [Text(x, color='#6A3819', size=30, font='Hangyaboly.ttf') for x in self.suits]
+            self.sums = [Text(str(sum((x.number for x in y.card_list))),
+                              color='#6A3819', size=30, font='Hangyaboly.ttf')
+                         for y in self.stacks]
+            self.counts = [Text(str(len(y.card_list)),
+                                color='#6A3819', size=30, font='Hangyaboly.ttf')
+                           for y in self.stacks]
+
 
         def render(self, width, height, st, at):
             render = super(DeckTable, self).render(width, height, st, at)
-            money_line_render = renpy.render(self.money_line, width, height, st, at)
-            force_line_render = renpy.render(self.force_line, width, height, st, at)
-            intrigue_line_render = renpy.render(self.intrigue_line, width, height, st, at)
-            knowledge_line_render = renpy.render(self.knowledge_line, width, height, st, at)
-            render.blit(money_line_render, (210-int(money_line_render.width/2), 620))
-            render.blit(force_line_render, (460-int(force_line_render.width/2), 620))
-            render.blit(intrigue_line_render, (710-int(intrigue_line_render.width/2), 620))
-            render.blit(knowledge_line_render, (960-int(knowledge_line_render.width/2), 620))
+            #  Adding suit headers
+            #  Feels a bit boilerplate-ish?
+            for i in range(len(self.headers)):
+                tmp_render = renpy.render(self.headers[i], width, height, st, at)
+                render.blit(tmp_render, (self.positions[i]+100-int(tmp_render.width/2), 115))
+                tmp_render = renpy.render(self.sums[i], width, height, st, at)
+                render.blit(tmp_render, (self.positions[i]+60-int(tmp_render.width/2), 602))
+                tmp_render = renpy.render(self.counts[i], width, height, st, at)
+                render.blit(tmp_render, (self.positions[i]+160-int(tmp_render.width/2), 602))
             return render
 
         def per_interact(self):
@@ -922,8 +922,8 @@ init -3 python:
             :return:
             """
             ret = super(DeckTable, self).visit()
+            ret += self.headers+self.sums+self.counts
             return ret
-            ret.extend((self.money_line, self.force_line. self.intrigue_line, self.knowledge_line))
 
         def finalize_success(self):
             pass
@@ -1055,6 +1055,7 @@ init -3 python:
         global player_deck
         global deck_table
         #  Defining 4 separate stacks, one for each suit
+
         money_stack = DeckStack(card_list=[x for x in player_deck if x.suit == u'Деньги'],
                                 stack_id='MONEY', #accept_from=None,
                                 x=79, xsize=220,
@@ -1075,6 +1076,8 @@ init -3 python:
                                   x=831, xsize=220,
                                   y=100, ysize=539,
                                   bg_file ='deck_stk.png')
+        #  Order in which stacks are passed is used to position various statistics on screen
+        #  So please keep it that way: money, force, intrigue, knowledge
         deck_table = DeckTable(stacks=[money_stack, force_stack, intrigue_stack, knowledge_stack], automove={})
         renpy.show_screen('deck_screen')
         renpy.show_screen('deck_hide_screen')
