@@ -592,12 +592,13 @@ init -3 python:
 
         def render(self, width, height, st, at):
             self.render_object = renpy.Render(width, height, st, at)
-            #  DEBUG STACK BOXES
-            box_renders = []
-            for x in range(len(self.stacks)):
-                tmp_render = self.cardboxes[x].render(self.stacks[x].xsize, self.stacks[x].ysize, st, at)
-                box_renders.append(tmp_render)
-                self.render_object.blit(tmp_render, (self.stacks[x].x, self.stacks[x].y))
+            #  DEBUG STACK BOXES. Draw them only if there are not proper background
+            if not all((x.bg_file for x in self.stacks)):
+                box_renders = []
+                for x in range(len(self.stacks)):
+                    tmp_render = self.cardboxes[x].render(self.stacks[x].xsize, self.stacks[x].ysize, st, at)
+                    box_renders.append(tmp_render)
+                    self.render_object.blit(tmp_render, (self.stacks[x].x, self.stacks[x].y))
             #  Stack images
             for i in range(len(self.stacks)):
                 if self.stacks[i].bg_file is not None:
