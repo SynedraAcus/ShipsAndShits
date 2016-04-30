@@ -1057,22 +1057,22 @@ init -3 python:
         #  Defining 4 separate stacks, one for each suit
         money_stack = DeckStack(card_list=[x for x in player_deck if x.suit == u'Деньги'],
                                 stack_id='MONEY', #accept_from=None,
-                                x=84, xsize=220,
+                                x=79, xsize=220,
                                 y=100, ysize=539,
                                 bg_file='deck_stk.png')
         force_stack = DeckStack(card_list=[x for x in player_deck if x.suit == u'Сила'],
                                 stack_id='FORCE', accept_from=None,
-                                x=338, xsize=220,
+                                x=323, xsize=220,
                                 y=100, ysize=539,
                                 bg_file='deck_stk.png')
         intrigue_stack = DeckStack(card_list=[x for x in player_deck if x.suit == u'Интриги'],
                                    stack_id='INTRIGUE', accept_from=None,
-                                   x=592, xsize=220,
+                                   x=578, xsize=220,
                                    y=100, ysize=539,
                                    bg_file='deck_stk.png')
         knowledge_stack=DeckStack(card_list=[x for x in player_deck if x.suit == u'Знания'],
                                   stack_id='KNOWLEDGE', accept_from=None,
-                                  x=846, xsize=220,
+                                  x=831, xsize=220,
                                   y=100, ysize=539,
                                   bg_file ='deck_stk.png')
         deck_table = DeckTable(stacks=[money_stack, force_stack, intrigue_stack, knowledge_stack], automove={})
