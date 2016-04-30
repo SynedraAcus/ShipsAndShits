@@ -1057,19 +1057,23 @@ init -3 python:
         money_stack = DeckStack(card_list=[x for x in player_deck if x.suit == u'Деньги'],
                                 stack_id='MONEY', #accept_from=None,
                                 x=100, xsize=220,
-                                y=100, ysize=500)
+                                y=100, ysize=539,
+                                bg_file='deck_stk.png')
         force_stack = DeckStack(card_list=[x for x in player_deck if x.suit == u'Сила'],
                                 stack_id='FORCE', accept_from=None,
                                 x=350, xsize=220,
-                                y=100, ysize=500)
+                                y=100, ysize=539,
+                                bg_file='deck_stk.png')
         intrigue_stack = DeckStack(card_list=[x for x in player_deck if x.suit == u'Интриги'],
                                    stack_id='INTRIGUE', accept_from=None,
                                    x=600, xsize=220,
-                                   y=100, ysize=500)
+                                   y=100, ysize=539,
+                                   bg_file='deck_stk.png')
         knowledge_stack=DeckStack(card_list=[x for x in player_deck if x.suit == u'Знания'],
                                   stack_id='KNOWLEDGE', accept_from=None,
                                   x=850, xsize=220,
-                                  y=100, ysize=500)
+                                  y=100, ysize=539,
+                                  bg_file ='deck_stk.png')
         deck_table = DeckTable(stacks=[money_stack, force_stack, intrigue_stack, knowledge_stack], automove={})
         renpy.show_screen('deck_screen')
         renpy.show_screen('deck_hide_screen')
