@@ -301,13 +301,6 @@ init -3 python:
                     card.minimize()
                     (card.get_displayable().transform.xpos, card.get_displayable().transform.ypos) = self.position_next_card(card)
                     self.append(card)
-            # if self.card_list:
-            #     for card in self.card_list:
-            #         card.minimize()
-            #         card.stack = self.id
-            #     self.position_cards()
-
-        # Card positioning methods
 
         def position_next_card(self, card):
             """
@@ -316,7 +309,7 @@ init -3 python:
             positioning algorithms.
             """
             if len(self.card_list) == 0:
-                return int(self.x+self.xsize/2-50), self.   y + 10
+                return int(self.x+self.xsize/2-50), self.   y + 40
             else:
                 # Get coordinates, sorted by y
                 coord = max(((c.get_displayable().transform.xpos, c.get_displayable().transform.ypos) for c in self.card_list), key=lambda c: c[1])
@@ -330,14 +323,14 @@ init -3 python:
             Return True if this stack is willing to give card away, False otherwise
             Should be defined by child classes
             '''
-            raise NotImplementedError('Give function should be overridden')
+            raise NotImplementedError('Give method should be overridden')
 
         def accept(self, card, origin=None):
             '''
             Return True if this stack accepts this card, False otherwise
             Should be defined by child classes
             '''
-            raise NotImplementedError('Accept function should be overridden')
+            raise NotImplementedError('Accept method should be overridden')
 
         #  Defining those here creates less messy code than
         #  inheriting from list ABC. Maybe even quicker
@@ -479,6 +472,13 @@ init -3 python:
         def give(self, card):
             return True
 
+        def position_next_card(self, card):
+            if len(self.card_list) == 0:
+                return (self.x+50, self.y+50)
+            else:
+                return(self.x+50,
+                       max((x.get_displayable().transform.ypos for x in self.card_list))+40)
+
     class PlayerConflictStack(Cardbox):
         """
         Player hand for conflict screen. Does not accept cards and positioning may break if this rule is violated!
@@ -585,14 +585,14 @@ init -3 python:
             for x in self.stacks:
                 if x.bg_file is not None:
                     self.stack_bgs.append(Image(x.bg_file))
-            #  Debug Cardbox highlighters
+            #  Default Cardbox highlighters
             self.cardboxes = []
             for x in self.stacks:
                 self.cardboxes.append(Solid('#10101020'))
 
         def render(self, width, height, st, at):
             self.render_object = renpy.Render(width, height, st, at)
-            #  DEBUG STACK BOXES. Draw them only if there are not proper background
+            #  DEFAULT STACK BOXES. Draw them only if there are not proper background
             if not all((x.bg_file for x in self.stacks)):
                 box_renders = []
                 for x in range(len(self.stacks)):
@@ -1000,14 +1000,14 @@ init -3 python:
         p_hand_stack = PlayerConflictStack(card_list=[x for x in player_deck if x.suit in suits],
                                            stack_id='P_HAND',
                                            accept_from=[],
-                                           x=70, y=465, xsize=970, ysize=205,
+                                           x=77, y=470, xsize=970, ysize=205,
                                            bg_file='images/lower_stk.png')
         mid_stack = MidStack(card_list=[], stack_id='M_STACK', accept_from=['P_HAND', 'O_HAND'],
-                             x=70, y=235, xsize=970, ysize=229,
+                             x=77, y=240, xsize=970, ysize=229,
                              bg_file='images/middle_stk.png')
         # Opponent stack takes top and doesn't need more than one line of cards, so it's narrow
         o_hand_stack = OpponentConflictStack(card_list=opponent_deck, stack_id='O_HAND',
-                                             x=70, y=35, xsize=970, ysize=205,
+                                             x=77, y=40, xsize=970, ysize=205,
                                              bg_file='images/upper_stk.png')
         a = {'P_HAND': 'M_STACK'}
         conflict_table = ConflictTable(stacks=[p_hand_stack, mid_stack, o_hand_stack],
@@ -1057,22 +1057,22 @@ init -3 python:
         #  Defining 4 separate stacks, one for each suit
         money_stack = DeckStack(card_list=[x for x in player_deck if x.suit == u'Деньги'],
                                 stack_id='MONEY', #accept_from=None,
-                                x=100, xsize=220,
+                                x=84, xsize=220,
                                 y=100, ysize=539,
                                 bg_file='deck_stk.png')
         force_stack = DeckStack(card_list=[x for x in player_deck if x.suit == u'Сила'],
                                 stack_id='FORCE', accept_from=None,
-                                x=350, xsize=220,
+                                x=338, xsize=220,
                                 y=100, ysize=539,
                                 bg_file='deck_stk.png')
         intrigue_stack = DeckStack(card_list=[x for x in player_deck if x.suit == u'Интриги'],
                                    stack_id='INTRIGUE', accept_from=None,
-                                   x=600, xsize=220,
+                                   x=592, xsize=220,
                                    y=100, ysize=539,
                                    bg_file='deck_stk.png')
         knowledge_stack=DeckStack(card_list=[x for x in player_deck if x.suit == u'Знания'],
                                   stack_id='KNOWLEDGE', accept_from=None,
-                                  x=850, xsize=220,
+                                  x=846, xsize=220,
                                   y=100, ysize=539,
                                   bg_file ='deck_stk.png')
         deck_table = DeckTable(stacks=[money_stack, force_stack, intrigue_stack, knowledge_stack], automove={})

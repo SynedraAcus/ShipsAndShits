@@ -124,7 +124,9 @@ screen input(prompt):
 # http://www.renpy.org/doc/html/screen_special.html#nvl
 
 screen nvl(dialogue, items=None):
-    add 'r2d2.png'
+    add 'r2d2.png':
+        xpos 12
+        ypos 7
     frame:
         area (0.05, 0.05, 0.9, 0.85)
         # $ Frame("images/Tmp_frame.png", 10, 10, xpadding=5, ypadding=5)
