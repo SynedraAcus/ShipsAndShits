@@ -6,9 +6,9 @@ init -3 python:
 import pygame
 
 SUITS={u'С':u'Сила',
-        u'Д':u'Деньги',
-        u'З':u'Знания',
-        u'И':u'Интриги'}
+            u'Д':u'Деньги',
+            u'З':u'Знания',
+            u'И':u'Интриги'}
 
     DEFAULT_HISTORY = u'Вам не известна история этой карты'
     #  SPENDABLE_COLOR and PERMANENT_COLOR are used by a format method, so they are without '#'
@@ -298,7 +298,8 @@ SUITS={u'С':u'Сила',
                 self.accept_from = accept_from
             self.bg_file = bg_file
             # For positioning
-            self.last_pos = [self.x+int(self.xsize/2)-75, self.y+40]
+            if not hasattr(self, 'last_pos'):
+                self.last_pos = [self.x+int(self.xsize/2)-75, self.y+40]
             # Adding cards
             self.card_list = []
             if len(card_list)>0:
@@ -543,9 +544,9 @@ SUITS={u'С':u'Сила',
         Central stack for the conflict
         """
         def __init__(self, **kwargs):
-            self.last_pos = [kwargs['x']+200,
-                             int(kwargs['y']+kwargs['ysize']/2-70)]
             super(MidStack, self).__init__(**kwargs)
+            #  Makes cards in MidStack not start from the stack's center
+            self.last_pos = [self.x+150, self.y+30]
 
         def accept(self, card, origin=None):
             if origin not in self.accept_from:
@@ -559,10 +560,6 @@ SUITS={u'С':u'Сила',
         def give(self, card):
             return True
 
-        def position_next_card(self, card):
-            if len(self.card_list)>0:
-                self.last_pos[0] += 40
-            return self.last_pos
 
 #  Table base and various specialized tables
 
