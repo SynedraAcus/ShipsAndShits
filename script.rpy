@@ -1165,6 +1165,8 @@ menu:
             jump weighted
         "Протестировать новый экран колоды":
             nvl clear
+            "Для тестирования колоды вам будет выдана целая куча мелких карт."
+            $ player_deck += deck(u'1Д1Д1Д1Д1Д1Д1Д1Д1Д1Д')
             jump deck_view
 
 label deck_view:

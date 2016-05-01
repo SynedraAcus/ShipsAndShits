@@ -1,8 +1,11 @@
 # Everything related to the card conflict mechanics
 
 init -3 python:
-    import pygame
-    SUITS={u'С':u'Сила',
+    import random
+
+import pygame
+
+SUITS={u'С':u'Сила',
         u'Д':u'Деньги',
         u'З':u'Знания',
         u'И':u'Интриги'}
@@ -294,6 +297,8 @@ init -3 python:
             if accept_from is not None:
                 self.accept_from = accept_from
             self.bg_file = bg_file
+            # For positioning
+            self.last_pos = [self.x+int(self.xsize/2)-75, self.y+40]
             # Adding cards
             self.card_list = []
             if len(card_list)>0:
@@ -303,18 +308,21 @@ init -3 python:
                     self.append(card)
 
         def position_next_card(self, card):
+            """Return position of the next card to be added.
+
+            Take a card and return the two-int tuple (x, y).
+            Places cards in two columns 75 and 25 pixels to the left from the center
+            of the stack. Does not currently work if there are more cards than could
+            be fit in this manner.
             """
-            Return position of the next card to be added
-            Places the next card 50 px under the lowest one, no matter what. Children should provide more reasonable
-            positioning algorithms.
-            """
-            if len(self.card_list) == 0:
-                return int(self.x+self.xsize/2-50), self.   y + 40
-            else:
-                # Get coordinates, sorted by y
-                coord = max(((c.get_displayable().transform.xpos, c.get_displayable().transform.ypos) for c in self.card_list), key=lambda c: c[1])
-                #  Add the next card 50 px under the lowest one
-                return coord[0], coord[1]+40
+            if len(self.card_list)>0:
+                # Add the card after latest one
+                self.last_pos[1] += 40
+            if self.last_pos[1]+140 >= self.ysize:
+                #  Starting the second stack, if the card does not fit
+                self.last_pos = [self.last_pos[0]+50, self.y+40+random.randint(-3, 3)]
+            return self.last_pos
+
 
         # Card transfer methods
 
@@ -472,13 +480,6 @@ init -3 python:
         def give(self, card):
             return True
 
-        def position_next_card(self, card):
-            if len(self.card_list) == 0:
-                return (self.x+50, self.y+50)
-            else:
-                return(self.x+50,
-                       max((x.get_displayable().transform.ypos for x in self.card_list))+40)
-
     class PlayerConflictStack(Cardbox):
         """
         Player hand for conflict screen. Does not accept cards and positioning may break if this rule is violated!
@@ -492,6 +493,7 @@ init -3 python:
                 l = len([x for x in kwargs['card_list'] if x.suit == suit])
                 if l>0:
                     lengths[suit] = (l-1)*40 + 100 #  Length in pixels
+            #  Overloading self.last_pos because in this case it needs to be dict, not list
             self.last_pos = {}
             x = kwargs['x']
             y = kwargs['y'] + 10
@@ -880,7 +882,7 @@ init -3 python:
     class DeckTable(Table):
         """
         The Table for a deck view. Is expected to contain 4 non-active Cardboxes (one for each suit).
-        Also has a small display space for value sums and such
+        Also has a small display for value sums and such
         """
         def __init__(self, **kwargs):
             super(DeckTable, self).__init__(**kwargs)
