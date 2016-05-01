@@ -6,9 +6,9 @@ init -3 python:
 import pygame
 
 SUITS={u'С':u'Сила',
-            u'Д':u'Деньги',
-            u'З':u'Знания',
-            u'И':u'Интриги'}
+                u'Д':u'Деньги',
+                u'З':u'Знания',
+                u'И':u'Интриги'}
 
     DEFAULT_HISTORY = u'Вам не известна история этой карты'
     #  SPENDABLE_COLOR and PERMANENT_COLOR are used by a format method, so they are without '#'
@@ -813,7 +813,15 @@ SUITS={u'С':u'Сила',
             super(ConflictTable, self).__init__(**kwargs)
             self.return_spent = return_spent
             self.finalizing = False # Set to True when calling finalize_*
+            if self.return_spent:
+                self.return_line = Text(u'Карты, потраченные в этом конфликте, будут возвращены',
+                                        color='#6A3819', size=15, font='Hangyaboly.ttf')
 
+        def render(self, width, height, st, at):
+            r = super(ConflictTable, self).render(width, height, st, at)
+            if self.return_spent:
+                r.blit(renpy.render(self.return_line, width, height, st, at), (77, 250))
+            return r
         def per_interact(self):
             # Check if the conflict has been won or lost
             stack_len = len(self.get_stack_by_id('M_STACK'))
