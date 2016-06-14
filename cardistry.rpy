@@ -5,10 +5,10 @@ init -3 python:
 
 import pygame
 
-    SUITS={u'С':u'Сила',
-           u'Д':u'Деньги',
-           u'З':u'Знания',
-           u'И':u'Интриги'}
+SUITS={u'С':u'Сила',
+                u'Д':u'Деньги',
+                u'З':u'Знания',
+                u'И':u'Интриги'}
 
     DEFAULT_HISTORY = u'Вам не известна история этой карты'
     #  SPENDABLE_COLOR and PERMANENT_COLOR are used by a format method, so they are without '#'
