@@ -2,10 +2,9 @@
 
 init -3 python:
     import random
+    import pygame
 
-import pygame
-
-SUITS={u'С':u'Сила',
+    SUITS={u'С':u'Сила',
                 u'Д':u'Деньги',
                 u'З':u'Знания',
                 u'И':u'Интриги'}
